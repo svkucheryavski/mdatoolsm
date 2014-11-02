@@ -1,0 +1,47 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.getgroups</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.getgroups.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.getgroups</h1><!--introduction--><p><tt>groups</tt> returns a dataset with binary values for all possible combinations of specified factors</p><!--/introduction--><pre class="codeinput">   g = getgroups(data, columns);
+</pre><p>The method gives an idea how grouping works. It is used in other methods for calculations and plotting of groupped data.</p><h2>Examples<a name="3"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+   data = people(1:10, :)
+
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>});
+   people.factor(<span class="string">'Region'</span>, {<span class="string">'A'</span>, <span class="string">'B'</span>});
+
+   g = getgroups(people, {<span class="string">'Sex'</span>, <span class="string">'Region'</span>});
+   show(g)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.getgroups
+% |groups| returns a dataset with binary values for all possible
+% combinations of specified factors
+%
+%% 
+%  
+   g = getgroups(data, columns);
+ 
+%%
+% The method gives an idea how grouping works. It is used
+% in other methods for calculations and plotting of groupped data.
+%
+%% Examples
+% 
+%
+%% 
+%  
+   load people
+   data = people(1:10, :)
+
+   people.factor('Sex', {'Male', 'Female'});
+   people.factor('Region', {'A', 'B'});
+
+   g = getgroups(people, {'Sex', 'Region'});
+   show(g)
+
+##### SOURCE END #####
+--></body></html>

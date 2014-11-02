@@ -1,0 +1,375 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Quick start guide</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-22"><meta name="DC.source" content="mdatools_ug_quick.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"></head><body><script src="assets/jquery.js"></script><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quick start guide</h1><!--introduction--><p>This document gives a brief introduction to the basic functionality of <i>mdatools</i> toolbox as well as presents the core ideas about how it deals with data, models and results. It is assumed that after reading the text and doing all exercises from the document one can easily start working with toolbox and then learn more features eventually.</p><!--/introduction--><h2>Introduction to datasets<a name="1"></a></h2><p>One of the most important things in the MDA toolbox is a <i>dataset</i> object. MATLAB is a great to deal with matrices and arrays, however one has to do a lot of rutine operations to represent the matrix values properly. Usually we have names for variables and objects or labels for measurements in our data. However, dealing with the names and labels in MATLAB is not an easy job. One of the ways to solve this issue is to use <i>dataset</i> ? a specific object, which is a wrapper for an conventional numeric matrix, giving possibilties to use names more or less easily. Such objects exist in many toolboxes (including Statistics Toolbox) and the <i>mdatools</i> is not an exception here. Moreover, in <i>mdatools</i> dataset is a main way to represent any values. Scores, loadings, residuals, regression coefficients and so on are datasets in <i>mdatools</i>. Therefore is is important to start with introduction what dataset is, how to create and manipulate datasets.</p><p>Actually in <i>mdatools</i> datasets give a lot more options than just a possibility to have names for rows and columns of a matrix. They allow to hide rows and columns without removing them (for example when one need to remove an outlier or do variable selection), one can use qualitative data, factors, to group values and so on. But in this qick guide we will talk only about most important features of datasets, namely names/labels for rows and columns, making subsets, displaying data values, doing mathematical calculations and making plots.</p><p>Dataset can be created from any matrix (array with two dimensions: rows and columns). Actually it is not necessary to provide names for the dimensions. Column names will be generated automatically and row names will remain empty. Here is an example for 3x2 matrix with height and weight values for three persons:</p><pre class="codeinput">   values = [180 84; 170 68; 165 71];
+   d = mdadata(values);
+
+   show(d)
+</pre><pre class="codeoutput">
+
+ Variables
+   V1  V2
+ ---- ---
+  180  84
+  170  68
+  165  71
+
+</pre><p>Function <tt>show()</tt> displays data values as a table. By default it uses three significant figures, this can be changed by providing extra argument, e.g. <tt>show(d, 5)</tt>. To specify names for rows and objects one can provide them as a second and third arguments of the <tt>mdadata()</tt>&nbsp;method. The names can be either cell arrays with text values or numeric sequences (vectors). Numbers will be converted to text automatically.</p><pre class="codeinput">   values = [180 84; 170 68; 165 71];
+   d = mdadata(values, 1:3, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>});
+
+   show(d)
+</pre><pre class="codeoutput">
+
+     Variables
+   Height  Weight
+  ------- -------
+1     180      84
+2     170      68
+3     165      71
+
+</pre><p>It is mandatory that row and column names are unique. It is recommended also not to use spaces and other special symbols, especially for column names, to avoid ambiguity. Actually the names may have two forms: full, with spaces and special symbols and short, with only letters and numbers. If one provides names with spaces and special symbols they will be converted to short form automatically. More on that can be found in the <a href="mdatools_ug.html">User Guide</a>.</p><p>The <tt>mdadata</tt> is a MATLAB object which has several properties and many methods. You can see some of the properties by using <tt>disp()</tt>.</p><pre class="codeinput">   disp(d)
+</pre><pre class="codeoutput">  3x2 mdadata array with properties:
+
+            name: ''
+            info: []
+        dimNames: {'Objects'  'Variables'}
+          values: [3x2 double]
+           nCols: 2
+           nRows: 3
+        nFactors: 0
+        rowNames: {'1'  '2'  '3'}
+        colNames: {'Height'  'Weight'}
+    rowFullNames: {'1'  '2'  '3'}
+    colFullNames: {'Height'  'Weight'}
+
+</pre><p>The most important ones are <tt>values</tt>, which is a matrix with data values, <tt>rowNames</tt> - cell array with row names and <tt>colNames</tt> - cell array with column names. All three can be changed manually for the whole object or for particular rows or columns. You can also specify name of the datasetm short information text and labels for each of the two dimensions</p><pre class="codeinput">   d.rowNames = {<span class="string">'Lars'</span>, <span class="string">'Peter'</span>, <span class="string">'Anna'</span>};
+   show(d)
+
+   d(1, :).rowNames = <span class="string">'Mike'</span>;
+   show(d)
+
+   d.name = <span class="string">'People'</span>;
+   d.info = <span class="string">'People data for quick start guide'</span>;
+   d.dimNames  = {<span class="string">'Persons'</span>, <span class="string">'Parameters'</span>};
+   show(d)
+</pre><pre class="codeoutput">
+
+         Variables
+       Height  Weight
+      ------- -------
+ Lars     180      84
+Peter     170      68
+ Anna     165      71
+
+
+
+         Variables
+       Height  Weight
+      ------- -------
+ Mike     180      84
+Peter     170      68
+ Anna     165      71
+
+
+
+People:
+People data for quick start guide
+
+         Parameters
+       Height  Weight
+      ------- -------
+ Mike     180      84
+Peter     170      68
+ Anna     165      71
+
+</pre><p>You can subset the dataset values using the same way as with matrices: by specifying indices for rows and columns. All special names and symbols, like <tt>:</tt> and <tt>end</tt> will work properly. Alternatively column and row names can be used for the same purpose.</p><pre class="codeinput">   show(d(1:2, :))
+   show(d({<span class="string">'Mike'</span>, <span class="string">'Anna'</span>}, <span class="string">'Height'</span>))
+</pre><pre class="codeoutput">
+
+People:
+
+         Parameters
+       Height  Weight
+      ------- -------
+ Mike     180      84
+Peter     170      68
+
+
+
+People:
+      Height
+     -------
+Mike     180
+Anna     165
+
+</pre><p>The <tt>mdadata</tt> class has most of the standard mathematical and statistical methods overrided. This means that you can work with datasets just as with conventinal matrices in MATLAB. Result of any operation is also a dataset (object of class <tt>mdadata</tt>). For example, let's calculate BMI index for our data values.</p><pre class="codeinput">show(d)
+bmi = d(:, <span class="string">'Weight'</span>) ./ (d(:, <span class="string">'Height'</span>) / 100) .^ 2;
+bmi.colNames = <span class="string">'BMI'</span>;
+
+show(bmi)
+</pre><pre class="codeoutput">
+
+People:
+People data for quick start guide
+
+         Parameters
+       Height  Weight
+      ------- -------
+ Mike     180      84
+Peter     170      68
+ Anna     165      71
+
+
+        BMI
+      -----
+ Mike  25.9
+Peter  23.5
+ Anna  26.1
+
+</pre><h2>Simple plots<a name="7"></a></h2><p>The <tt>mdadata</tt>&nbsp;also overrides several plotting methods, including <tt>scatter()</tt>, <tt>plot()</tt>, <tt>bar()</tt> and several others, including statistical plots, such as <tt>hist()</tt>, <tt>boxplot()</tt> and <tt>qqplot()</tt>. It means that if one provided an <tt>mdadata</tt> object as a first argument for these functions, a specially written version will be used instead of conventional MATLAB methods. Thus to make a scatter plot one have to provide a dataset with one or two columns. If more than two are available, <tt>scatter()</tt>&nbsp;method will ignore them.</p><pre class="codeinput">   figure
+   subplot(1, 2, 1)
+   scatter(d)
+   subplot(1, 2, 2)
+   plot(d)
+</pre><img vspace="5" hspace="5" src="mdatools_ug_quick_01.png" alt=""> <p>As you can see the labels for axes as well as title for the plot were set automatically using dataset names. Color of data points, lines and bars are selected automatically but one can specify these and several other most important arguments for each plot. There are also additional options, allowing for example color groupping of data points and lines according to a vector of values, look at description of plotting methods for the <tt>mdadata</tt> class for details. One of the most useful option is a possibility to show labels for data points or bars. Labels can be names (<tt>'names'</tt>), numbers (<tt>'numbers'</tt>) or values (<tt>'values'</tt> this can be used only with bar plot).</p><pre class="codeinput">   figure
+   subplot(1, 2, 1)
+   scatter(d, <span class="string">'Marker'</span>, <span class="string">'d'</span>, <span class="string">'Color'</span>, <span class="string">'g'</span>, <span class="string">'Labels'</span>, <span class="string">'names'</span>)
+   subplot(1, 2, 2)
+   bar(d(<span class="string">'Mike'</span>, :), <span class="string">'FaceColor'</span>, <span class="string">'b'</span>, <span class="string">'Labels'</span>, <span class="string">'values'</span>)
+</pre><img vspace="5" hspace="5" src="mdatools_ug_quick_02.png" alt=""> <h2>Univariate statistics<a name="9"></a></h2><p>There are several statistic methods available also for the <tt>mdadata</tt> datasets. To demonstrate this we will use a subset of dataset <tt>'people'</tt>, which is provided with the toolbox. In the dataset there are values for 32 persons from scandinavian and medditeranian regions (50% males, 50% females). Here are some examples.</p><pre class="codeinput">   load(<span class="string">'people'</span>)
+   d = people(:, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>, <span class="string">'Shoesize'</span>});
+
+   show( mean(d) )
+   show( std(d) )
+   show( se(d) )
+   show( percentile(d, 25) )
+   show( summary(d) )
+</pre><pre class="codeoutput">
+
+             Variables
+      Height  Weight  Shoesize
+     ------- ------- ---------
+Mean     173    64.5      39.9
+
+
+
+              Variables
+       Height  Weight  Shoesize
+      ------- ------- ---------
+Stdev    10.1    15.2       3.9
+
+
+
+                   Variables
+            Height  Weight  Shoesize
+           ------- ------- ---------
+Std. error    1.78    2.69     0.689
+
+
+
+Percentiles:
+
+            Variables
+     Height  Weight  Shoesize
+    ------- ------- ---------
+25%     164      50        36
+
+
+
+Summary statistics:
+
+               Variables
+        Height  Weight  Shoesize
+       ------- ------- ---------
+   Min     157      46        34
+    Q1     164      50        36
+Median     174    64.5        40
+  Mean     173    64.5      39.9
+    Q3     180    80.5        43
+   Max     198      92        48
+
+</pre><p>As well as several statistic plots.</p><pre class="codeinput">   figure
+   subplot(2, 2, 1)
+   hist( d(:, <span class="string">'Height'</span>) )
+   subplot(2, 2, 2)
+   qqplot( d(:, <span class="string">'Height'</span>) )
+   subplot(2, 2, 3)
+   boxplot( d )
+</pre><img vspace="5" hspace="5" src="mdatools_ug_quick_03.png" alt=""> <p>We hope that this brief overview of <tt>mdadata</tt> gave an overall impression how it works and how to use it for storing and visualisation of data values. To learn more, please, look at the <a href="mdatools_ug.html">User Guide</a> and <a href="classes/mdadata.html">full description</a> of the <tt>mdadata</tt> class and its metods.</p><h2>Principal component analysis<a name="12"></a></h2><h2>Partial least squares regression<a name="13"></a></h2><h2>Working with images<a name="14"></a></h2><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Quick start guide
+% 
+% This document gives a brief introduction to the basic functionality of _mdatools_ 
+% toolbox as well as presents the core ideas about how it deals with data, models and results. 
+% It is assumed that after reading the text and doing all exercises from the document
+% one can easily start working with toolbox and then learn more features eventually.
+%
+%% Introduction to datasets
+%
+% One of the most important things in the MDA toolbox is a _dataset_ object. MATLAB is a great 
+% to deal with matrices and arrays, however one has to do a lot of rutine operations to represent 
+% the matrix values properly. Usually we have names for variables and objects or labels for 
+% measurements in our data. However, dealing with the names and labels in MATLAB is not an 
+% easy job. One of the ways to solve this issue is to use _dataset_ ? a specific object, which 
+% is a wrapper for an conventional numeric matrix, giving possibilties to use names more or less
+% easily. Such objects exist in many toolboxes (including Statistics Toolbox) and the _mdatools_ is
+% not an exception here. Moreover, in _mdatools_ dataset is a main way to represent any values.
+% Scores, loadings, residuals, regression coefficients and so on are datasets in _mdatools_.
+% Therefore is is important to start with introduction what dataset is, how to create and manipulate
+% datasets.
+%
+% Actually in _mdatools_ datasets give a lot more options than just a possibility to have names for
+% rows and columns of a matrix. They allow to hide rows and columns without removing them (for example 
+% when one need to remove an outlier or do variable selection), one can use qualitative data,
+% factors, to group values and so on. But in this qick guide we will talk only about most important
+% features of datasets, namely names/labels for rows and columns, making subsets, displaying data
+% values, doing mathematical calculations and making plots.
+%
+% Dataset can be created from any matrix (array with two dimensions: rows and columns). Actually it 
+% is not necessary to provide names for the dimensions. Column names will be generated automatically
+% and row names will remain empty. Here is an example for 3x2 matrix with height and weight values 
+% for three persons:
+%
+
+   values = [180 84; 170 68; 165 71];
+   d = mdadata(values);
+   
+   show(d)
+   
+%%
+% Function |show()| displays data values as a table. By default it uses three significant figures,
+% this can be changed by providing extra argument, e.g. |show(d, 5)|. To specify names for rows and
+% objects one can provide them as a second and third arguments of the |mdadata()| method. The names
+% can be either cell arrays with text values or numeric sequences (vectors). Numbers will be
+% converted to text automatically.
+%
+
+   values = [180 84; 170 68; 165 71];
+   d = mdadata(values, 1:3, {'Height', 'Weight'});
+
+   show(d)
+
+%%
+% It is mandatory that row and column names are unique. It is recommended also not to use spaces and
+% other special symbols, especially for column names, to avoid ambiguity. Actually the names may 
+% have two forms: full, with spaces and special symbols and short, with only letters and numbers. If 
+% one provides names with spaces and special symbols they will be converted to short form
+% automatically. More on that can be found in the <mdatools_ug.html User Guide>.
+%
+% The |mdadata| is a MATLAB object which has several properties and many methods. You can see some
+% of the properties by using |disp()|.
+
+   disp(d)
+   
+%% 
+% The most important ones are |values|, which is a matrix with data values, |rowNames| - cell array
+% with row names and |colNames| - cell array with column names. All three can be changed manually for 
+% the whole object or for particular rows or columns. You can also specify name of the datasetm short 
+% information text and labels for each of the two dimensions
+
+   d.rowNames = {'Lars', 'Peter', 'Anna'};
+   show(d)
+   
+   d(1, :).rowNames = 'Mike';
+   show(d)
+   
+   d.name = 'People';
+   d.info = 'People data for quick start guide';
+   d.dimNames  = {'Persons', 'Parameters'};
+   show(d)
+
+%%
+% You can subset the dataset values using the same way as with matrices: by specifying indices for
+% rows and columns. All special names and symbols, like |:| and |end| will work properly.
+% Alternatively column and row names can be used for the same purpose.
+
+   show(d(1:2, :))
+   show(d({'Mike', 'Anna'}, 'Height'))
+  
+%%
+% The |mdadata| class has most of the standard mathematical and statistical methods overrided. This 
+% means that you can work with datasets just as with conventinal matrices in MATLAB. Result of any 
+% operation is also a dataset (object of class |mdadata|). For example, let's calculate BMI index 
+% for our data values.
+
+show(d)
+bmi = d(:, 'Weight') ./ (d(:, 'Height') / 100) .^ 2;
+bmi.colNames = 'BMI';
+
+show(bmi)
+
+%% Simple plots
+%
+% The |mdadata| also overrides several plotting methods, including |scatter()|, |plot()|, |bar()| 
+% and several others, including statistical plots, such as |hist()|, |boxplot()| and |qqplot()|. It 
+% means that if one provided an |mdadata| object as a first argument for these functions, a
+% specially written version will be used instead of conventional MATLAB methods. Thus to make a
+% scatter plot one have to provide a dataset with one or two columns. If more than two are
+% available, |scatter()| method will ignore them.
+
+   figure
+   subplot(1, 2, 1)
+   scatter(d)
+   subplot(1, 2, 2)
+   plot(d)
+   
+%%
+% As you can see the labels for axes as well as title for the plot were set automatically using
+% dataset names. Color of data points, lines and bars are selected automatically but one can specify 
+% these and several other most important arguments for each plot. There are also additional options,
+% allowing for example color groupping of data points and lines according to a vector of values, 
+% look at description of plotting methods for the |mdadata| class for details. One of the most useful 
+% option is a possibility to show labels for data points or bars. Labels can be names (|'names'|), numbers 
+% (|'numbers'|) or values (|'values'| this can be used only with bar plot).
+
+   figure
+   subplot(1, 2, 1)
+   scatter(d, 'Marker', 'd', 'Color', 'g', 'Labels', 'names')
+   subplot(1, 2, 2)
+   bar(d('Mike', :), 'FaceColor', 'b', 'Labels', 'values')
+   
+%% Univariate statistics
+%
+% There are several statistic methods available also for the |mdadata| datasets. To demonstrate this 
+% we will use a subset of dataset |'people'|, which is provided with the toolbox. In the dataset there 
+% are values for 32 persons from scandinavian and medditeranian regions (50% males, 50% females). Here 
+% are some examples.
+%
+
+   load('people')
+   d = people(:, {'Height', 'Weight', 'Shoesize'});
+   
+   show( mean(d) )
+   show( std(d) )
+   show( se(d) )
+   show( percentile(d, 25) )
+   show( summary(d) )
+   
+%%
+% As well as several statistic plots.
+%
+   figure
+   subplot(2, 2, 1)
+   hist( d(:, 'Height') )
+   subplot(2, 2, 2)
+   qqplot( d(:, 'Height') )
+   subplot(2, 2, 3)
+   boxplot( d )
+   
+%%
+% We hope that this brief overview of |mdadata| gave an overall impression how it works and
+% how to use it for storing and visualisation of data values. To learn more, please, look at the 
+% <mdatools_ug.html User Guide> and <classes/mdadata.html full description> of the |mdadata| class 
+% and its metods.
+%
+
+%% Principal component analysis
+%% Partial least squares regression
+%% Working with images
+##### SOURCE END #####
+--></body></html>

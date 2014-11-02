@@ -1,0 +1,75 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.ci</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.ci.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.ci</h1><!--introduction--><p><tt>ci</tt> calculates confidence interval using Student's t-distribution either for each column of dataset or for the first column, which values are split into groups.</p><!--/introduction--><pre class="codeinput">   s = ci(data);
+   s = ci(data, alpha);
+   s = ci(data, factors);
+   s = ci(data, factors, alpha);
+</pre><p>By default, method calculates confidence interval for each column of the <tt>data</tt> object. However if a dataset with factors is also provided the method will calculate the interval only for the first column of <tt>data</tt> by splitting its values into groups, corresponded to all possible combination of the factors.</p><p>Argument <tt>alpha</tt> is a signigicance level (between 0 and 1, default is 0.05).</p><h2>Examples<a name="3"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+
+   <span class="comment">% calculate confidence interval for each column</span>
+   s = ci(people);
+   show(s)
+
+   <span class="comment">% mark columns "Sex" and "Region" as a factors</span>
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>})
+   people.factor(<span class="string">'Region'</span>, {<span class="string">'A'</span>, <span class="string">'B'</span>})
+
+   <span class="comment">% calculate confidence interval for "Height" separately for each sex and region.</span>
+   s = ci(people(:, <span class="string">'Height'</span>), people(:, {<span class="string">'Sex'</span>, <span class="string">'Region'</span>}));
+   show(s)
+
+   s = ci(people(:, <span class="string">'Height'</span>), people(:, {<span class="string">'Sex'</span>, <span class="string">'Region'</span>}), 0.10);
+   show(s)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.ci
+% |ci| calculates confidence interval using Student's t-distribution either 
+% for each column of dataset or for the first column, which values are split
+% into groups.
+%
+%% 
+%  
+   s = ci(data);
+   s = ci(data, alpha);
+   s = ci(data, factors);
+   s = ci(data, factors, alpha);
+ 
+%%
+% By default, method calculates confidence interval for each column of the
+% |data| object. However if a dataset with factors is also provided the
+% method will calculate the interval only for the first column of
+% |data| by splitting its values into groups, corresponded to all
+% possible combination of the factors.
+%
+% Argument |alpha| is a signigicance level (between 0 and 1, default is 0.05).
+%
+%% Examples
+% 
+%
+%% 
+%  
+   load people
+
+   % calculate confidence interval for each column
+   s = ci(people);
+   show(s)
+   
+   % mark columns "Sex" and "Region" as a factors
+   people.factor('Sex', {'Male', 'Female'})
+   people.factor('Region', {'A', 'B'})
+
+   % calculate confidence interval for "Height" separately for each sex and region.
+   s = ci(people(:, 'Height'), people(:, {'Sex', 'Region'}));
+   show(s)
+
+   s = ci(people(:, 'Height'), people(:, {'Sex', 'Region'}), 0.10);
+   show(s)
+
+##### SOURCE END #####
+--></body></html>

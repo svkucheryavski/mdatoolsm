@@ -1,0 +1,84 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.qqplot</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-17"><meta name="DC.source" content="mdadata.qqplot.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.qqplot</h1><!--introduction--><p><tt>qqplot</tt> makes a quantile-quantile plot for selected columns of dataset.</p><!--/introduction--><pre class="codeinput">   qqplot(data)
+   qqplot(data, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">)</span>
+
+   qqplot(data, factors)
+   qqplot(data, factors, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">)</span>
+</pre><p>Quantile-quantile plot for normal distribution calculates real and theoretical quantiles of each data value as if the values are distributed normally. The calculated values are shown as a scatter plot and can be used to evaluate if data is distributed normally or deviates from normal distribution.</p><p>If dataset has more than one column, the method  will make the plot for the first column only.</p><p>Optional argument <tt>'factors'</tt> is a dataset with qualitative variables (factors) used to split values to groups and show points separately for each group on the same axis.</p><h2>Parameters<a name="3"></a></h2><p>All parameters for Matlab's <tt>plot()</tt> function will work. Extra parameters are shown below. If factors are used the color parameters should have a value for each group, made by combination of the factors.</p><p><table class="properties-list">
+<tr><td class="name">ShowNormal</td><td class="text">show or not a line for ideal normal distribution.  Possible values are <tt>'off'</tt> and <tt>'on'</tt> (default). </td></tr>
+<tr><td class="name">Labels</td><td class="text">show or not labels for the data points. Possible  values are <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects and <tt>'numbers'</tt>  for their numbers. </td></tr>
+<tr><td class="name">LineColor</td><td class="text">a color of fitted line (the color of points can be  changed using parameter <tt>'Color'</tt>)</td></tr>
+</table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+
+   figure
+   qqplot(people(:, <span class="string">'Height'</span>), <span class="string">'Labels'</span>, <span class="string">'on'</span>)
+
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>})
+   figure
+   qqplot(people(:, <span class="string">'IQ'</span>), people(:, <span class="string">'Sex'</span>))
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.qqplot
+% |qqplot| makes a quantile-quantile plot for selected columns of dataset.
+%
+%% 
+%  
+   qqplot(data)
+   qqplot(data, 'ParamName', ParamValue, ...)
+   
+   qqplot(data, factors)
+   qqplot(data, factors, 'ParamName', ParamValue, ...)
+ 
+%%
+% Quantile-quantile plot for normal distribution calculates real and theoretical 
+% quantiles of each data value as if the values are distributed normally.
+% The calculated values are shown as a scatter plot and can be used to
+% evaluate if data is distributed normally or deviates from normal
+% distribution.      
+%
+% If dataset has more than one column, the method  will make the plot 
+% for the first column only.
+%
+% Optional argument |'factors'| is a dataset with qualitative variables
+% (factors) used to split values to groups and show points separately 
+% for each group on the same axis.
+%
+%
+%% Parameters
+% 
+% All parameters for Matlab's |plot()| function will work. Extra parameters 
+% are shown below. If factors are used the color parameters should have 
+% a value for each group, made by combination of the factors.
+%
+% <html><table class="properties-list">
+% <tr><td class="name">ShowNormal</td><td class="text">show or not a line for ideal normal distribution.  Possible values are <tt>'off'</tt> and <tt>'on'</tt> (default). </td></tr>
+% <tr><td class="name">Labels</td><td class="text">show or not labels for the data points. Possible  values are <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects and <tt>'numbers'</tt>  for their numbers. </td></tr>
+% <tr><td class="name">LineColor</td><td class="text">a color of fitted line (the color of points can be  changed using parameter <tt>'Color'</tt>)</td></tr>
+% </table></html>
+%
+%
+%% Examples
+% 
+%
+%% 
+%  
+   load people
+
+   figure
+   qqplot(people(:, 'Height'), 'Labels', 'on')   
+   
+   people.factor('Sex', {'Male', 'Female'})
+   figure
+   qqplot(people(:, 'IQ'), people(:, 'Sex'))
+ 
+%%
+
+##### SOURCE END #####
+--></body></html>

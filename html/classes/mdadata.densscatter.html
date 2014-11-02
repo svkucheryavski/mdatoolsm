@@ -1,0 +1,54 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.densscatter</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.densscatter.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.densscatter</h1><!--introduction--><p><tt>densscatter</tt> makes a density scatter plot for <tt>mdadata</tt> object.</p><p>Density scatter plot looks like a normal scatter plot where data points are colored by their density - how many other data points are around.</p><!--/introduction--><h2>Parameters<a name="1"></a></h2><p>The syntax and parameters are similar to 'mdadata.scatter' The additional parameters are:</p><p><table class="properties-list">
+<tr><td class="name">NBins</td><td class="text">umber of sections to split every axis of the plottingarea into. E.g. if it is 100, the XY plane will be split to 100x100sections and density of each section will be calculated.</td></tr>
+<tr><td class="name">Colormap</td><td class="text">hich colormap to use for color separation. By defaulta built in palette based on colorbrewer 2 colors is used. AnyMatlab colormap can be used (<tt>@jet</tt>, <tt>@spring</tt>, etc).</td></tr>
+</table></p><h2>Examples<a name="2"></a></h2><pre class="codeinput">   d = mdadata(randn(10000, 2));
+
+   figure
+   subplot(1, 2, 1)
+   densscatter(d)
+   subplot(1, 2, 2)
+   densscatter(d, <span class="string">'NBins'</span>, 20, <span class="string">'Colormap'</span>, @parula)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.densscatter
+% |densscatter| makes a density scatter plot for |mdadata| object.
+%
+% Density scatter plot looks like a normal scatter plot where data points
+% are colored by their density - how many other data points are around.
+%
+%% Parameters
+% 
+% The syntax and parameters are similar to 'mdadata.scatter' The
+% additional parameters are:
+%  
+% <html><table class="properties-list">
+% <tr><td class="name">NBins</td><td class="text">umber of sections to split every axis of the plottingarea into. E.g. if it is 100, the XY plane will be split to 100x100sections and density of each section will be calculated.</td></tr>
+% <tr><td class="name">Colormap</td><td class="text">hich colormap to use for color separation. By defaulta built in palette based on colorbrewer 2 colors is used. AnyMatlab colormap can be used (<tt>@jet</tt>, <tt>@spring</tt>, etc).</td></tr>
+% </table></html>
+%
+%
+%% Examples
+% 
+% 
+%% 
+%  
+   d = mdadata(randn(10000, 2));
+
+   figure
+   subplot(1, 2, 1)
+   densscatter(d)
+   subplot(1, 2, 2)
+   densscatter(d, 'NBins', 20, 'Colormap', @parula)
+ 
+%%
+
+##### SOURCE END #####
+--></body></html>

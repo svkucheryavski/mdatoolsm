@@ -1,0 +1,82 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.gscatter</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.gscatter.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.gscatter</h1><!--introduction--><p><tt>gscatter</tt> makes a group scatter plot</p><!--/introduction--><pre class="codeinput">   gscatter(data, factors)
+   gscatter(data, factors, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">)</span>
+</pre><p>The method makes a scatter plot for two or more group of points, defined by a combination of provided factors. By default, each group has its own color. If more columns exist, the method will generate a figure with several subplots for all pairwise combinations of the columns. The maximal number of combinations is limited by 10, so if more than five columns are available, the method will show plots only for the first five.</p><h2>Parameters<a name="3"></a></h2><p><table class="properties-list">
+<tr><td class="name">Labels</td><td class="text">how or not labels for the data points. Possiblevalues are <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects and <tt>'numbers'</tt>for their numbers.</td></tr>
+<tr><td class="name">Marker</td><td class="text">ne value or a vector with values (one for each group)for the marker symbol.</td></tr>
+<tr><td class="name">MarkerEdgeColor</td><td class="text">ne value or a vector with values (one for each group)for the marker edge color. If color is specified using RGB values, theparameter should be a matrix with as many rows as many groupsexist.</td></tr>
+<tr><td class="name">MarkerFaceColor</td><td class="text">ne value or a vector with values (one for each group)for the marker edge color. If color is specified using RGB values, theparameter should be a matrix with as many rows as many groupsexist.</td></tr>
+<tr><td class="name">MarkerSize</td><td class="text">ne value or a vector with values (one for each group)for the marker size.</td></tr>
+</table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>})
+
+   figure
+   subplot(1, 2, 1)
+   gscatter(people(:, <span class="string">'Height:Weight'</span>), people(:, <span class="string">'Sex'</span>))
+
+   subplot(1, 2, 2)
+   gscatter(people(:, <span class="string">'Height:Weight'</span>), people(:, <span class="string">'Sex'</span>), <span class="string">'Labels'</span>, <span class="string">'on'</span>,<span class="keyword">...</span>
+     <span class="string">'MarkerSize'</span>, [7 10], <span class="string">'Marker'</span>, <span class="string">'so'</span>, <span class="string">'MarkerFaceColor'</span>, <span class="string">'rb'</span>)
+
+   figure
+   gscatter(people, people(:, <span class="string">'Sex'</span>), <span class="string">'LegendLocation'</span>, <span class="string">'best'</span>)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.gscatter
+% |gscatter| makes a group scatter plot
+%
+%% 
+%  
+   gscatter(data, factors)
+   gscatter(data, factors, 'ParamName', ParamValue, ...)
+ 
+%%
+% The method makes a scatter plot for two or more group of points,
+% defined by a combination of provided factors. By default, each group 
+% has its own color. If more columns exist, the method will generate
+% a figure with several subplots for all pairwise combinations of the
+% columns. The maximal number of combinations is limited by 10, so if
+% more than five columns are available, the method will show plots
+% only for the first five.
+%
+%% Parameters
+% 
+% <html><table class="properties-list">
+% <tr><td class="name">Labels</td><td class="text">how or not labels for the data points. Possiblevalues are <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects and <tt>'numbers'</tt>for their numbers.</td></tr>
+% <tr><td class="name">Marker</td><td class="text">ne value or a vector with values (one for each group)for the marker symbol.</td></tr>
+% <tr><td class="name">MarkerEdgeColor</td><td class="text">ne value or a vector with values (one for each group)for the marker edge color. If color is specified using RGB values, theparameter should be a matrix with as many rows as many groupsexist.</td></tr>
+% <tr><td class="name">MarkerFaceColor</td><td class="text">ne value or a vector with values (one for each group)for the marker edge color. If color is specified using RGB values, theparameter should be a matrix with as many rows as many groupsexist.</td></tr>
+% <tr><td class="name">MarkerSize</td><td class="text">ne value or a vector with values (one for each group)for the marker size.</td></tr>
+% </table></html>
+%
+%
+%% Examples
+% 
+%
+%% 
+%  
+   load people
+   people.factor('Sex', {'Male', 'Female'})
+   
+   figure
+   subplot(1, 2, 1)
+   gscatter(people(:, 'Height:Weight'), people(:, 'Sex'))
+   
+   subplot(1, 2, 2)
+   gscatter(people(:, 'Height:Weight'), people(:, 'Sex'), 'Labels', 'on',...
+     'MarkerSize', [7 10], 'Marker', 'so', 'MarkerFaceColor', 'rb')
+   
+   figure
+   gscatter(people, people(:, 'Sex'), 'LegendLocation', 'best')
+ 
+%%
+
+##### SOURCE END #####
+--></body></html>

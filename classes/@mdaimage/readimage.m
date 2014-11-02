@@ -1,0 +1,2 @@
+function readimage(filename)
+end

@@ -1,0 +1,112 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.errorbar</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.errorbar.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.errorbar</h1><!--introduction--><p><tt>errorbar</tt> makes an error bar plot for dataset columns</p><!--/introduction--><pre class="codeinput">   errobar(data);
+   errorbar(data, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
+
+   errobar(data, factors);
+   errorbar(data, factors, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
+</pre><p>The method is similar to standard <tt>errorbar()</tt> function, however all statistic are caclulated automatically, only dataset with original values should be provided.</p><p>Optional argument <tt>'factors'</tt> is a dataset with qualitative variables (factors) used to split data values into groups and show error bars separately for each group on the same axis. In this case one plot will be made only for the first column of data.</p><h2>Parameters<a name="3"></a></h2><p>All parameters for Matlab's <tt>plot()</tt> function (e.g. <tt>'Color'</tt>, etc.) can be used. Additional parameters are:</p><p><table class="properties-list">
+<tr><td class="name">Type</td><td class="text">ow to calculate size of the error bars. By default (<tt>'ci'</tt>)error bars shows confidence interval for mean values. This can bechanged to: <tt>'se'</tt> to show standard error, or to <tt>'sd'</tt> to show standarddeviation. Both can be combined with <tt>Alpha</tt> parameter, seeexamples below.</td></tr>
+<tr><td class="name">Alpha</td><td class="text">ignificance level, a value between 0 and 1.</td></tr>
+</table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+   people.removecols(<span class="string">'Income'</span>);
+
+   <span class="comment">% show average and 95% confidence intervals</span>
+   figure
+   errorbar(people)
+
+   <span class="comment">% show average and 90% confidence intervals</span>
+   figure
+   errorbar(people, <span class="string">'Alpha'</span>, 0.1)
+
+   <span class="comment">% show average +/- standard error</span>
+   figure
+   errorbar(people, <span class="string">'Type'</span>, <span class="string">'se'</span>)
+
+   <span class="comment">% show average +/- standard deviation</span>
+   figure
+   errorbar(people, <span class="string">'Type'</span>, <span class="string">'sd'</span>)
+
+   <span class="comment">% show average and 95% of most common values (+/- 1.96 sd)</span>
+   figure
+   errorbar(people, <span class="string">'Type'</span>, <span class="string">'sd'</span>, <span class="string">'Alpha'</span>, 0.05)
+
+   <span class="comment">% confidence intervals for groups</span>
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>});
+   figure
+   errorbar(people(:, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>}), people(:, <span class="string">'Sex'</span>))
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.errorbar
+% |errorbar| makes an error bar plot for dataset columns
+%
+%% 
+%  
+   errobar(data);
+   errorbar(data, 'ParamName', ParamValue, ...);
+   
+   errobar(data, factors);
+   errorbar(data, factors, 'ParamName', ParamValue, ...);
+ 
+%%
+% The method is similar to standard |errorbar()| function, however 
+% all statistic are caclulated automatically, only dataset with original
+% values should be provided.
+%
+% Optional argument |'factors'| is a dataset with qualitative variables
+% (factors) used to split data values into groups and show error bars
+% separately for each group on the same axis. In this case one plot
+% will be made only for the first column of data.
+%
+%% Parameters
+% 
+% All parameters for Matlab's |plot()| function (e.g. |'Color'|, etc.)
+% can be used. Additional parameters are:
+%
+% <html><table class="properties-list">
+% <tr><td class="name">Type</td><td class="text">ow to calculate size of the error bars. By default (<tt>'ci'</tt>)error bars shows confidence interval for mean values. This can bechanged to: <tt>'se'</tt> to show standard error, or to <tt>'sd'</tt> to show standarddeviation. Both can be combined with <tt>Alpha</tt> parameter, seeexamples below.</td></tr>
+% <tr><td class="name">Alpha</td><td class="text">ignificance level, a value between 0 and 1.</td></tr>
+% </table></html>
+%
+%
+%% Examples
+% 
+%% 
+%  
+   
+   load people
+   people.removecols('Income');
+
+   % show average and 95% confidence intervals
+   figure
+   errorbar(people)
+
+   % show average and 90% confidence intervals
+   figure
+   errorbar(people, 'Alpha', 0.1)
+
+   % show average +/- standard error
+   figure
+   errorbar(people, 'Type', 'se')
+
+   % show average +/- standard deviation
+   figure
+   errorbar(people, 'Type', 'sd')
+
+   % show average and 95% of most common values (+/- 1.96 sd)
+   figure
+   errorbar(people, 'Type', 'sd', 'Alpha', 0.05)
+
+   % confidence intervals for groups
+   people.factor('Sex', {'Male', 'Female'});
+   figure
+   errorbar(people(:, {'Height', 'Weight'}), people(:, 'Sex'))
+
+##### SOURCE END #####
+--></body></html>
