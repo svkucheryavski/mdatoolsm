@@ -6,16 +6,16 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>mdadata.plot</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.plot.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.plot</h1><!--introduction--><p><tt>plot</tt> makes a scatter plot for <tt>mdadata</tt> class object</p><!--/introduction--><pre class="codeinput">   plot(data);
+      --><title>mdadata.plot</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdadata.plot.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.plot</h1><!--introduction--><p><tt>plot</tt> makes a scatter plot for <tt>mdadata</tt> class object</p><!--/introduction--><pre class="codeinput">   plot(data);
    plot(data, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
    plot(data, x);
    plot(data, x, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
-</pre><p>The method is based on the standard <tt>plot()</tt> function and give some extra functionality, such as automatic labels for axis, grouping plot lines with color, etc. If output variable is specified the method returns a structure or a cell array with plot elements handles (plot handle, labels handle, etc).</p><p>The only mandatory argument is a dataset (object of class <tt>mdadata</tt>). The optional second argument (<tt>x</tt>) is a vector of values for the x axis. If it is not provided, a sequence 1:N, where N is number of columns in the dataset, will be used. The ticks for x axis in this case will be generated based on column names. The method assumes that every column of the data is a variable and every row is an observation.</p><h2>Parameters<a name="3"></a></h2><p>All parameters for Matlab's <tt>plot()</tt> function (e.g. <tt>'Color'</tt>, <tt>'LineStyle'</tt>, etc.) can be used. Additional parameters are:</p><p><table class="properties-list">
-<tr><td class="name">Colorby</td><td class="text">ake color grouping of points by a vector of values. Theparameter can be a numeric vector with the same number of values asnumber of rows in the data object.</td></tr>
-<tr><td class="name">Colormap</td><td class="text">function for generating colormap for the color grouping.By default uses a built in colormap based on colorbrewer2.org. Possiblevalues are: <tt>@jet</tt>, <tt>@gray</tt>, and so on.</td></tr>
-<tr><td class="name">Colorbar</td><td class="text">how or not a colorbar (legend for color groups). Possiblevalues are <tt>'on'</tt> and <tt>'off'</tt>. By default colorbar is not shown.</td></tr>
-<tr><td class="name">ColorbarTitle</td><td class="text">text string with title to be shown on top ofcolorbar.</td></tr>
-<tr><td class="name">Reduce</td><td class="text">f data has many rows (more than 2000) this number willbe reduced to speed up the plot by removing rows which are similar.The reducing algorithm is based on PCA (Principal ComponentAnalysis) and density of the rows on scores plot for first twocomponents. Set this parameter to <tt>'off'</tt> to avoid reducing.</td></tr>
+</pre><p>The method is based on the standard <tt>plot()</tt> function and give some extra functionality, such as automatic labels for axis, grouping plot lines with color, etc. If output variable is specified the method returns a structure or a cell array with plot elements handles (plot handle, labels handle, etc).</p><p>The only mandatory argument is a dataset (object of class <tt>mdadata</tt>). The optional second argument (<tt>x</tt>) is a vector of values for the x axis. If it is not provided, a sequence 1:N, where N is number of columns in the dataset, will be used. The ticks for x axis in this case will be generated based on column names. The method assumes that every column of the data is a variable and every row is an observation.</p><h2>Parameters<a name="3"></a></h2><p>All parameters for Matlab's 'plot()' function (e.g. <tt>Color</tt>, <tt>LineStyle</tt>, etc.) can be used. Additional parameters are:</p><p><table class="properties-list">
+<tr><td class="name">Colorby</td><td class="text">make color grouping of points by a vector of values. The  parameter can be a numeric vector with the same number of values as  number of rows in the data object. </td></tr>
+<tr><td class="name">Colormap</td><td class="text">a function for generating colormap for the color grouping.  By default uses a built in colormap based on colorbrewer2.org. Possible  values are: <tt>@jet</tt>, <tt>@gray</tt>, and so on.</td></tr>
+<tr><td class="name">Colorbar</td><td class="text">show or not a colorbar (legend for color groups). Possible  values are <tt>'on'</tt> and <tt>'off'</tt>. By default colorbar is not shown.</td></tr>
+<tr><td class="name">ColorbarTitle</td><td class="text">a text string with title to be shown on top of  colorbar.</td></tr>
+<tr><td class="name">Reduce</td><td class="text">if data has many rows (more than 2000) this number will  be reduced to speed up the plot by removing rows which are similar.   The reducing algorithm is based on PCA (Principal Component  Analysis) and density of the rows on scores plot for first two   components. Set this parameter to <tt>'off'</tt> to avoid reducing. </td></tr>
 </table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   load <span class="string">simdata</span>
 
    <span class="comment">% make plot of UV/Vis spectra and change standard properties</span>
@@ -36,7 +36,7 @@ To make changes, update the MATLAB code and republish this document.
    plot(spectra, <span class="string">'Colorby'</span>, conc(:, 1), <span class="string">'Colormap'</span>, @summer);
    subplot(3, 1, 3)
    plot(spectra, <span class="string">'Colorby'</span>, conc(:, 1), <span class="string">'Colorbar'</span>, <span class="string">'on'</span>);
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% mdadata.plot
 % |plot| makes a scatter plot for |mdadata| class object
@@ -63,15 +63,15 @@ To make changes, update the MATLAB code and republish this document.
 %
 %% Parameters
 % 
-% All parameters for Matlab's |plot()| function (e.g. |'Color'|, |'LineStyle'|, etc.)
+% All parameters for Matlab's 'plot()' function (e.g. |Color|, |LineStyle|, etc.)
 % can be used. Additional parameters are:
 %
 % <html><table class="properties-list">
-% <tr><td class="name">Colorby</td><td class="text">ake color grouping of points by a vector of values. Theparameter can be a numeric vector with the same number of values asnumber of rows in the data object.</td></tr>
-% <tr><td class="name">Colormap</td><td class="text">function for generating colormap for the color grouping.By default uses a built in colormap based on colorbrewer2.org. Possiblevalues are: <tt>@jet</tt>, <tt>@gray</tt>, and so on.</td></tr>
-% <tr><td class="name">Colorbar</td><td class="text">how or not a colorbar (legend for color groups). Possiblevalues are <tt>'on'</tt> and <tt>'off'</tt>. By default colorbar is not shown.</td></tr>
-% <tr><td class="name">ColorbarTitle</td><td class="text">text string with title to be shown on top ofcolorbar.</td></tr>
-% <tr><td class="name">Reduce</td><td class="text">f data has many rows (more than 2000) this number willbe reduced to speed up the plot by removing rows which are similar.The reducing algorithm is based on PCA (Principal ComponentAnalysis) and density of the rows on scores plot for first twocomponents. Set this parameter to <tt>'off'</tt> to avoid reducing.</td></tr>
+% <tr><td class="name">Colorby</td><td class="text">make color grouping of points by a vector of values. The  parameter can be a numeric vector with the same number of values as  number of rows in the data object. </td></tr>
+% <tr><td class="name">Colormap</td><td class="text">a function for generating colormap for the color grouping.  By default uses a built in colormap based on colorbrewer2.org. Possible  values are: <tt>@jet</tt>, <tt>@gray</tt>, and so on.</td></tr>
+% <tr><td class="name">Colorbar</td><td class="text">show or not a colorbar (legend for color groups). Possible  values are <tt>'on'</tt> and <tt>'off'</tt>. By default colorbar is not shown.</td></tr>
+% <tr><td class="name">ColorbarTitle</td><td class="text">a text string with title to be shown on top of  colorbar.</td></tr>
+% <tr><td class="name">Reduce</td><td class="text">if data has many rows (more than 2000) this number will  be reduced to speed up the plot by removing rows which are similar.   The reducing algorithm is based on PCA (Principal Component  Analysis) and density of the rows on scores plot for first two   components. Set this parameter to <tt>'off'</tt> to avoid reducing. </td></tr>
 % </table></html>
 %  
 %

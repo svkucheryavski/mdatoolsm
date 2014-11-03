@@ -28,6 +28,8 @@ function varargout = plotcumexpvar(obj, varargin)
       plotData = [plotData; [lead obj.testres.variance(:, 2)']];
       plotData(end, :).rowNames = {'test'};
    end   
+   
+   plotData.name = 'Explained variance (cumulative)';
       
    if strcmp(type, 'bar')   
       h = gbar(plotData, varargin{:});
@@ -36,6 +38,9 @@ function varargout = plotcumexpvar(obj, varargin)
    else
       error('Wrong plot type!');
    end
+   
+   ylabel('Variance, %');
+   xlabel('Components');
    
    if nargout > 0
       varargout{1} = h;

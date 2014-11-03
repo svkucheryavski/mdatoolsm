@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>mdadata.factor</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.factor.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.factor</h1><!--introduction--><p><tt>factor</tt> mark a column of a dataset as a factor</p><!--/introduction--><pre class="codeinput">   factor(data, column);
+      --><title>mdadata.factor</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdadata.factor.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.factor</h1><!--introduction--><p><tt>factor</tt> mark a column of a dataset as a factor</p><!--/introduction--><pre class="codeinput">   factor(data, column);
    factor(data, column, levelNames);
 </pre><p>Factor is a categorical variable with discrete values (levels). If a column marked as a factor it will be shown not among the dataset value ('data.values') but among factors ('data.factors'). It means the factors will be excluded from all arithmetic and statistic calculations and/or modelling.</p><p>Factors are used to split data into groups in some statistic methods and plots, calculation qualitative statistics, making classification and discrimination models for the data and so on.</p><p>The argument <tt>column</tt> is a column name or number to be marked as a factor and optional argument <tt>levelNames</tt> is a cell array with names for each level of the factor.</p><h2>Examples<a name="3"></a></h2><pre class="codeinput">   load <span class="string">people</span>
 
@@ -34,7 +34,7 @@ To make changes, update the MATLAB code and republish this document.
 
    disp(<span class="string">'Only quantitative data:'</span>)
    disp(data.numValues)
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% mdadata.factor
 % |factor| mark a column of a dataset as a factor

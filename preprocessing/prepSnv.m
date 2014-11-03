@@ -1,8 +1,13 @@
 classdef prepSnv < prepItem
+   
+   properties (SetAccess = private)
+      name = 'snv';
+      fullName = 'Standard Normal Variate';      
+   end
+   
    methods
       function obj = prepSnv(varargin)
          obj = obj@prepItem(varargin{:});
-         obj.name = 'snv';
       end 
       
       function out = apply(obj, values, excludedRows, excludedCols)

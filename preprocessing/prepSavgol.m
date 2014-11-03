@@ -1,10 +1,13 @@
 classdef prepSavgol < prepItem
    
+   properties (SetAccess = private)
+      name = 'savgol';
+      fullName = 'Savitzky-Goley transformation';      
+   end
+   
    methods
       function obj = prepSavgol(varargin)
          obj = obj@prepItem(varargin{:});
-         obj.name = 'savgol';
-         obj.fullName = 'Savitzky-Goley transformation';
          
          obj.optionList = {...
             'Derivative', {0 1 2}, 0, 'popup'; ...

@@ -19,8 +19,10 @@ function varargout = plotexpvar(obj, varargin)
    if ~isempty(obj.testres) && isa(obj.testres, 'pcares')
       plotData = [plotData; obj.testres.variance(:, 1)'];
       plotData(end, :).rowNames = {'test'};
-   end   
-      
+   end
+   
+   plotData.name = 'Explained variance';
+   
    if strcmp(type, 'bar')   
       h = gbar(plotData, varargin{:});
    elseif strcmp(type, 'line')   
@@ -28,6 +30,9 @@ function varargout = plotexpvar(obj, varargin)
    else
       error('Wrong plot type!');
    end
+   
+   ylabel('Variance, %');
+   xlabel('Components');
    
    if nargout > 0
       varargout{1} = h;

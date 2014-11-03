@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>mdadata.levelplot</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.levelplot.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.levelplot</h1><!--introduction--><p><tt>levelplot</tt> makes a level plot for dataset values.</p><!--/introduction--><pre class="codeinput">   levelplot(data);
+      --><title>mdadata.levelplot</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdadata.levelplot.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.levelplot</h1><!--introduction--><p><tt>levelplot</tt> makes a level plot for dataset values.</p><!--/introduction--><pre class="codeinput">   levelplot(data);
 </pre><p>The method visualises a matrix of values from the dataset as a set of rectangles (levels), oriented the same way as values in the matrix. Color of each rectangle corresponds to the value. This can be particularly useful for comparison of the same factors obtained at different conditions or for different groups (e.g. average values for males and females) or pairwise comparison (e.g. covariance or correlation matrices).</p><h2>Examples<a name="3"></a></h2><pre class="codeinput">   load <span class="string">people</span>
 
    figure
@@ -16,7 +16,7 @@ To make changes, update the MATLAB code and republish this document.
    levelplot(corr(people(:, 1:6)))
    colormap(<span class="string">'winter'</span>)
    colorbar
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% mdadata.levelplot
 % |levelplot| makes a level plot for dataset values.

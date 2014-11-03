@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Group plots</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdatools_ug_mdadata_gplots.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Group plots</h1><!--introduction--><p>Factors can also be used when making both statistical and conventional plots. In this section we will look at the basic principles that work similar for any group plots and additional possibilities of conventional plots.</p><!--/introduction--><h2>Statistical group plots<a name="1"></a></h2><p>With statistical plots it works the same way as with calculation of qualitative statistics: instead of original variables (columns) methods use values of one variable, which is split into groups according to a combination of factors specified by user.</p><p>The syntax for plotting methods is therefore very very similar to the methods for calculation of statistics: first argument is a dataset with values and second argument should be a dataset with one or more factors. If data object has more than one column, several subplots (up to 12) will be shown on the same figure. Here are some examples.</p><p>To show how it works for histograms, let us generate a dataset, where first variable will contain normally distributed random values from two distributions, second variable will contain uniformly distributed random values from two distributions, and the third will be a factor telling which distribution the values come from.</p><pre class="codeinput">n = 1000;
+      --><title>Group plots</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdatools_ug_mdadata_gplots.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Group plots</h1><!--introduction--><p>Factors can also be used when making both statistical and conventional plots. In this section we will look at the basic principles that work similar for any group plots and additional possibilities of conventional plots.</p><!--/introduction--><h2>Statistical group plots<a name="1"></a></h2><p>With statistical plots it works the same way as with calculation of qualitative statistics: instead of original variables (columns) methods use values of one variable, which is split into groups according to a combination of factors specified by user.</p><p>The syntax for plotting methods is therefore very very similar to the methods for calculation of statistics: first argument is a dataset with values and second argument should be a dataset with one or more factors. If data object has more than one column, several subplots (up to 12) will be shown on the same figure. Here are some examples.</p><p>To show how it works for histograms, let us generate a dataset, where first variable will contain normally distributed random values from two distributions, second variable will contain uniformly distributed random values from two distributions, and the third will be a factor telling which distribution the values come from.</p><pre class="codeinput">n = 1000;
 v1 = [randn(n, 1); randn(n, 1) + 2];
 v2 = [rand(n, 1); rand(n, 1) + 0.3];
 v3 = [ones(n, 1); zeros(n, 1)];
@@ -60,28 +60,23 @@ data = mdadata([expvarcal; expvarcv], {<span class="string">'Cal'</span>, <span 
 figure(<span class="string">'Position'</span>, [0 0 400 300])
 gbar(data);
 </pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_06.png" alt=""> <p>Parameters for the group plots are the same as for conventional analogues, but if one want to change color settings, separate color for each group has to be specified. Other properties (e.g. line style) can have one value (same for all groups) or also as many values as many groups. Here is how it works for bar plot.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
-gbar(data, <span class="string">'FaceColor'</span>, <span class="string">'yc'</span>, <span class="string">'EdgeColor'</span>, <span class="string">'rb'</span>, <span class="string">'Legend'</span>, <span class="string">'off'</span>, <span class="string">'Labels'</span>, <span class="string">'names'</span>);
-</pre><pre class="codeoutput">Error using mdadata/gbar (line 3626)
-There is no Legend property on the Bar class.
-
-Error in mdatools_ug_mdadata_gplots (line 136)
-gbar(data, 'FaceColor', 'yc', 'EdgeColor', 'rb', 'Legend', 'off', 'Labels', 'names');
-</pre><p>To make a group line plot there are two possibilities. First of all it can work the same way as the bar plot: every row is a group.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
+gbar(data, <span class="string">'FaceColor'</span>, <span class="string">'yc'</span>, <span class="string">'EdgeColor'</span>, <span class="string">'rb'</span>, <span class="string">'Labels'</span>, <span class="string">'names'</span>);
+</pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_07.png" alt=""> <p>To make a group line plot there are two possibilities. First of all it can work the same way as the bar plot: every row is a group.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
 gplot(data, <span class="string">'Marker'</span>, <span class="string">'.'</span>)
-</pre><p>Alternatively one can provide a dataset with factors as a second argument for the plotting methods. In this case the rows of original data will be shown in groups.</p><pre class="codeinput">data = people(:, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>, <span class="string">'Wine'</span>, <span class="string">'Beer'</span>});
+</pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_08.png" alt=""> <p>Alternatively one can provide a dataset with factors as a second argument for the plotting methods. In this case the rows of original data will be shown in groups.</p><pre class="codeinput">data = people(:, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>, <span class="string">'Wine'</span>, <span class="string">'Beer'</span>});
 factors = people(:, {<span class="string">'Sex'</span>, <span class="string">'Region'</span>});
 factors.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>});
 factors.factor(<span class="string">'Region'</span>, {<span class="string">'A'</span>, <span class="string">'B'</span>});
 
 figure(<span class="string">'Position'</span>, [0 0 400 300])
 gplot(data, factors)
-</pre><p>In group line plot, one can specify line and marker settings for each group separately or use one value for all. It should be noticed that since color in group plots is used for separation of the groups, it is not possibile to use parameter <tt>'Colorby'</tt> and related.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
+</pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_09.png" alt=""> <p>In group line plot, one can specify line and marker settings for each group separately or use one value for all. It should be noticed that since color in group plots is used for separation of the groups, it is not possibile to use parameter <tt>'Colorby'</tt> and related.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
 gplot(data, factors, <span class="string">'LineStyle'</span>, {<span class="string">'-'</span>, <span class="string">'--'</span>, <span class="string">':'</span>, <span class="string">'-.'</span>}, <span class="string">'LineWidth'</span>, 2)
-</pre><p>Group scatter plot works similar to the normal one. To introduce groups, you just need to specify a dataset with factors as a second argument.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
+</pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_10.png" alt=""> <p>Group scatter plot works similar to the normal one. To introduce groups, you just need to specify a dataset with factors as a second argument.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
 gscatter(data(:, {<span class="string">'Wine'</span>, <span class="string">'Beer'</span>}), factors);
-</pre><p>And similar to <tt>gplot()</tt> one can specify color and marker settings: either for each group or one for all of them.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
+</pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_11.png" alt=""> <p>And similar to <tt>gplot()</tt> one can specify color and marker settings: either for each group or one for all of them.</p><pre class="codeinput">figure(<span class="string">'Position'</span>, [0 0 400 300])
 gscatter(data, factors, <span class="string">'Marker'</span>, <span class="string">'ssoo'</span>, <span class="string">'MarkerFaceColor'</span>, <span class="string">'rbrb'</span>, <span class="string">'Labels'</span>, <span class="string">'names'</span>)
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="mdatools_ug_mdadata_gplots_12.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Group plots
 %
@@ -218,7 +213,7 @@ gbar(data);
 %
 
 figure('Position', [0 0 400 300])
-gbar(data, 'FaceColor', 'yc', 'EdgeColor', 'rb', 'Legend', 'off', 'Labels', 'names');
+gbar(data, 'FaceColor', 'yc', 'EdgeColor', 'rb', 'Labels', 'names');
 
 %% 
 % To make a group line plot there are two possibilities. First of all it

@@ -2566,6 +2566,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
          
          data = mdadata(svalues, srowNames, scolNames, obj.dimNames, obj.name);
+         data.info = obj.info;
          data.colFullNames = scolFullNames;
          data.rowFullNames = srowFullNames;
          objFactorCols = col_ind(ismember(col_ind, find(obj.factorCols)));

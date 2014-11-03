@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Quick start guide</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdatools_quick.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quick start guide</h1><!--introduction--><p>This document gives a brief introduction to the basic functionality of <i>mdatools</i> toolbox as well as presents some ideas about how it deals with data, models and results. It is assumed that after reading the text and doing all exercises from the document one can easily start working with toolbox and then learn more features gradually.</p><!--/introduction--><h2>Introduction to datasets<a name="1"></a></h2><p>One of the most important things in the MDA toolbox is a <i>dataset</i> object. MATLAB is a great to deal with matrices and arrays, however one has to do a lot of rutine operations to represent e.g. matrix values properly. Usually we have names for variables and objects or labels for measurements in our data. However, dealing with the names and labels in MATLAB is not an easy job. One of the ways to solve this issue is to use <i>dataset</i> - a specific object, which is a wrapper for a conventional numeric matrix, giving possibilties to use names more or less easily. Such objects exist in many toolboxes (including Statistics Toolbox) and the <i>mdatools</i> is not an exception here. Moreover, in <i>mdatools</i> dataset is a main way to represent any values. Scores, loadings, residuals, regression coefficients and so on are datasets in <i>mdatools</i>. Therefore is is important to start with introduction what dataset is, how to create and manipulate datasets.</p><p>Actually in <i>mdatools</i> datasets give a lot more options than just a possibility to have names for rows and columns of a matrix. They allow to hide rows and columns without removing them (for example when one need to remove an outlier or do variable selection), to use qualitative data, factors, for grouping values and do many other things. But in this qick guide we will talk only about most important features of datasets, namely names/labels for rows and columns, making subsets, displaying data values, doing mathematical calculations and making plots.</p><p>Dataset can be created from any matrix (array with two dimensions: rows and columns). Actually it is not necessary to provide names for the dimensions. Column names will be generated automatically and row names will remain empty. Here is an example for 3x2 matrix with height and weight values for four persons:</p><pre class="codeinput">   values = [180 84; 170 68; 165 71; 172 75];
+      --><title>Quick start guide</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdatools_quick.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quick start guide</h1><!--introduction--><p>This document gives a brief introduction to the basic functionality of <i>mdatools</i> toolbox as well as presents some ideas about how it deals with data, models and results. It is assumed that after reading the text and doing all exercises from the document one can easily start working with toolbox and then learn more features gradually.</p><!--/introduction--><h2>Introduction to datasets<a name="1"></a></h2><p>One of the most important things in the MDA toolbox is a <i>dataset</i> object. MATLAB is a great to deal with matrices and arrays, however one has to do a lot of rutine operations to represent e.g. matrix values properly. Usually we have names for variables and objects or labels for measurements in our data. However, dealing with the names and labels in MATLAB is not an easy job. One of the ways to solve this issue is to use <i>dataset</i> - a specific object, which is a wrapper for a conventional numeric matrix, giving possibilties to use names more or less easily. Such objects exist in many toolboxes (including Statistics Toolbox) and the <i>mdatools</i> is not an exception here. Moreover, in <i>mdatools</i> dataset is a main way to represent any values. Scores, loadings, residuals, regression coefficients and so on are datasets in <i>mdatools</i>. Therefore is is important to start with introduction what dataset is, how to create and manipulate datasets.</p><p>Actually in <i>mdatools</i> datasets give a lot more options than just a possibility to have names for rows and columns of a matrix. They allow to hide rows and columns without removing them (for example when one need to remove an outlier or do variable selection), to use qualitative data, factors, for grouping values and do many other things. But in this qick guide we will talk only about most important features of datasets, namely names/labels for rows and columns, making subsets, displaying data values, doing mathematical calculations and making plots.</p><p>Dataset can be created from any matrix (array with two dimensions: rows and columns). Actually it is not necessary to provide names for the dimensions. Column names will be generated automatically and row names will remain empty. Here is an example for 3x2 matrix with height and weight values for four persons:</p><pre class="codeinput">   values = [180 84; 170 68; 165 71; 172 75];
    d = mdadata(values);
 
    show(d)
@@ -35,8 +35,9 @@ To make changes, update the MATLAB code and republish this document.
 4     172      75
 
 </pre><p>It is mandatory that row and column names are unique. It is recommended also not to use spaces and other special symbols, especially for column names, to avoid ambiguity. Actually the names may have two forms: full, with spaces and special symbols and short, with only letters and numbers. If one provides names with spaces and special symbols they will be converted to the short form automatically. More on that can be found in the <a href="mdatools_ug.html">User Guide</a>.</p><p>The <tt>mdadata</tt> is a MATLAB object which has several properties and many methods. You can see some of the properties by using <tt>disp()</tt>.</p><pre class="codeinput">   disp(d)
-</pre><pre class="codeoutput">  4x2 mdadata array with properties:
+</pre><pre class="codeoutput">  mdadata handle
 
+  Properties:
             name: ''
             info: []
         dimNames: {'Objects'  'Variables'}
@@ -48,6 +49,7 @@ To make changes, update the MATLAB code and republish this document.
         colNames: {'Height'  'Weight'}
     rowFullNames: {'1'  '2'  '3'  '4'}
     colFullNames: {'Height'  'Weight'}
+
 
 </pre><p>The most important ones are <tt>values</tt>, which is a matrix with data values, <tt>rowNames</tt> - cell array with row names and <tt>colNames</tt> - cell array with column names. All three can be changed manually for the whole object or for particular rows or columns. You can also specify name of the dataset, short information text and labels for each of the two dimensions</p><pre class="codeinput">   d.rowNames = {<span class="string">'Lars'</span>, <span class="string">'Peter'</span>, <span class="string">'Anna'</span>, <span class="string">'Kim'</span>};
    show(d)
@@ -211,8 +213,9 @@ Median     174    64.5        40
    m = mdapca(people, 8, <span class="string">'Scale'</span>, <span class="string">'on'</span>);
    disp(m)
    disp(m.calres)
-</pre><pre class="codeoutput">  mdapca with properties:
+</pre><pre class="codeoutput">  mdapca handle
 
+  Properties:
            info: []
           nComp: 8
        loadings: [12x8 mdadata]
@@ -226,8 +229,10 @@ Median     174    64.5        40
          limits: [2x8 mdadata]
          method: 'svd'
 
-  pcares with properties:
 
+  pcares handle
+
+  Properties:
         info: 'Results for calibration set'
       scores: [32x8 mdadata]
     variance: [8x2 mdadata]
@@ -235,11 +240,13 @@ Median     174    64.5        40
           T2: [32x8 mdadata]
           Q2: [32x8 mdadata]
 
+
 </pre><p>As you can see, indeed the <tt>m</tt> object has <tt>mdapca</tt> class and containes, among others, loadings of the principal component space. It also has three objects with results: <tt>calres</tt>, <tt>cvres</tt> and <tt>testrest</tt> but the last two are empty, since we did not use any validation here.</p><p>For cross-validation one need to specify parameter <tt>'CV'</tt> with cell array as a value. The first element of the cell array is how to split data. Possible values are <tt>'rand'</tt> for random splits, <tt>'ven'</tt> for systematic (venetian blinds) splits and <tt>'full'</tt> for full cross-validation (leave-one-out). For the first two one can specify a second value which is number of segments to split the data into. Finally, for the random splits, we can also specify a number of repetitions. Thus the following example will make cross-validation with random splits to eight segments and four repetitions.</p><pre class="codeinput">   load(<span class="string">'people'</span>)
    m = mdapca(people, 8, <span class="string">'Scale'</span>, <span class="string">'on'</span>, <span class="string">'CV'</span>, {<span class="string">'rand'</span>, 8, 4});
    disp(m)
-</pre><pre class="codeoutput">  mdapca with properties:
+</pre><pre class="codeoutput">  mdapca handle
 
+  Properties:
            info: []
           nComp: 8
        loadings: [12x8 mdadata]
@@ -252,6 +259,7 @@ Median     174    64.5        40
         testres: []
          limits: [2x8 mdadata]
          method: 'svd'
+
 
 </pre><p>Now model contains two types of results which are not emplty - <tt>calres</tt> and <tt>cvres</tt>.</p><p>How to explore models and results? All numerical values are available as <tt>mdadata</tt> objects, so if you want to look at e.g. scores for the first five rows of calibration set, just use</p><pre class="codeinput">   show(m.calres.scores(1:5, :))
 </pre><pre class="codeoutput">
@@ -273,14 +281,14 @@ Rasmus      -3   -0.36  -0.212   -1.12  -0.204  0.0166   -0.12  -0.469
 </pre><pre class="codeoutput">
         Eigenvalues  Expvar  Cumexpvar  Expvar (CV)  Cumexpvar (CV)
        ------------ ------- ---------- ------------ ---------------
-Comp 1         6.43    53.6       53.6         46.1            46.1
-Comp 2         2.24    18.7       72.3         17.4            63.5
-Comp 3         1.62    13.5       85.7         15.6            79.1
-Comp 4        0.998    8.32       94.1           12              91
-Comp 5        0.319    2.66       96.7         3.35            94.4
-Comp 6        0.165    1.38       98.1         1.88            96.3
-Comp 7       0.0994   0.828       98.9         1.31            97.6
-Comp 8        0.055   0.458       99.4         0.94            98.5
+Comp 1         6.43    53.6       53.6         46.2            46.2
+Comp 2         2.24    18.7       72.3         17.3            63.4
+Comp 3         1.62    13.5       85.7         15.1            78.6
+Comp 4        0.998    8.32       94.1         12.6            91.2
+Comp 5        0.319    2.66       96.7          3.2            94.4
+Comp 6        0.165    1.38       98.1         1.61              96
+Comp 7       0.0994   0.828       98.9         1.37            97.4
+Comp 8        0.055   0.458       99.4        0.919            98.3
 
 </pre><img vspace="5" hspace="5" src="mdatools_quick_04.png" alt=""> <p>If one need to look at the scores and loadings for other set of components, just specify this as a second argument:</p><pre class="codeinput">   figure(<span class="string">'Position'</span>, [100 100 800 500])
    plot(m, [1 3])
@@ -318,13 +326,8 @@ Comp 8        0.055   0.458       99.4         0.94            98.5
 
    subplot(1, 2, 2)
    plotscores(m.calres, <span class="string">'Labels'</span>, <span class="string">'names'</span>, <span class="string">'Colorby'</span>, people(:, <span class="string">'Beer'</span>))
-</pre><img vspace="5" hspace="5" src="mdatools_quick_09.png" alt=""> <p>Thus in the second plot data points are colorised according to annual beer consumption by the persons and one can also see a colobar with legend.</p><p>More details about PCA model and result objects and methods can be found in class descriptions (<a href="classes/mdapca.html">mdapca</a> and <a href="classes/pcares.html">pcares</a>).</p><h2>Working with images<a name="22"></a></h2><p>The <i>mdatools</i> may work naturally with images. Image can be represented as a 2-way dataset by unfolding 3-way cube, so all pixels become rows (objects) and all channels - columns (variables). In <i>mdatools? there is a specific object to work with images, <tt>mdaimage</tt>. It is based on _mdadata</i> object and inherits all its properties and methods. So all examples above will also work with <tt>mdaimage</tt> obects.</p><p>However there are also some important things to know. First of all image has no row names, since number of pixels is very large, it would slow manipulations with such objects if we used names. Second difference is when you subset an <tt>mdaimage</tt> you have to use three indices: width, height and channels. Finally <tt>mdaimage</tt> has a method <tt>imagesc()</tt> allowing to show an image for any channel. Let's play with that:</p><pre class="codeinput">   img = imread(<span class="string">''</span>);
-</pre><pre class="codeoutput">Error using imread (line 349)
-File "" does not exist.
-
-Error in mdatools_quick (line 336)
-   img = imread('');
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="mdatools_quick_09.png" alt=""> <p>Thus in the second plot data points are colorised according to annual beer consumption by the persons and one can also see a colobar with legend.</p><p>More details about PCA model and result objects and methods can be found in class descriptions (<a href="classes/mdapca.html">mdapca</a> and <a href="classes/pcares.html">pcares</a>).</p><h2>Working with images<a name="22"></a></h2><p>The <i>mdatools</i> may work naturally with images. Image can be represented as a 2-way dataset by unfolding 3-way cube, so all pixels become rows (objects) and all channels - columns (variables). In <i>mdatools? there is a specific object to work with images, <tt>mdaimage</tt>. It is based on _mdadata</i> object and inherits all its properties and methods. So all examples above will also work with <tt>mdaimage</tt> obects.</p><p>However there are also some important things to know. First of all image has no row names, since number of pixels is very large, it would slow manipulations with such objects if we used names. Second difference is when you subset an <tt>mdaimage</tt> you have to use three indices: width, height and channels. Finally <tt>mdaimage</tt> has a method <tt>imagesc()</tt> allowing to show an image for any channel. Let's play with that:</p><pre class="language-matlab">img = imread(<span class="string">'test.jpg'</span>);
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Quick start guide
 % 
@@ -661,7 +664,7 @@ show(bmi)
 % and channels. Finally |mdaimage| has a method |imagesc()| allowing to
 % show an image for any channel. Let's play with that:
 %
-   img = imread('');
+%   img = imread('test.jpg');
    
 ##### SOURCE END #####
 --></body></html>

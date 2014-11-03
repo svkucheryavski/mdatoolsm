@@ -158,7 +158,7 @@ classdef mdapca < handle
       
       function setOptions(obj, data, varargin)
          % set up number of components
-         if numel(varargin) > 1 && isnumeric(varargin{1})
+         if numel(varargin) > 0 && isnumeric(varargin{1})
             nc = varargin{1};
             varargin(1) = [];
          else

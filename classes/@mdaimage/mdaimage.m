@@ -1,5 +1,54 @@
 classdef mdaimage < mdadata
-   
+% 'mdaimage' is an extenstion of 'mdadata' class for working with images.
+%
+%   img = mdaimge(im);
+%   img = mdaimage(im, channelNames);
+%   img = mdaimage(im, channelNames, dimNames, name);
+%
+%
+%
+% The 'mdaimage' class extends possibilities given by 'mdadata' allowing to 
+% manipulate with datasets as images. It inherits all methods and properties of
+% the 'mdadata'. 
+% 
+% There are several differences in how to work with image objects. First of all, 
+% it has no row names (number of rows corresponds to number of pixels and is too
+% large for handling the names). Besides that, when subset the 'mdaimage' object, one 
+% must use three indices (rows, columns and channels) instead of two. If
+% only two indices are used, the subset will be 'mdadata' object.
+%
+%
+% Properties (additional):
+% ------------------------
+%  'width' - width of image in pixels
+%  'height' - height of image in pixels
+%
+%
+% Examples:
+% ---------
+%
+%   im = imread('test.jpg');
+%   img = mdaimage(im, {'Red', 'Green', 'Blue'});
+%
+%   % show intensities for 25 pixels from right upper corner
+%   show(img(1:5, 1:5, :))
+%
+%   % show scatter plot for the pixels
+%   figure
+%   scatter(img(:, :, {'Red', 'Blue'})
+%
+%   % show image for the second (green) channel
+%   figure
+%   imagesc(img(:, :, 2))
+%
+%
+% Methods (additional):
+% ---------------------
+%  'imagesc' - show image for selected channel
+%
+%
+%
+
    properties (GetAccess = 'public', SetAccess = 'protected')
       width 
       height
@@ -114,6 +163,15 @@ classdef mdaimage < mdadata
       end   
       
       function varargout = imagesc(obj, varargin)
+      % 'imagesc' shows image of selected channel for 'mdaimage' object.
+      %
+      %    imagesc(img(:, :, 2))
+      %
+      %
+      % If some of image pixels are hidden (excluded as outliers,
+      % background, etc), they are shown as transparent.
+      %
+      
          if obj.nCols ~= 1
             error('Specify channel to show as an image!');
          end

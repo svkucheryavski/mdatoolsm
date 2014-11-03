@@ -17,7 +17,7 @@ function publish_class(classname, varargin)
    properties_list = false;
    methods_list = false;
    
-   if strfind(version, 'R2014b') && ~isempty(strfind(lines{i}, 'Contents of'))
+   if ~isempty(strfind(version, 'R2014b')) && ~isempty(strfind(lines{i}, 'Contents of'))
       lines(1:6) = [];
    end
    
@@ -234,12 +234,18 @@ end
 function l = parseQuotes(l, is_html)
 % takes all words as 'xxx' and convert to |xxx| (inline code)
 % takes all words as "xxx" and convert to |'xxx'| (string constants)
-
    if nargin < 2 || is_html == false
-      l = regexprep(l, '('')([A-Za-z0-9_()@]+)('')', '|${strrep($0, char(39), '''')}|');
-      l = regexprep(l, '(")([A-Za-z0-9_()@]+)(")', '|''${strrep($0, char(34), '''')}''|');
-      l = regexprep(l, '<a href="([^"]*)">([\w\s])*</a>', '<../$1 $2>');
       
+      l = regexprep(l, '<a href="([^"]*)">([\w\s])*</a>', '<../$1 $2>');
+
+      if ~isempty(regexp(l, '(")([A-Za-z0-9 ,.''_()@]+)(")', 'ONCE'))
+         % complex line like 'p.add("name")'
+         l = regexprep(l, '(")([A-Za-z0-9 ,.''_()@]+)(")', '|${strrep($0, char(34), '''')}|');
+      else
+         l = regexprep(l, '('')([A-Za-z0-9_()@]+)('')', '|${strrep($0, char(39), '''')}|');
+         l = regexprep(l, '(")([A-Za-z0-9_()@]+)(")', '|''${strrep($0, char(34), '''')}''|');
+      end
+            
       if ~isempty(strfind(l, 'See also'))
          l = [' See also: ', regexprep(strrep(l, 'See also ', ''), ...
             '([A-Za-z\.])*', ' <${strtrim(lower($0))}.html ${strtrim(lower($0))}>')];      

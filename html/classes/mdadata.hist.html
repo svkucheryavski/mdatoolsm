@@ -6,22 +6,23 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>mdadata.hist</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-10-29"><meta name="DC.source" content="mdadata.hist.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.hist</h1><!--introduction--><p><tt>hist</tt> makes a histogram plot for selected columns of dataset.</p><!--/introduction--><pre class="codeinput">   hist(data);
+      --><title>mdadata.hist</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdadata.hist.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.hist</h1><!--introduction--><p><tt>hist</tt> makes a histogram plot for selected columns of dataset.</p><!--/introduction--><pre class="codeinput">   hist(data);
    hist(data, nbins);
    hist(data, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
 
    hist(data, factors);
    hist(data, factors, nbins);
    hist(data, factors, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
-</pre><p>The function returns a structure with plot elements (plot handle, labels handle, etc). If dataset has more than one column, the method will make a plot for the first column only.</p><p>Optional argument <tt>'factors'</tt> is a dataset with qualitative variables (factors) used to split values to groups and show distribution histogram separately for each group on the same axis.</p><h2>Parameters<a name="3"></a></h2><p>All parameters for Matlab's <tt>bar()</tt> function will work. Optinally the second parameter (after dataset) is either number of bins or a vector with bin intervals like in original <tt>hist()</tt> function. Extra parameters are shown below.</p><p><table class="properties-list">
-<tr><td class="name">Density</td><td class="text">alculate density instead of frequency. Possiblevalues are <tt>'on'</tt> and <tt>'off'</tt> (default).</td></tr>
-<tr><td class="name">ShowNormal</td><td class="text">hows a curve with normal theoretical normal distribution.Possible values are <tt>'on'</tt> and <tt>'off'</tt> (default).</td></tr>
-<tr><td class="name">Labels</td><td class="text">how or not labels for the histogram bars. Possiblevalues are <tt>'on'</tt> and <tt>'off'</tt> (default). If <tt>'on'</tt>, the values will be shown ontop of each bar.</td></tr>
-<tr><td class="name">FaceColor</td><td class="text">he parameter is similar to the one for bar plot, however iffactors are used it should have a value for each group, made by combinationof the factors.</td></tr>
-<tr><td class="name">EdgeColor</td><td class="text">he parameter is similar to the one for bar plot, however iffactors are used it should have a value for each group, made by combinationof the factors.</td></tr>
-<tr><td class="name">Color</td><td class="text">olor of normal probability curve (if used), if factors are used itshould have a value for each group, made by combination of the factors.</td></tr>
-<tr><td class="name">FaceAlpha</td><td class="text">ransparency of the bars, a value between 0 (fully transparent)and 1 (not transparent). Default value is 0.5.</td></tr>
-<tr><td class="name">LineWidth</td><td class="text">ine thickness of normal probability curve (if used), default is 2.</td></tr>
+</pre><p>The function returns a structure with plot elements (plot handle, labels handle, etc). If dataset has more than one column, the method will make a plot for the first column only.</p><p>Optional argument <tt>factors</tt> is a dataset with qualitative variables (factors) used to split values to groups and show distribution histogram separately for each group on the same axis.</p><h2>Parameters<a name="3"></a></h2><p>All parameters for Matlab's <tt>bar()</tt> function will work. Optinally the second parameter (after dataset) is either number of bins or a vector with bin intervals like in original <tt>hist()</tt> function. Extra parameters are shown below.</p><p><table class="properties-list">
+<tr><td class="name">Density</td><td class="text">calculate density instead of frequency. Possible  values are <tt>'on'</tt> and <tt>'off'</tt> (default).</td></tr>
+<tr><td class="name">ShowNormal</td><td class="text">shows a curve with normal theoretical normal distribution.  Possible values are <tt>'on'</tt> and <tt>'off'</tt> (default). </td></tr>
+<tr><td class="name">Labels</td><td class="text">show or not labels for the histogram bars. Possible  values are <tt>'on'</tt> and <tt>'off'</tt> (default). If <tt>'on'</tt>, the values will be shown on   top of each bar.</td></tr>
+<tr><td class="name">FaceColor</td><td class="text">the parameter is similar to the one for bar plot, however if   factors are used it should have a value for each group, made by combination   of the factors.</td></tr>
+<tr><td class="name">EdgeColor</td><td class="text">the parameter is similar to the one for bar plot, however if   factors are used it should have a value for each group, made by combination   of the factors.</td></tr>
+<tr><td class="name">Color</td><td class="text">color of normal probability curve (if used), if factors are used it   should have a value for each group, made by combination of the factors.</td></tr>
+<tr><td class="name">FaceAlpha</td><td class="text">transparency of the bars, a value between 0 (fully transparent)   and 1 (not transparent). Default value is 0.5.</td></tr>
+<tr><td class="name">LineWidth</td><td class="text">line thickness of normal probability curve (if used), default is 2.</td></tr>
+<tr><td class="name">LineStyle</td><td class="text">line style of normal probability curve (if used), default is "-".</td></tr>
 </table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   load <span class="string">people</span>
 
    <span class="comment">% show historgram for particular column</span>
@@ -35,7 +36,7 @@ To make changes, update the MATLAB code and republish this document.
    people.factor(<span class="string">'Sex'</span>, {<span class="string">'M'</span>, <span class="string">'F'</span>});
    figure
    hist(people(:, <span class="string">'Height'</span>), people(:, <span class="string">'Sex'</span>), <span class="string">'ShowNormal'</span>, <span class="string">'on'</span>);
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% mdadata.hist
 % |hist| makes a histogram plot for selected columns of dataset.
@@ -55,7 +56,7 @@ To make changes, update the MATLAB code and republish this document.
 % labels handle, etc). If dataset has more than one column, the method 
 % will make a plot for the first column only.
 % 
-% Optional argument |'factors'| is a dataset with qualitative variables
+% Optional argument |factors| is a dataset with qualitative variables
 % (factors) used to split values to groups and show distribution
 % histogram separately for each group on the same axis.
 %
@@ -66,14 +67,15 @@ To make changes, update the MATLAB code and republish this document.
 % intervals like in original |hist()| function. Extra parameters are shown below.
 %
 % <html><table class="properties-list">
-% <tr><td class="name">Density</td><td class="text">alculate density instead of frequency. Possiblevalues are <tt>'on'</tt> and <tt>'off'</tt> (default).</td></tr>
-% <tr><td class="name">ShowNormal</td><td class="text">hows a curve with normal theoretical normal distribution.Possible values are <tt>'on'</tt> and <tt>'off'</tt> (default).</td></tr>
-% <tr><td class="name">Labels</td><td class="text">how or not labels for the histogram bars. Possiblevalues are <tt>'on'</tt> and <tt>'off'</tt> (default). If <tt>'on'</tt>, the values will be shown ontop of each bar.</td></tr>
-% <tr><td class="name">FaceColor</td><td class="text">he parameter is similar to the one for bar plot, however iffactors are used it should have a value for each group, made by combinationof the factors.</td></tr>
-% <tr><td class="name">EdgeColor</td><td class="text">he parameter is similar to the one for bar plot, however iffactors are used it should have a value for each group, made by combinationof the factors.</td></tr>
-% <tr><td class="name">Color</td><td class="text">olor of normal probability curve (if used), if factors are used itshould have a value for each group, made by combination of the factors.</td></tr>
-% <tr><td class="name">FaceAlpha</td><td class="text">ransparency of the bars, a value between 0 (fully transparent)and 1 (not transparent). Default value is 0.5.</td></tr>
-% <tr><td class="name">LineWidth</td><td class="text">ine thickness of normal probability curve (if used), default is 2.</td></tr>
+% <tr><td class="name">Density</td><td class="text">calculate density instead of frequency. Possible  values are <tt>'on'</tt> and <tt>'off'</tt> (default).</td></tr>
+% <tr><td class="name">ShowNormal</td><td class="text">shows a curve with normal theoretical normal distribution.  Possible values are <tt>'on'</tt> and <tt>'off'</tt> (default). </td></tr>
+% <tr><td class="name">Labels</td><td class="text">show or not labels for the histogram bars. Possible  values are <tt>'on'</tt> and <tt>'off'</tt> (default). If <tt>'on'</tt>, the values will be shown on   top of each bar.</td></tr>
+% <tr><td class="name">FaceColor</td><td class="text">the parameter is similar to the one for bar plot, however if   factors are used it should have a value for each group, made by combination   of the factors.</td></tr>
+% <tr><td class="name">EdgeColor</td><td class="text">the parameter is similar to the one for bar plot, however if   factors are used it should have a value for each group, made by combination   of the factors.</td></tr>
+% <tr><td class="name">Color</td><td class="text">color of normal probability curve (if used), if factors are used it   should have a value for each group, made by combination of the factors.</td></tr>
+% <tr><td class="name">FaceAlpha</td><td class="text">transparency of the bars, a value between 0 (fully transparent)   and 1 (not transparent). Default value is 0.5.</td></tr>
+% <tr><td class="name">LineWidth</td><td class="text">line thickness of normal probability curve (if used), default is 2.</td></tr>
+% <tr><td class="name">LineStyle</td><td class="text">line style of normal probability curve (if used), default is "-".</td></tr>
 % </table></html>
 %
 %

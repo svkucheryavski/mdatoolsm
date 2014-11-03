@@ -42,10 +42,10 @@ function h = showColorbar(cmap, cgroup, colorbarTitle, dx, dy)
    % show labels for colorbar elements
    x = linspace(xinit, xinit + (n - 1) * cbWidth, ng);
    y = ones(1, ng) * yinit - cbHeight * 0.75;
-   v = num2str(linspace(min(cgroup), max(cgroup), ng), 3);
+   v = num2str(linspace(min(cgroup), max(cgroup), ng)', 3);
    
    sz = get(gca, 'FontSize');
-   h.labels = text(x + cbWidth/2, y, strsplit(v, ' '), 'FontSize', sz * 0.85, 'HorizontalAlignment','center');
+   h.labels = text(x + cbWidth/2, y, v, 'FontSize', sz * 0.85, 'HorizontalAlignment','center');
    
    if ~isempty(colorbarTitle)
       yfactor = 1.8;

@@ -1,8 +1,6 @@
 classdef prepItem < handle
    
    properties (SetAccess = 'protected', Hidden = true)
-      name
-      fullName
       options = {}
       values
       optionList = {}

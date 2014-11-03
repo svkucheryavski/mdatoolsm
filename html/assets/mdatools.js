@@ -1,48 +1,43 @@
+
 $( document ).ready(function() {
+  var xmltext = '\
+  <toc version="2.0">\
+  <tocitem target="mdatools.html">Multivariate Data Analysis Toolbox (mdatools)\
+     <tocitem target="mdatools_quick.html">Quick start guide</tocitem>\
+     <tocitem target="mdatools_ug.html" image="HelpIcon.GETTING_STARTED">User guide\
+        <tocitem target="mdatools_ug_mdadata.html">Dataset object (mdadata)\
+           <tocitem target="mdatools_ug_mdadata_intro.html">Introduction to mdadata class</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_subsets.html">Sorting data and making subsets</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_math.html">Mathematical operators and functions</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_stat.html">Quantitative statistics</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_plots.html">Simple plots</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_groups.html">Factors and groups</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_gplots.html">Group plots</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_exclude.html">Hiding rows and columns</tocitem>\
+           <tocitem target="mdatools_ug_mdadata_gui.html">GUI tools</tocitem>\
+        </tocitem>\
+        <tocitem target="mdatools_ug_mdaimage.html">Working with images (mdaimage)</tocitem>\
+        <tocitem target="mdatools_ug_prep.html">Data preprocessing</tocitem>\
+        <tocitem target="mdatools_ug_prep.html">Principal component analysis</tocitem>\
+        <tocitem target="mdatools_ug_mlr.html">Multiple linear regression</tocitem>\
+        <tocitem target="mdatools_ug_pls.html">Partial least squares regression</tocitem>\
+        <tocitem target="mdatools_ug_simca.html">SIMCA classification</tocitem>\
+        <tocitem target="mdatools_ug_plsda.html">PLS discriminant analysis</tocitem>\
+        <tocitem target="mdatools_ug_explore.html">GUI tool for interactive modelling</tocitem>\
+     </tocitem>\
+     <tocitem target="classes/mdadata.html" image="HelpIcon.FUNCTIONS">Class "mdadata"</tocitem>\
+     <tocitem target="classes/mdaimage.html" image="HelpIcon.FUNCTIONS">Class "mdaimage"</tocitem>\
+     <tocitem target="classes/prep.html" image="HelpIcon.FUNCTIONS">Class "prep"</tocitem>\
+  </tocitem>\
+  </toc>\
+  ';
 
-   var xmltext = '
-<?xml version="1.0" encoding="utf-8"?>
-<toc version="2.0">
-
-   <tocitem target="mdatools.html">Multivariate Data Analysis Toolbox (mdatools)
-      <tocitem target="mdatools_quick.html">Quick start guide</tocitem>
-      <tocitem target="mdatools_ug.html" image="HelpIcon.GETTING_STARTED">User guide
-         <tocitem target="mdatools_ug_mdadata.html">Dataset object (mdadata)
-            <tocitem target="mdatools_ug_mdadata_intro.html">Introduction to mdadata class</tocitem>
-            <tocitem target="mdatools_ug_mdadata_subsets.html">Sorting data and making subsets</tocitem>
-            <tocitem target="mdatools_ug_mdadata_math.html">Mathematical operators and functions</tocitem>
-            <tocitem target="mdatools_ug_mdadata_stat.html">Quantitative statistics</tocitem>
-            <tocitem target="mdatools_ug_mdadata_plots.html">Simple plots</tocitem>
-            <tocitem target="mdatools_ug_mdadata_groups.html">Factors and groups</tocitem>
-            <tocitem target="mdatools_ug_mdadata_gplots.html">Group plots</tocitem>
-            <tocitem target="mdatools_ug_mdadata_exclude.html">Hiding rows and columns</tocitem>
-            <tocitem target="mdatools_ug_mdadata_gui.html">GUI tools</tocitem>
-         </tocitem>
-         <tocitem target="mdatools_ug_mdaimage.html">Working with images (mdaimage)</tocitem>
-         <tocitem target="mdatools_ug_prep.html">Data preprocessing</tocitem>
-         <tocitem target="mdatools_ug_prep.html">Principal component analysis</tocitem>
-         <tocitem target="mdatools_ug_mlr.html">Multiple linear regression</tocitem>
-         <tocitem target="mdatools_ug_pls.html">Partial least squares regression</tocitem>
-         <tocitem target="mdatools_ug_simca.html">SIMCA classification</tocitem>
-         <tocitem target="mdatools_ug_plsda.html">PLS discriminant analysis</tocitem>
-         <tocitem target="mdatools_ug_explore.html">GUI tool for interactive modelling</tocitem>
-      </tocitem>
-      <tocitem target="classes/mdadata.html" image="HelpIcon.FUNCTIONS">Classes and methods
-         <tocitem target="mdadata_exclude.html">GUI tools</tocitem>
-      </tocitem>
-   </tocitem>
-
-
-</toc>
-   ';
 
 
    if ((typeof is_method != 'undefined') && is_method) {
-      var xmlfile = "../helptoc.xml";
       var urlstr = '../';
       var targetstr = 'classes/';
    } else {
-      var xmlfile = "helptoc.xml";
       var urlstr = '';
       var targetstr = '';
    }
@@ -78,8 +73,10 @@ $( document ).ready(function() {
       });
    })
 
-   function parseToc(xml)
+   function parseToc(xmltext)
    {
+      var xml = $.parseXML(xmltext);
+
       var filename = window.location.href.substr(window.location.href.lastIndexOf("/")+1);
       var nav = [];
       var node = $(xml).find('tocitem[target="' + targetstr + filename + '"]');

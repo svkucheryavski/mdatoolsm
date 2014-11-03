@@ -1,8 +1,12 @@
 classdef prepCenter < prepItem
+   properties (SetAccess = private)
+      name = 'center';
+      fullName = 'mean centering';      
+   end
+   
    methods
       function obj = prepCenter(varargin)
          obj = obj@prepItem(varargin{:});
-         obj.name = 'center';
       end 
       
       function out = apply(obj, values, excludedRows, excludedCols)

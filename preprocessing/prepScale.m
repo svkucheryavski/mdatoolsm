@@ -1,9 +1,12 @@
 classdef prepScale < prepItem
+   properties (SetAccess = private)
+      name = 'scale';
+      fullName = 'standardization';      
+   end
+   
    methods
       function obj = prepScale(varargin)
          obj = obj@prepItem(varargin{:});
-         obj.name = 'scale';
-         obj.fullName = 'Standardize';
       end 
       
       function out = apply(obj, values, excludedRows, excludedCols)

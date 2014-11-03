@@ -333,5 +333,5 @@ show(bmi)
 % and channels. Finally |mdaimage| has a method |imagesc()| allowing to
 % show an image for any channel. Let's play with that:
 %
-   img = imread('');
+%   img = imread('test.jpg');
    

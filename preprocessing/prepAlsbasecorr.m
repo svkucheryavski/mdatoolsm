@@ -1,10 +1,13 @@
 classdef prepAlsbasecorr < prepItem
+
+   properties (SetAccess = private)
+      name = 'alsbasecorr';
+      fullName = 'ALS baseline correction';      
+   end
    
    methods
       function obj = prepAlsbasecorr(varargin)
          obj = obj@prepItem(varargin{:});
-         obj.name = 'alsbasecorr';
-         obj.fullName = 'ALS baseline correction';
          
          obj.optionList = {...
             'Smoothness', [1 10^12], 10^5, 'editnum';...
