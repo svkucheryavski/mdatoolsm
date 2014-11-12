@@ -1,6 +1,6 @@
 classdef Setting < handle
    
-   properties (SetAccess = 'protected')
+   properties (Constant)
       HEIGHT = 35;
       LIST_HEIGHT = 25;
       LIST_BACKGROUND = [0.96 0.96 0.96];      

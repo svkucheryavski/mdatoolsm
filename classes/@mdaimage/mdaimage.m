@@ -22,7 +22,7 @@ classdef mdaimage < mdadata
 % ------------------------
 %  'width' - width of image in pixels
 %  'height' - height of image in pixels
-%
+%  'image' - an array with pixel values for all channels
 %
 % Examples:
 % ---------
@@ -194,6 +194,7 @@ classdef mdaimage < mdadata
          colormap(cmap(64));
          set(h, 'AlphaData', alpha);
          axis off
+         title(obj.colFullNames{1});
          if nargout > 0
             varargout{1} = h;
          end   

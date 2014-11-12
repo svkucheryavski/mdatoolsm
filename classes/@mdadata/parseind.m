@@ -32,7 +32,7 @@ function varargout = parseind(ind, n, names, colnames, values)
       end   
    end
       
-   if numel(ind) > 1 
+   if numel(ind) > 0 
    % more than one index   
       
       if (ischar(ind))

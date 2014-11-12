@@ -32,7 +32,6 @@ classdef prepCenter < prepItem
          end
          
          means = obj.values{1};
-         
          out = bsxfun(@plus, values, means);
       end
       

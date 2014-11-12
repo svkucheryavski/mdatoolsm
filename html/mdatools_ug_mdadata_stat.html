@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Quantitative statistics</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdatools_ug_mdadata_stat.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quantitative statistics</h1><p>Most of the statistical functions can be also applied directly to the <i>mdadata</i> objects. Besides that, a few of additional methods have been implemented, including for example, <tt>summary()</tt> which is an analogue of the same function in R. The defaiult functions include: <tt>mean()</tt>, <tt>std()</tt>, <tt>min()</tt>, <tt>max()</tt>, <tt>var()</tt>, <tt>cov()</tt>&iuml;&iquest;&frac12;and <tt>corr()</tt>.</p><p>The functions calculate statistics for each column. The result of calculations is also an object of <i>dataset</i> class.</p><pre class="codeinput">load <span class="string">people</span>
+      --><title>Quantitative statistics</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-05"><meta name="DC.source" content="mdatools_ug_mdadata_stat.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quantitative statistics</h1><p>Most of the statistical functions can be also applied directly to the <i>mdadata</i> objects. Besides that, a few of additional methods have been implemented, including for example, <tt>summary()</tt> which is an analogue of the same function in R. The defaiult functions include: <tt>mean()</tt>, <tt>std()</tt>, <tt>min()</tt>, <tt>max()</tt>, <tt>var()</tt>, <tt>cov()</tt>&iuml;&iquest;&frac12;and <tt>corr()</tt>.</p><p>The functions calculate statistics for each column. The result of calculations is also an object of <i>dataset</i> class.</p><pre class="codeinput">load <span class="string">people</span>
 
 <span class="comment">% take only first six columns</span>
 data = people(:, [1:2 4:6]);
@@ -145,7 +145,7 @@ Median     174    64.5        40    34     3e+04
     Q3     180    80.5        43    41   3.4e+04
    Max     198      92        48    55   4.5e+04
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Quantitative statistics
 %

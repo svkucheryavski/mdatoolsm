@@ -1,6 +1,6 @@
 function varargout = plotyresiduals(obj, varargin)
 
-   [nresp, ncomp, varargin] = regres.getPlotParams(obj.nResp, obj.nComp, varargin{:});
+   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.respNames, varargin{:});
 
    [type, varargin] = getarg(varargin, 'Type');
    if isempty(type)

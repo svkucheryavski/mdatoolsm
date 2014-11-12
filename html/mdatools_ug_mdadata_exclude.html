@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Hiding rows and columns</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdatools_ug_mdadata_exclude.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Hiding rows and columns</h1><p>Rows and columns in the <tt>mdadata</tt> datasets can be excluded from calculations and other manipulations. The main idea is to give a tool which allows to exclude/hide part without actually removing it. It can be used, for possible outliers. Here we will show several examples on how this hiding works.</p><p>To exclude row or column can be done with methods <tt>excluderows()</tt> and <tt>excludecols()</tt> correspondingly. Number, sequence, names or sequence of names can be used as an argument.</p><pre class="codeinput">load <span class="string">people</span>
+      --><title>Hiding rows and columns</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-05"><meta name="DC.source" content="mdatools_ug_mdadata_exclude.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Hiding rows and columns</h1><p>Rows and columns in the <tt>mdadata</tt> datasets can be excluded from calculations and other manipulations. The main idea is to give a tool which allows to exclude/hide part without actually removing it. It can be used, for possible outliers. Here we will show several examples on how this hiding works.</p><p>To exclude row or column can be done with methods <tt>excluderows()</tt> and <tt>excludecols()</tt> correspondingly. Number, sequence, names or sequence of names can be used as an argument.</p><pre class="codeinput">load <span class="string">people</span>
 show(people(1:5, :))
 
 people.excludecols({<span class="string">'Income'</span>, <span class="string">'Beer'</span>, <span class="string">'IQ'</span>})
@@ -17,6 +17,7 @@ show(people(1:5, :))
 </pre><pre class="codeoutput">
 
 People:
+People dataset
 
                                              Variables
         Height  Weight  Hairleng  Shoesize  Age   Income  Beer  Wine  Sex  Swim  Region   IQ
@@ -30,6 +31,7 @@ Rasmus     183      83        -1        44   37  3.4e+04   320    98   -1    91 
 
 
 People:
+People dataset
 
                                    Variables
         Height  Weight  Hairleng  Shoesize  Age  Wine  Sex  Swim  Region
@@ -43,6 +45,7 @@ Rasmus     183      83        -1        44   37    98   -1    91      -1
 
 
 People:
+People dataset
 
                                    Variables
         Height  Weight  Hairleng  Shoesize  Age  Wine  Sex  Swim  Region
@@ -82,6 +85,7 @@ show(people(1:5, :))
 </pre><pre class="codeoutput">
 
 People:
+People dataset
 
                                       Variables
         Height  Weight  Hairleng  Shoesize  Age  Wine  Sex  Swim  Region   IQ
@@ -92,7 +96,7 @@ Rasmus     183      83        -1        44   37    98   -1    91      -1  127
   Lene     166      47        -1        36   32    78    1    75      -1  112
  Mette     170      60         1        38   23    99    1    81      -1  110
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Hiding rows and columns
 %

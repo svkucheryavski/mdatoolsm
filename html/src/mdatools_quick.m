@@ -83,7 +83,7 @@
 
 %%
 % You can subset datasets using the same way as with matrices: by specifying indices for
-% rows and columns. All special names and symbols, like "|:|" and "|end|" will work properly.
+% rows and columns. All special names and symbols, like |:| and |end| will work properly.
 % Alternatively column and row names can be used for the same purpose.
 %
 
@@ -200,7 +200,7 @@ show(bmi)
 %
 
    load('people')
-   m = mdapca(people, 8, 'Scale', 'on');   
+   m = mdapca(people, 6, 'Scale', 'on');   
    disp(m)
    disp(m.calres)
    
@@ -220,7 +220,7 @@ show(bmi)
 %
 
    load('people')
-   m = mdapca(people, 8, 'Scale', 'on', 'CV', {'rand', 8, 4});   
+   m = mdapca(people, 6, 'Scale', 'on', 'CV', {'rand', 8, 4});   
    disp(m)
 
 %%
@@ -321,9 +321,9 @@ show(bmi)
 %
 % The _mdatools_ may work naturally with images. Image can be represented
 % as a 2-way dataset by unfolding 3-way cube, so all pixels become rows
-% (objects) and all channels - columns (variables). In _mdatools? there is
+% (objects) and all channels - columns (variables). In _mdatools_ there is
 % a specific object to work with images, |mdaimage|. It is based on
-% _mdadata_ object and inherits all its properties and methods. So all
+% _mdadata_ class and inherits all its properties and methods. So all
 % examples above will also work with |mdaimage| obects.
 %
 % However there are also some important things to know. First of all image
@@ -333,5 +333,128 @@ show(bmi)
 % and channels. Finally |mdaimage| has a method |imagesc()| allowing to
 % show an image for any channel. Let's play with that:
 %
-%   img = imread('test.jpg');
+   img = imread('test.jpg');
+   img = mdaimage(img, {'Red', 'Green', 'Blue'});
+   disp(img)
    
+   % show color values for 3x3 pixels from left top corner
+   show(img(1:3, 1:3, :))
+   
+   
+%% 
+% Method |imagesc| shows images for separate channels. If it is needed to
+% show a color image, use |.image| property, but do not forget to scale
+% intensities, since all values of |mdaimage| are double.
+%
+   figure
+
+   subplot(2, 2, 1)
+   imagesc(img(:, :, 'Red'))
+   title('Red')
+
+   subplot(2, 2, 2)
+   imagesc(img(:, :, 'Green'))
+   title('Green')
+
+   subplot(2, 2, 3)
+   imagesc(img(:, :, 'Blue'))
+   title('Blue')
+   
+   subplot(2, 2, 4)
+   imshow(img.image/255)
+   title('Color image')
+   
+   colormap(gray)
+   
+   
+%%
+% Since image is just an extension of |mdadata| it can be treated as a just
+% a dataset, e.g. here is how to make a density scatter plot.
+%
+
+   figure
+   densscatter( img(:, :, {'Red', 'Blue'}));
+   
+%%
+% When one make a PCA model for an object of _mdaimage_ class, all results
+% for objects (pixels), such as scores and residuals will be automatically
+% converted to _mdaimage_ objects as well. It means, we can make scatter
+% image for particular component.
+%
+
+   m = mdapca(img);
+   
+   figure('Position', [100 100 800 300])
+   
+   subplot(1, 2, 1)
+   plotscores(m.calres, 'Type', 'densscatter');
+   
+   subplot(1, 2, 2)
+   imagesc(m.calres.scores(:, :, 2));
+   
+   
+%% GUI Tools
+%
+% The toolbox has also GUI for interactive exploration of data and models.
+% Currently it is in alpha version and can only work with datasets. To run
+% the GUI (it is called _explorer_ in _mdatools_) just use:
+%
+
+   explore(people);
+
+%%
+% The window is split into several parts with three plots and panels with
+% parameters on right side. The parameters include settings for the current
+% plot (plot type and various options) and preprocessing. Background of a
+% panel with current plot is highlighted with light bage color. To change
+% the current plot just click on a panel (gray area outside axes) of the plot 
+% you want to change to.
+% 
+% For any dataset there are two designated variables (columns). The first
+% is used to make one-variable plots like histogram, QQ-plot, etc. The
+% second is used to make scatter plot. The designated variables are shown
+% with gray dashed lines on a line plot. Their position can be changed
+% using arrows (left/right for first and up/down for second).
+%
+% For scatter, line and image plots it is possible to select objects or
+% variables, exclude them, show excluded variables and include them back.
+% The procedure is similar for all plots, so only selecting objects on 
+% scatter plot will be explained below.
+%
+% To select points on scatter plot do:
+%
+% # Select panel with scatter plot.
+% # Push "s" button on keyboard, so a cursor looks like a cross.
+% # Make a closed polygon around points you need to select.
+% # If needed change polygon shape using nodes.
+% # Double click inside polygon to make selection.
+%
+% The selected points are highlighted with color. All other plots, like
+% e.g. line plot or histogram will be shown only for selected objects. To
+% unselect objects use "Esc" button. It also can be used if you started
+% selection but would like to stop without selecting objects.
+%
+% Other important shortcuts are:
+%
+% * "e" to exclude selected objects
+% * "a" to add excluded objects back 
+% * "i" invert current selection
+%
+% If you want to add some of the excluded objects back, you
+% need to make them visible using plot options (e.g. "Excluded rows"), then
+% select them and push key "a". All operations with selected objects, e.g.
+% inverting selection, excluding, including, etc. are also available from
+% context menu (use right mous button with cursor on selected objects or
+% variables).
+%
+% Data can be also preprocessed directly in the explorer. To define a sequence 
+% of preprocessed methods  select method from a list and click "Add". Icons with errors (up/down)
+% can be used to change the position of a method in the sequence and cross
+% icon removes the method. Names of methods, which have additional settings (e.g.
+% Savitzky-Golay) are shown as blue hyperlinks. By clicking on the link one
+% can get a modal window with the settings, change and save them. Finally
+% two buttons at the bottom of this section allow to apply the
+% preprocessing sequence to the data and reset data to original state.
+%
+%
+%

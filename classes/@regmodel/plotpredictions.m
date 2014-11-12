@@ -1,5 +1,5 @@
 function plotpredictions(obj, varargin)
-   [nresp, ncomp, varargin] = regres.getPlotParams(obj.nResp, obj.nComp, varargin{:});
+   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, varargin{:});
    
    args = mdadata.getgscatteroptions(3, varargin{:});
    

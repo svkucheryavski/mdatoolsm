@@ -121,7 +121,7 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, tt, code { font-size:12px; }
+pre, tt, code { font-size:1em; font-family: Consolas, monospaced;}
 pre { margin:0px 0px 20px; }
 pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }

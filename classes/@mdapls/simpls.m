@@ -49,7 +49,7 @@ function m = simpls(X, y, nComp, cv)
       M = M - p * p';
       A = C * A;      
       
-      if ~cv && eval < 10^-12 
+      if ~cv && eval(1) < 10^-12 
          % stop cycle is egienvalue is almost zero
          break
       end

@@ -1,4 +1,4 @@
-classdef mdadata3 < handle
+classdef mdadata3 < handle & matlab.mixin.Copyable
 % 'mdadata3' is a class to keep 3-way data. It has some features of 'mdadata'   
 % like names for rows, cols and the third way, and ability to hide rows.
 %
@@ -8,7 +8,7 @@ classdef mdadata3 < handle
       dimNames
       wayNamesAll
       wayFullNamesAll
-      excludedRows
+      excludedRows      
    end
    
 	properties (Access = 'protected')
@@ -193,6 +193,11 @@ classdef mdadata3 < handle
       function varargout = subset(obj, varargin)
       % 'subset' returns a subset of the data set
       %
+         if isempty(varargin)
+            varargout{1} = obj;
+            return;
+         end
+         
          if nargin  < 4
          % only two indices 
             ind{1} = 1:size(obj.values_, 1);

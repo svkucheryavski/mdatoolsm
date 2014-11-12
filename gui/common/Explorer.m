@@ -14,7 +14,12 @@ classdef Explorer < handle
       end   
       
       function createGUI(obj)
-         obj.gui.f = figure('Position', [100 500 1000 600]);  
+         s = get(0,'screensize');
+         w = 800;
+         h = 600;
+         l = (s(3) - w)/2;
+         b = (s(4) - h)/2;
+         obj.gui.f = figure('Position', [l b w h]);  
 %          set(obj.gui.f,'Toolbar','figure'); 
 %          tbh = findall(obj.gui.f,'Type','uitoolbar');
 %          hb = findall(tbh);

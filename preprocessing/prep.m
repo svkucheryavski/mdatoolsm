@@ -12,7 +12,7 @@ classdef prep < handle
 % existent object, there is now need to create a new variable. If it is
 % applied to a conventional Matlab matrix one has to reassign the values.
 %
-% It "remembers" all parameters, including those, calculated at first run.
+% It remembers all parameters, including those, calculated at first run.
 % For example if mean centering is used, when a preprocessing object
 % applied to a dataset a vector of mean values will be calculated and
 % stored in the object. So when we use it next time, the mean values will
@@ -131,21 +131,22 @@ classdef prep < handle
                      'text-decoration: none;'...
                      '">' item.name '</div></html>'];
                callback = [];   
-            end  
-            if i == 1
-               obj.gui.items(i).arrowUp = obj.addButton(h, '', 'Move up', {@obj.up, i}, upIcon, true);
-            else   
+            end 
+            
+            if i > 1
                obj.gui.items(i).arrowUp = obj.addButton(h, '', 'Move up', {@obj.up, i}, upIcon);
+            else   
+               obj.gui.items(i).arrowUp = obj.addButton(h, '', 'Move up', {@obj.up, i}, upIcon, true);
             end
                
-            if i == numel(obj.items)
-               obj.gui.items(i).arrowDn = obj.addButton(h, '', 'Move down', {@obj.down, i}, downIcon, true);
-            else   
+            if i < numel(obj.items)
                obj.gui.items(i).arrowDn = obj.addButton(h, '', 'Move down', {@obj.down, i}, downIcon);
+            else   
+               obj.gui.items(i).arrowDn = obj.addButton(h, '', 'Move down', {@obj.down, i}, downIcon, true);
             end
 
             obj.gui.items(i).name = obj.addButton(h, txt, 'Change parameters', callback);
-            obj.gui.items(i).cross = obj.addButton(h, 'x', 'Remove method', {@obj.remove, i});
+            obj.gui.items(i).cross = obj.addButton(h, 'x', 'Remove method', {@obj.guiRemove, i});
                               
                obj.gui.layout.add(obj.gui.items(i).arrowUp, i, 1, 'Fill', 'Both', ...
                   'MaximumHeight', obj.HEIGHT, 'MinimumHeight', obj.HEIGHT, ...

@@ -133,7 +133,7 @@ gbar(data);
 %
 
 figure('Position', [0 0 400 300])
-gbar(data, 'FaceColor', 'yc', 'EdgeColor', 'rb', 'Legend', 'off', 'Labels', 'names');
+gbar(data, 'FaceColor', 'yc', 'EdgeColor', 'rb', 'Labels', 'names');
 
 %% 
 % To make a group line plot there are two possibilities. First of all it

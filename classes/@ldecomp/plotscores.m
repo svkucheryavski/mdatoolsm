@@ -29,7 +29,7 @@ function varargout = plotscores(obj, varargin)
          
    if strcmp(type, 'scatter')
       h = scatter(obj.scores(:, comp), varargin{:});
-   elseif strcmp(type, 'density')   
+   elseif strcmp(type, 'density') ||   strcmp(type, 'densscatter')
       h = densscatter(obj.scores(:, comp), varargin{:});
 %    elseif strcmp(type, 'line')   
 %       h = gplot(obj.scores(:, comp)', varargin{:});

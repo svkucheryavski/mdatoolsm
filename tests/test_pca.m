@@ -238,12 +238,12 @@ function showPlotsForResult(res, colorby)
    subplot(2, 2, 2)
    plotscores(res, 3, 'Labels', 'names', 'Colorby', colorby, 'ShowExcluded', 'on');
    subplot(2, 2, 3)
-   plotscores(res, [1 2], 'Type', 'line');
+   plotscores(res, [1 2], 'Type', 'densscatter');
    subplot(2, 2, 4)
    if isa(res.scores, 'mdaimage')
       plotscores(res, [1 2], 'Type', 'density');
    else   
-      plotscores(res, 2, 'Type', 'line');
+      plotscores(res, 2, 'Type', 'scatter');
    end
    
    % residuals and variance plots

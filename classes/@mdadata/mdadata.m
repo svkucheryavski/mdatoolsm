@@ -568,11 +568,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          if nargin < 4
             withFactors = true;
          end   
-         
          ind = parsecolind(obj, ind, full, withFactors);
          fullColInd = 1:obj.nColsAll;
          fullColInd((~full & obj.excludedCols) | (~withFactors & obj.factorCols)) = [];
-         
          out = fullColInd(ind);
       end
       
@@ -970,7 +968,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          if nargout > 0
             varargout{1} = 1;
-         end   
+         end           
       end
       
       function varargout = notfactor(obj, ind)
@@ -1012,6 +1010,32 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          out = subset(obj, ':', f);
       
+      end
+      
+      function out = splitfactor(obj, ind)
+         
+         ind = getfullcolind(obj, ind);
+         
+         if numel(ind) ~= 1
+            error('You can split only one factor at time!');
+         end 
+         
+         values = obj.valuesAll(:, ind);
+         levels = unique(values, 'stable');
+         levelNames = obj.factorLevelNames{ind};
+         nlevels = numel(levels);
+         
+         newvalues = zeros(size(values, 1), nlevels);
+         
+         for i = 1:nlevels
+            newvalues(:, i) = (values == levels(i)) * 2 - 1;
+         end
+         
+         out = mdadata(newvalues, obj.rowNamesAll, levelNames, {obj.dimNames{1} obj.colNamesAll{ind}});
+         out.name = obj.name;
+         out.info = obj.info;
+         out.rowFullNamesAll = obj.rowFullNamesAll;
+         out.excluderows(obj.excludedRows);              
       end
       
       function out = getfactorlevels(obj, ind)
@@ -1066,7 +1090,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          [nRows, nFactors] = size(values);
          
          % get factor values as level indices (1, 2, 3)
-         [~, ~, values] = unique(values);
+         [~, ~, values] = unique(values, 'stable');
          values = reshape(values, nRows, nFactors);
          
          % get factor values as names
@@ -1182,6 +1206,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
                  
       function out = ctranspose(a)
          out = mdadata(ctranspose(a.numValues), a.colNamesWithoutFactors, a.rowNames, a.dimNames(end:-1:1));
+         out.name = a.name;
+         out.info = a.info;
          out.colFullNames = a.rowFullNames ;
          out.rowFullNames = a.colFullNamesWithoutFactors;
       end
@@ -1228,10 +1254,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
             rowFullNames = b.rowFullNames ;
          end   
          
-         af = a.factorCols;
-         
+         af = a.factorCols;         
          bf = b.factorCols;
-         fl = [a.factorLevelNames b.factorLevelNames];
+         fl = [a.factorLevelNames; b.factorLevelNames];
          
          if ~all(af == bf)
             error('Factor columns in data "a" should correspond to factor columns in data "b"!')
@@ -1250,7 +1275,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             
             b = varargin{i};
             bf = b.factorCols;
-            fl = [fl b.factorLevelNames];
+            fl = [fl; b.factorLevelNames];
             
             if ~all(af == bf)
                error('Factor columns in data "a" should correspond to factor columns in data "b"!')
@@ -1268,10 +1293,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end   
          
          f = find(a.factorCols);
+         out.factorCols = a.factorCols;
          for i = 1:numel(f)
-            l = vertcat(fl{f(i), :});
-            out.factor(f(i), unique(l(:))); 
-         end   
+            l = [fl{:, f}]';
+            out.factorLevelNames{i} = unique(l(:), 'stable'); 
+         end         
       end
       
       function out = power(a, b)
@@ -2573,10 +2599,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          dataFactorCols = find(obj.factorCols(col_ind));
          
          for i = 1:numel(dataFactorCols)
-            objLevels = unique(values(:, objFactorCols(i)));
-            dataLevels = unique(svalues(:, dataFactorCols(i)));
-            
-            levels = obj.factorLevelNames{objFactorCols(i)}(ismember(dataLevels, objLevels));
+            objLevels = unique(values(:, objFactorCols(i)), 'stable');
+            dataLevels = unique(svalues(:, dataFactorCols(i)), 'stable');
+            levels = obj.factorLevelNames{objFactorCols(i)}(ismember(objLevels, dataLevels));
             data.factor(dataFactorCols(i), levels');
 %            data.factor(dataFactorCols(i), objLevels);
          end
@@ -2699,7 +2724,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          rowNames = [];
          [showLabels, varargin] = getarg(varargin, 'Labels');   
          if ~isempty(showLabels) && ~strcmp(showLabels, 'none')
-            if isempty(obj.rowNames) || strcmp(showLabels, 'numbers')
+            if isempty(obj.rowFullNames) || strcmp(showLabels, 'numbers')
                if showExcluded
                   names = textgen('', 1:obj.nRowsAll);
                   rowNames = names(~obj.excludedRows);
@@ -2709,9 +2734,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
                   rowNamesHidden = [];
                end   
             elseif strcmp(showLabels, 'names')
-               rowNames = obj.rowNames;
+               rowNames = obj.rowFullNames;
                if showExcluded
-                  rowNamesHidden = obj.rowNamesAll(obj.excludedRows);
+                  rowNamesHidden = obj.rowFullNamesAll(obj.excludedRows);
                else
                   rowNamesHidden = [];
                end   
@@ -4016,12 +4041,12 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
          
          objs = mdasplit(obj, groups);
-         nGroups = numel(obj);
+         nGroups = numel(objs);
          
-         [args, varargin] = mdadata.getgscatteroptions(nGroups, varargin);
+         [args, varargin] = mdadata.getgscatteroptions(nGroups, varargin{:});
          
          % show hidden rows or not?
-         [v, varargin] = getarg(varargin, 'ShowExcluded');
+         [v, varargin] = getarg(varargin, 'ShowExcluded');         
          if isempty(v) || strcmp(v, 'off')
             showExcluded = false;
          else
@@ -4032,7 +4057,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          labelsHidden = [];
          showLabels = getarg(varargin, 'Labels');   
          if ~isempty(showLabels) && strcmp(showLabels, 'names')
-            labelsHidden = obj.rowNamesAll(obj.excludedRows);
+            labelsHidden = obj.rowFullNamesAll(obj.excludedRows);
          end   
 
          hp = cell(nGroups, 1);
@@ -4046,7 +4071,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
          hold off
          h.plots = hp;
-
+         
          if showExcluded
             values = obj.valuesHidden;
             if obj.nCols == 1
@@ -5111,7 +5136,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
                colNames{i} = ['* ' colNames{i} ];
                
                % get factor values as indices
-               [~, ~, v] = unique(values(:, i));
+               [~, ~, v] = unique(values(:, i), 'stable');
                
                % calculate maximal width for the field
                factors = obj.getfactorlevels(i);

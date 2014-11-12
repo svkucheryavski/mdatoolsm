@@ -115,6 +115,7 @@ classdef regcoeffs < handle
       end
       
       function varargout = plot(obj, resp, comp, varargin)
+         
          if nargin < 3
             comp = obj.nComp;
          end
@@ -154,7 +155,7 @@ classdef regcoeffs < handle
          else
             showCI = true;
          end   
-   
+         
          if ~showCI
             if strcmp(type, 'line')
                h = gplot(obj.values(:, resp, comp)', varargin{:}, 'Marker', mr);

@@ -55,7 +55,8 @@ classdef regmodel < handle
          obj.calres.info = 'Results for calibration set';
          
          % check if test set is provided and apply model to the test set
-         v = getarg(varargin, 'TestSet');
+         
+         v = getarg(varargin, 'TestSet');         
          if ~isempty(v) 
             if ~iscell(v) || numel(v) ~= 2
                error('Test set should be a cell with two datasets (X and Y)!')

@@ -83,7 +83,11 @@ classdef mdapls < regmodel
          
       end
       
-      function res = predict(obj, oX, oyref, cv)
+      function res = predict(obj, oX, oyref, cv, makeres)
+         
+         if nargin < 5
+            makeres = true;
+         end
          
          if nargin < 4
             cv = false;
@@ -110,11 +114,11 @@ classdef mdapls < regmodel
          xscores.excluderows(X.excludedRows);
          
          ypred = zeros(X.nRowsAll, obj.regcoeffs.nResp, obj.nComp);
-         for i = 1:obj.regcoeffs.nResp
-            b = squeeze(obj.regcoeffs.values_.values_(:, i, :));
-            ypred(:, i, :) = X.valuesAll(:, ~X.factorCols) * b;
+         for i = 1:obj.regcoeffs.nComp
+            b = squeeze(obj.regcoeffs.values_.values_(:, :, i));
+            ypred(:, :, i) = X.valuesAll(:, ~X.factorCols) * b;
             if ~isempty(obj.prep)
-               ypred(:, i, :) = obj.prep{2}.sweep(ypred(:, i, :));
+               ypred(:, :, i) = obj.prep{2}.sweep(squeeze(ypred(:, :, i)));
             end
          end
 
@@ -159,7 +163,14 @@ classdef mdapls < regmodel
                ydecomp = [];
             end   
             
-            res = plsres(xdecomp, ydecomp, ypred, yref);
+            if makeres
+               res = plsres(xdecomp, ydecomp, ypred, yref);
+            else
+               res.xdecomp = xdecomp;
+               res.ydecomp = ydecomp;
+               res.ypred = ypred;
+               res.yref = yref;
+            end   
          end   
       end
       
@@ -264,7 +275,7 @@ classdef mdapls < regmodel
       end
       
       function plot(obj, varargin)
-         [nresp, ncomp, varargin] = regres.getPlotParams(obj.nResp, obj.nComp, varargin{:});
+         [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, varargin{:});
          subplot(2, 2, 1)
          plotxresiduals(obj, ncomp, varargin{:});
          subplot(2, 2, 2)

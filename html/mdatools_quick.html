@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Quick start guide</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdatools_quick.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quick start guide</h1><!--introduction--><p>This document gives a brief introduction to the basic functionality of <i>mdatools</i> toolbox as well as presents some ideas about how it deals with data, models and results. It is assumed that after reading the text and doing all exercises from the document one can easily start working with toolbox and then learn more features gradually.</p><!--/introduction--><h2>Introduction to datasets<a name="1"></a></h2><p>One of the most important things in the MDA toolbox is a <i>dataset</i> object. MATLAB is a great to deal with matrices and arrays, however one has to do a lot of rutine operations to represent e.g. matrix values properly. Usually we have names for variables and objects or labels for measurements in our data. However, dealing with the names and labels in MATLAB is not an easy job. One of the ways to solve this issue is to use <i>dataset</i> - a specific object, which is a wrapper for a conventional numeric matrix, giving possibilties to use names more or less easily. Such objects exist in many toolboxes (including Statistics Toolbox) and the <i>mdatools</i> is not an exception here. Moreover, in <i>mdatools</i> dataset is a main way to represent any values. Scores, loadings, residuals, regression coefficients and so on are datasets in <i>mdatools</i>. Therefore is is important to start with introduction what dataset is, how to create and manipulate datasets.</p><p>Actually in <i>mdatools</i> datasets give a lot more options than just a possibility to have names for rows and columns of a matrix. They allow to hide rows and columns without removing them (for example when one need to remove an outlier or do variable selection), to use qualitative data, factors, for grouping values and do many other things. But in this qick guide we will talk only about most important features of datasets, namely names/labels for rows and columns, making subsets, displaying data values, doing mathematical calculations and making plots.</p><p>Dataset can be created from any matrix (array with two dimensions: rows and columns). Actually it is not necessary to provide names for the dimensions. Column names will be generated automatically and row names will remain empty. Here is an example for 3x2 matrix with height and weight values for four persons:</p><pre class="codeinput">   values = [180 84; 170 68; 165 71; 172 75];
+      --><title>Quick start guide</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-05"><meta name="DC.source" content="mdatools_quick.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Quick start guide</h1><!--introduction--><p>This document gives a brief introduction to the basic functionality of <i>mdatools</i> toolbox as well as presents some ideas about how it deals with data, models and results. It is assumed that after reading the text and doing all exercises from the document one can easily start working with toolbox and then learn more features gradually.</p><!--/introduction--><h2>Introduction to datasets<a name="1"></a></h2><p>One of the most important things in the MDA toolbox is a <i>dataset</i> object. MATLAB is a great to deal with matrices and arrays, however one has to do a lot of rutine operations to represent e.g. matrix values properly. Usually we have names for variables and objects or labels for measurements in our data. However, dealing with the names and labels in MATLAB is not an easy job. One of the ways to solve this issue is to use <i>dataset</i> - a specific object, which is a wrapper for a conventional numeric matrix, giving possibilties to use names more or less easily. Such objects exist in many toolboxes (including Statistics Toolbox) and the <i>mdatools</i> is not an exception here. Moreover, in <i>mdatools</i> dataset is a main way to represent any values. Scores, loadings, residuals, regression coefficients and so on are datasets in <i>mdatools</i>. Therefore is is important to start with introduction what dataset is, how to create and manipulate datasets.</p><p>Actually in <i>mdatools</i> datasets give a lot more options than just a possibility to have names for rows and columns of a matrix. They allow to hide rows and columns without removing them (for example when one need to remove an outlier or do variable selection), to use qualitative data, factors, for grouping values and do many other things. But in this qick guide we will talk only about most important features of datasets, namely names/labels for rows and columns, making subsets, displaying data values, doing mathematical calculations and making plots.</p><p>Dataset can be created from any matrix (array with two dimensions: rows and columns). Actually it is not necessary to provide names for the dimensions. Column names will be generated automatically and row names will remain empty. Here is an example for 3x2 matrix with height and weight values for four persons:</p><pre class="codeinput">   values = [180 84; 170 68; 165 71; 172 75];
    d = mdadata(values);
 
    show(d)
@@ -35,9 +35,8 @@ To make changes, update the MATLAB code and republish this document.
 4     172      75
 
 </pre><p>It is mandatory that row and column names are unique. It is recommended also not to use spaces and other special symbols, especially for column names, to avoid ambiguity. Actually the names may have two forms: full, with spaces and special symbols and short, with only letters and numbers. If one provides names with spaces and special symbols they will be converted to the short form automatically. More on that can be found in the <a href="mdatools_ug.html">User Guide</a>.</p><p>The <tt>mdadata</tt> is a MATLAB object which has several properties and many methods. You can see some of the properties by using <tt>disp()</tt>.</p><pre class="codeinput">   disp(d)
-</pre><pre class="codeoutput">  mdadata handle
+</pre><pre class="codeoutput">  4x2 mdadata array with properties:
 
-  Properties:
             name: ''
             info: []
         dimNames: {'Objects'  'Variables'}
@@ -49,7 +48,6 @@ To make changes, update the MATLAB code and republish this document.
         colNames: {'Height'  'Weight'}
     rowFullNames: {'1'  '2'  '3'  '4'}
     colFullNames: {'Height'  'Weight'}
-
 
 </pre><p>The most important ones are <tt>values</tt>, which is a matrix with data values, <tt>rowNames</tt> - cell array with row names and <tt>colNames</tt> - cell array with column names. All three can be changed manually for the whole object or for particular rows or columns. You can also specify name of the dataset, short information text and labels for each of the two dimensions</p><pre class="codeinput">   d.rowNames = {<span class="string">'Lars'</span>, <span class="string">'Peter'</span>, <span class="string">'Anna'</span>, <span class="string">'Kim'</span>};
    show(d)
@@ -94,11 +92,12 @@ Peter     170      68
  Anna     165      71
   Kim     172      75
 
-</pre><p>You can subset datasets using the same way as with matrices: by specifying indices for rows and columns. All special names and symbols, like "|:|" and "|end|" will work properly. Alternatively column and row names can be used for the same purpose.</p><pre class="codeinput">   show(d(1:2, :))
+</pre><p>You can subset datasets using the same way as with matrices: by specifying indices for rows and columns. All special names and symbols, like <tt>:</tt> and <tt>end</tt> will work properly. Alternatively column and row names can be used for the same purpose.</p><pre class="codeinput">   show(d(1:2, :))
    show(d({<span class="string">'Mike'</span>, <span class="string">'Anna'</span>}, <span class="string">'Height'</span>))
 </pre><pre class="codeoutput">
 
 People:
+People data for quick start guide
 
          Parameters
        Height  Weight
@@ -109,6 +108,7 @@ Peter     170      68
 
 
 People:
+People data for quick start guide
       Height
      -------
 Mike     180
@@ -148,6 +148,7 @@ Peter  23.5
 </pre><pre class="codeoutput">
 
 People:
+People dataset
 
                Variables
         Height  Weight  Shoesize
@@ -210,70 +211,64 @@ Median     174    64.5        40
    subplot(2, 2, 3)
    boxplot( d )
 </pre><img vspace="5" hspace="5" src="mdatools_quick_03.png" alt=""> <p>We hope that this brief overview of <tt>mdadata</tt> class gave an overall impression on how it works and how to use it for storing and visualisation of data values. To learn more, please, look at the <a href="mdatools_ug.html">User Guide</a> and <a href="classes/mdadata.html">full description</a> of the <tt>mdadata</tt> class and its metods.</p><h2>Principal component analysis<a name="12"></a></h2><p>The next step is to learn how to build and use models in <i>mdatools</i>. We will employ PCA to demonstrate the most important things, as we believe it is most known, and then will show some pecularities and issues on how this methodology works with regression models.</p><p>The basic idea behind creating and using <i>any</i> model is following. For most of the methods, <tt>mdatools</tt> has two classes (objects). One for model, that can be calibrated using this method, and one for result of applying this model to any dataset(s). The first (model) object has properties related to the model only. The second (result) object, contains properties related to the results. Thus for PCA model contains: loadings and their eigenvalues, number of components, which preprocessing methods to use and so on. The PCA result object mainly contains: scores, variance, and Q2/T2 residuals.</p><p>Of course the results of calibration, cross-validation or test-set validation are also part of a model. Therefore any model may have three result objects, as the model properties. One for calibration set (<tt>calres</tt>) is always exist, since it is not possible to make a model without calibration set. The other two, <tt>cvres</tt> and <tt>testres</tt>, are optional and are empty if none of the validation methods is used.</p><p>Any model and result object has also methods for making various plots and showing statistics. Thus method <tt>plotscores()</tt> for result object shows scores only for particular results. But the same <tt>plotscores()</tt> method being called for a model will show scores for each of the results available. The same for, e.g. explained variance. Method <tt>plotexpvar()</tt> shows explained variance for each component either for particular result or for the whole model (calibration, test and cross-validation if last two are available).</p><p>Let's look how to make and explore PCA model and results using the <i>People</i> data.</p><pre class="codeinput">   load(<span class="string">'people'</span>)
-   m = mdapca(people, 8, <span class="string">'Scale'</span>, <span class="string">'on'</span>);
+   m = mdapca(people, 6, <span class="string">'Scale'</span>, <span class="string">'on'</span>);
    disp(m)
    disp(m.calres)
-</pre><pre class="codeoutput">  mdapca handle
+</pre><pre class="codeoutput">  mdapca with properties:
 
-  Properties:
            info: []
-          nComp: 8
-       loadings: [12x8 mdadata]
-    eigenvalues: [8x1 mdadata]
+          nComp: 6
+       loadings: [12x6 mdadata]
+    eigenvalues: [6x1 mdadata]
            prep: [1x1 prep]
           alpha: 0.0500
              cv: []
          calres: [1x1 pcares]
           cvres: []
         testres: []
-         limits: [2x8 mdadata]
+         limits: [2x6 mdadata]
          method: 'svd'
 
+  pcares with properties:
 
-  pcares handle
-
-  Properties:
         info: 'Results for calibration set'
-      scores: [32x8 mdadata]
-    variance: [8x2 mdadata]
-    modpower: [32x8 mdadata]
-          T2: [32x8 mdadata]
-          Q2: [32x8 mdadata]
-
+      scores: [32x6 mdadata]
+    variance: [6x2 mdadata]
+    modpower: [32x6 mdadata]
+          T2: [32x6 mdadata]
+          Q2: [32x6 mdadata]
 
 </pre><p>As you can see, indeed the <tt>m</tt> object has <tt>mdapca</tt> class and containes, among others, loadings of the principal component space. It also has three objects with results: <tt>calres</tt>, <tt>cvres</tt> and <tt>testrest</tt> but the last two are empty, since we did not use any validation here.</p><p>For cross-validation one need to specify parameter <tt>'CV'</tt> with cell array as a value. The first element of the cell array is how to split data. Possible values are <tt>'rand'</tt> for random splits, <tt>'ven'</tt> for systematic (venetian blinds) splits and <tt>'full'</tt> for full cross-validation (leave-one-out). For the first two one can specify a second value which is number of segments to split the data into. Finally, for the random splits, we can also specify a number of repetitions. Thus the following example will make cross-validation with random splits to eight segments and four repetitions.</p><pre class="codeinput">   load(<span class="string">'people'</span>)
-   m = mdapca(people, 8, <span class="string">'Scale'</span>, <span class="string">'on'</span>, <span class="string">'CV'</span>, {<span class="string">'rand'</span>, 8, 4});
+   m = mdapca(people, 6, <span class="string">'Scale'</span>, <span class="string">'on'</span>, <span class="string">'CV'</span>, {<span class="string">'rand'</span>, 8, 4});
    disp(m)
-</pre><pre class="codeoutput">  mdapca handle
+</pre><pre class="codeoutput">  mdapca with properties:
 
-  Properties:
            info: []
-          nComp: 8
-       loadings: [12x8 mdadata]
-    eigenvalues: [8x1 mdadata]
+          nComp: 6
+       loadings: [12x6 mdadata]
+    eigenvalues: [6x1 mdadata]
            prep: [1x1 prep]
           alpha: 0.0500
              cv: {'rand'  [8]  [4]}
          calres: [1x1 pcares]
           cvres: [1x1 pcares]
         testres: []
-         limits: [2x8 mdadata]
+         limits: [2x6 mdadata]
          method: 'svd'
-
 
 </pre><p>Now model contains two types of results which are not emplty - <tt>calres</tt> and <tt>cvres</tt>.</p><p>How to explore models and results? All numerical values are available as <tt>mdadata</tt> objects, so if you want to look at e.g. scores for the first five rows of calibration set, just use</p><pre class="codeinput">   show(m.calres.scores(1:5, :))
 </pre><pre class="codeoutput">
 
 Scores:
 
-                                  Components
-        Comp 1  Comp 2  Comp 3  Comp 4  Comp 5  Comp 6  Comp 7  Comp 8
-       ------- ------- ------- ------- ------- ------- ------- -------
-  Lars   -5.33  -0.677    1.07     1.1   -1.06   0.017  -0.563  0.0851
- Peter   -3.11  -0.293  -0.671   -1.31  -0.435  -0.119  -0.109  -0.456
-Rasmus      -3   -0.36  -0.212   -1.12  -0.204  0.0166   -0.12  -0.469
-  Lene    1.08   -1.84  -0.409  -0.123    1.32  -0.872  -0.704   0.328
- Mette   0.981   -1.43   -1.65   0.526  -0.714  0.0346  0.0957   0.127
+                          Components
+        Comp 1  Comp 2  Comp 3  Comp 4  Comp 5  Comp 6
+       ------- ------- ------- ------- ------- -------
+  Lars   -5.33  -0.677    1.07     1.1   -1.06   0.017
+ Peter   -3.11  -0.293  -0.671   -1.31  -0.435  -0.119
+Rasmus      -3   -0.36  -0.212   -1.12  -0.204  0.0166
+  Lene    1.08   -1.84  -0.409  -0.123    1.32  -0.872
+ Mette   0.981   -1.43   -1.65   0.526  -0.714  0.0346
 
 </pre><p>However it is much easier with plots. Here is how to show summary and plot overview for a PCA model:</p><pre class="codeinput">   summary(m)
    figure(<span class="string">'Position'</span>, [100 100 800 500])
@@ -281,14 +276,12 @@ Rasmus      -3   -0.36  -0.212   -1.12  -0.204  0.0166   -0.12  -0.469
 </pre><pre class="codeoutput">
         Eigenvalues  Expvar  Cumexpvar  Expvar (CV)  Cumexpvar (CV)
        ------------ ------- ---------- ------------ ---------------
-Comp 1         6.43    53.6       53.6         46.2            46.2
-Comp 2         2.24    18.7       72.3         17.3            63.4
-Comp 3         1.62    13.5       85.7         15.1            78.6
-Comp 4        0.998    8.32       94.1         12.6            91.2
-Comp 5        0.319    2.66       96.7          3.2            94.4
-Comp 6        0.165    1.38       98.1         1.61              96
-Comp 7       0.0994   0.828       98.9         1.37            97.4
-Comp 8        0.055   0.458       99.4        0.919            98.3
+Comp 1         6.43    53.6       53.6         44.7            44.7
+Comp 2         2.24    18.7       72.3           17            61.7
+Comp 3         1.62    13.5       85.7         15.7            77.3
+Comp 4        0.998    8.32       94.1         13.8            91.1
+Comp 5        0.319    2.66       96.7         3.17            94.3
+Comp 6        0.165    1.38       98.1         1.68            95.9
 
 </pre><img vspace="5" hspace="5" src="mdatools_quick_04.png" alt=""> <p>If one need to look at the scores and loadings for other set of components, just specify this as a second argument:</p><pre class="codeinput">   figure(<span class="string">'Position'</span>, [100 100 800 500])
    plot(m, [1 3])
@@ -326,8 +319,76 @@ Comp 8        0.055   0.458       99.4        0.919            98.3
 
    subplot(1, 2, 2)
    plotscores(m.calres, <span class="string">'Labels'</span>, <span class="string">'names'</span>, <span class="string">'Colorby'</span>, people(:, <span class="string">'Beer'</span>))
-</pre><img vspace="5" hspace="5" src="mdatools_quick_09.png" alt=""> <p>Thus in the second plot data points are colorised according to annual beer consumption by the persons and one can also see a colobar with legend.</p><p>More details about PCA model and result objects and methods can be found in class descriptions (<a href="classes/mdapca.html">mdapca</a> and <a href="classes/pcares.html">pcares</a>).</p><h2>Working with images<a name="22"></a></h2><p>The <i>mdatools</i> may work naturally with images. Image can be represented as a 2-way dataset by unfolding 3-way cube, so all pixels become rows (objects) and all channels - columns (variables). In <i>mdatools? there is a specific object to work with images, <tt>mdaimage</tt>. It is based on _mdadata</i> object and inherits all its properties and methods. So all examples above will also work with <tt>mdaimage</tt> obects.</p><p>However there are also some important things to know. First of all image has no row names, since number of pixels is very large, it would slow manipulations with such objects if we used names. Second difference is when you subset an <tt>mdaimage</tt> you have to use three indices: width, height and channels. Finally <tt>mdaimage</tt> has a method <tt>imagesc()</tt> allowing to show an image for any channel. Let's play with that:</p><pre class="language-matlab">img = imread(<span class="string">'test.jpg'</span>);
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="mdatools_quick_09.png" alt=""> <p>Thus in the second plot data points are colorised according to annual beer consumption by the persons and one can also see a colobar with legend.</p><p>More details about PCA model and result objects and methods can be found in class descriptions (<a href="classes/mdapca.html">mdapca</a> and <a href="classes/pcares.html">pcares</a>).</p><h2>Working with images<a name="22"></a></h2><p>The <i>mdatools</i> may work naturally with images. Image can be represented as a 2-way dataset by unfolding 3-way cube, so all pixels become rows (objects) and all channels - columns (variables). In <i>mdatools</i> there is a specific object to work with images, <tt>mdaimage</tt>. It is based on <i>mdadata</i> class and inherits all its properties and methods. So all examples above will also work with <tt>mdaimage</tt> obects.</p><p>However there are also some important things to know. First of all image has no row names, since number of pixels is very large, it would slow manipulations with such objects if we used names. Second difference is when you subset an <tt>mdaimage</tt> you have to use three indices: width, height and channels. Finally <tt>mdaimage</tt> has a method <tt>imagesc()</tt> allowing to show an image for any channel. Let's play with that:</p><pre class="codeinput">   img = imread(<span class="string">'test.jpg'</span>);
+   img = mdaimage(img, {<span class="string">'Red'</span>, <span class="string">'Green'</span>, <span class="string">'Blue'</span>});
+   disp(img)
+
+   <span class="comment">% show color values for 3x3 pixels from left top corner</span>
+   show(img(1:3, 1:3, :))
+</pre><pre class="codeoutput">  114000x3 mdaimage array with properties:
+
+           width: 400
+          height: 285
+           image: [285x400x3 double]
+            name: ''
+            info: []
+        dimNames: {'Pixels'  'Channels'}
+          values: [114000x3 double]
+           nCols: 3
+           nRows: 114000
+        nFactors: 0
+        rowNames: {}
+        colNames: {'Red'  'Green'  'Blue'}
+    rowFullNames: {}
+    colFullNames: {'Red'  'Green'  'Blue'}
+
+
+
+      Channels
+  Red  Green  Blue
+ ---- ------ -----
+  183     80   101
+  191     76   105
+  187     73    99
+  187     77   102
+  185     75   102
+  183     73   100
+  183     73   100
+  182     72    97
+  223    119   142
+
+</pre><p>Method <tt>imagesc</tt> shows images for separate channels. If it is needed to show a color image, use <tt>.image</tt> property, but do not forget to scale intensities, since all values of <tt>mdaimage</tt> are double.</p><pre class="codeinput">   figure
+
+   subplot(2, 2, 1)
+   imagesc(img(:, :, <span class="string">'Red'</span>))
+   title(<span class="string">'Red'</span>)
+
+   subplot(2, 2, 2)
+   imagesc(img(:, :, <span class="string">'Green'</span>))
+   title(<span class="string">'Green'</span>)
+
+   subplot(2, 2, 3)
+   imagesc(img(:, :, <span class="string">'Blue'</span>))
+   title(<span class="string">'Blue'</span>)
+
+   subplot(2, 2, 4)
+   imshow(img.image/255)
+   title(<span class="string">'Color image'</span>)
+
+   colormap(gray)
+</pre><img vspace="5" hspace="5" src="mdatools_quick_10.png" alt=""> <p>Since image is just an extension of <tt>mdadata</tt> it can be treated as a just a dataset, e.g. here is how to make a density scatter plot.</p><pre class="codeinput">   figure
+   densscatter( img(:, :, {<span class="string">'Red'</span>, <span class="string">'Blue'</span>}));
+</pre><img vspace="5" hspace="5" src="mdatools_quick_11.png" alt=""> <p>When one make a PCA model for an object of <i>mdaimage</i> class, all results for objects (pixels), such as scores and residuals will be automatically converted to <i>mdaimage</i> objects as well. It means, we can make scatter image for particular component.</p><pre class="codeinput">   m = mdapca(img);
+
+   figure(<span class="string">'Position'</span>, [100 100 800 300])
+
+   subplot(1, 2, 1)
+   plotscores(m.calres, <span class="string">'Type'</span>, <span class="string">'densscatter'</span>);
+
+   subplot(1, 2, 2)
+   imagesc(m.calres.scores(:, :, 2));
+</pre><img vspace="5" hspace="5" src="mdatools_quick_12.png" alt=""> <h2>GUI Tools<a name="26"></a></h2><p>The toolbox has also GUI for interactive exploration of data and models. Currently it is in alpha version and can only work with datasets. To run the GUI (it is called <i>explorer</i> in <i>mdatools</i>) just use:</p><pre class="codeinput">   explore(people);
+</pre><img vspace="5" hspace="5" src="mdatools_quick_13.png" alt=""> <p>The window is split into several parts with three plots and panels with parameters on right side. The parameters include settings for the current plot (plot type and various options) and preprocessing. Background of a panel with current plot is highlighted with light bage color. To change the current plot just click on a panel (gray area outside axes) of the plot you want to change to.</p><p>For any dataset there are two designated variables (columns). The first is used to make one-variable plots like histogram, QQ-plot, etc. The second is used to make scatter plot. The designated variables are shown with gray dashed lines on a line plot. Their position can be changed using arrows (left/right for first and up/down for second).</p><p>For scatter, line and image plots it is possible to select objects or variables, exclude them, show excluded variables and include them back. The procedure is similar for all plots, so only selecting objects on scatter plot will be explained below.</p><p>To select points on scatter plot do:</p><div><ol><li>Select panel with scatter plot.</li><li>Push "s" button on keyboard, so a cursor looks like a cross.</li><li>Make a closed polygon around points you need to select.</li><li>If needed change polygon shape using nodes.</li><li>Double click inside polygon to make selection.</li></ol></div><p>The selected points are highlighted with color. All other plots, like e.g. line plot or histogram will be shown only for selected objects. To unselect objects use "Esc" button. It also can be used if you started selection but would like to stop without selecting objects.</p><p>Other important shortcuts are:</p><div><ul><li>"e" to exclude selected objects</li><li>"a" to add excluded objects back</li><li>"i" invert current selection</li></ul></div><p>If you want to add some of the excluded objects back, you need to make them visible using plot options (e.g. "Excluded rows"), then select them and push key "a". All operations with selected objects, e.g. inverting selection, excluding, including, etc. are also available from context menu (use right mous button with cursor on selected objects or variables).</p><p>Data can be also preprocessed directly in the explorer. To define a sequence of preprocessed methods  select method from a list and click "Add". Icons with errors (up/down) can be used to change the position of a method in the sequence and cross icon removes the method. Names of methods, which have additional settings (e.g. Savitzky-Golay) are shown as blue hyperlinks. By clicking on the link one can get a modal window with the settings, change and save them. Finally two buttons at the bottom of this section allow to apply the preprocessing sequence to the data and reset data to original state.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Quick start guide
 % 
@@ -414,7 +475,7 @@ Comp 8        0.055   0.458       99.4        0.919            98.3
 
 %%
 % You can subset datasets using the same way as with matrices: by specifying indices for
-% rows and columns. All special names and symbols, like "|:|" and "|end|" will work properly.
+% rows and columns. All special names and symbols, like |:| and |end| will work properly.
 % Alternatively column and row names can be used for the same purpose.
 %
 
@@ -531,7 +592,7 @@ show(bmi)
 %
 
    load('people')
-   m = mdapca(people, 8, 'Scale', 'on');   
+   m = mdapca(people, 6, 'Scale', 'on');   
    disp(m)
    disp(m.calres)
    
@@ -551,7 +612,7 @@ show(bmi)
 %
 
    load('people')
-   m = mdapca(people, 8, 'Scale', 'on', 'CV', {'rand', 8, 4});   
+   m = mdapca(people, 6, 'Scale', 'on', 'CV', {'rand', 8, 4});   
    disp(m)
 
 %%
@@ -652,9 +713,9 @@ show(bmi)
 %
 % The _mdatools_ may work naturally with images. Image can be represented
 % as a 2-way dataset by unfolding 3-way cube, so all pixels become rows
-% (objects) and all channels - columns (variables). In _mdatools? there is
+% (objects) and all channels - columns (variables). In _mdatools_ there is
 % a specific object to work with images, |mdaimage|. It is based on
-% _mdadata_ object and inherits all its properties and methods. So all
+% _mdadata_ class and inherits all its properties and methods. So all
 % examples above will also work with |mdaimage| obects.
 %
 % However there are also some important things to know. First of all image
@@ -664,7 +725,130 @@ show(bmi)
 % and channels. Finally |mdaimage| has a method |imagesc()| allowing to
 % show an image for any channel. Let's play with that:
 %
-%   img = imread('test.jpg');
+   img = imread('test.jpg');
+   img = mdaimage(img, {'Red', 'Green', 'Blue'});
+   disp(img)
    
+   % show color values for 3x3 pixels from left top corner
+   show(img(1:3, 1:3, :))
+   
+   
+%% 
+% Method |imagesc| shows images for separate channels. If it is needed to
+% show a color image, use |.image| property, but do not forget to scale
+% intensities, since all values of |mdaimage| are double.
+%
+   figure
+
+   subplot(2, 2, 1)
+   imagesc(img(:, :, 'Red'))
+   title('Red')
+
+   subplot(2, 2, 2)
+   imagesc(img(:, :, 'Green'))
+   title('Green')
+
+   subplot(2, 2, 3)
+   imagesc(img(:, :, 'Blue'))
+   title('Blue')
+   
+   subplot(2, 2, 4)
+   imshow(img.image/255)
+   title('Color image')
+   
+   colormap(gray)
+   
+   
+%%
+% Since image is just an extension of |mdadata| it can be treated as a just
+% a dataset, e.g. here is how to make a density scatter plot.
+%
+
+   figure
+   densscatter( img(:, :, {'Red', 'Blue'}));
+   
+%%
+% When one make a PCA model for an object of _mdaimage_ class, all results
+% for objects (pixels), such as scores and residuals will be automatically
+% converted to _mdaimage_ objects as well. It means, we can make scatter
+% image for particular component.
+%
+
+   m = mdapca(img);
+   
+   figure('Position', [100 100 800 300])
+   
+   subplot(1, 2, 1)
+   plotscores(m.calres, 'Type', 'densscatter');
+   
+   subplot(1, 2, 2)
+   imagesc(m.calres.scores(:, :, 2));
+   
+   
+%% GUI Tools
+%
+% The toolbox has also GUI for interactive exploration of data and models.
+% Currently it is in alpha version and can only work with datasets. To run
+% the GUI (it is called _explorer_ in _mdatools_) just use:
+%
+
+   explore(people);
+
+%%
+% The window is split into several parts with three plots and panels with
+% parameters on right side. The parameters include settings for the current
+% plot (plot type and various options) and preprocessing. Background of a
+% panel with current plot is highlighted with light bage color. To change
+% the current plot just click on a panel (gray area outside axes) of the plot 
+% you want to change to.
+% 
+% For any dataset there are two designated variables (columns). The first
+% is used to make one-variable plots like histogram, QQ-plot, etc. The
+% second is used to make scatter plot. The designated variables are shown
+% with gray dashed lines on a line plot. Their position can be changed
+% using arrows (left/right for first and up/down for second).
+%
+% For scatter, line and image plots it is possible to select objects or
+% variables, exclude them, show excluded variables and include them back.
+% The procedure is similar for all plots, so only selecting objects on 
+% scatter plot will be explained below.
+%
+% To select points on scatter plot do:
+%
+% # Select panel with scatter plot.
+% # Push "s" button on keyboard, so a cursor looks like a cross.
+% # Make a closed polygon around points you need to select.
+% # If needed change polygon shape using nodes.
+% # Double click inside polygon to make selection.
+%
+% The selected points are highlighted with color. All other plots, like
+% e.g. line plot or histogram will be shown only for selected objects. To
+% unselect objects use "Esc" button. It also can be used if you started
+% selection but would like to stop without selecting objects.
+%
+% Other important shortcuts are:
+%
+% * "e" to exclude selected objects
+% * "a" to add excluded objects back 
+% * "i" invert current selection
+%
+% If you want to add some of the excluded objects back, you
+% need to make them visible using plot options (e.g. "Excluded rows"), then
+% select them and push key "a". All operations with selected objects, e.g.
+% inverting selection, excluding, including, etc. are also available from
+% context menu (use right mous button with cursor on selected objects or
+% variables).
+%
+% Data can be also preprocessed directly in the explorer. To define a sequence 
+% of preprocessed methods  select method from a list and click "Add". Icons with errors (up/down)
+% can be used to change the position of a method in the sequence and cross
+% icon removes the method. Names of methods, which have additional settings (e.g.
+% Savitzky-Golay) are shown as blue hyperlinks. By clicking on the link one
+% can get a modal window with the settings, change and save them. Finally
+% two buttons at the bottom of this section allow to apply the
+% preprocessing sequence to the data and reset data to original state.
+%
+%
+%
 ##### SOURCE END #####
 --></body></html>

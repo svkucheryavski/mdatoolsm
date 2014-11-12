@@ -4,15 +4,29 @@ classdef plsres < regres
       ydecomp
     end
     
+    properties (Dependent = true, Hidden = true, Access = 'private')
+      nComp
+      nPred
+    end
+    
     methods
       function obj = plsres(xdecomp, ydecomp, varargin)
          obj = obj@regres(varargin{:});
          obj.xdecomp = xdecomp;
          obj.ydecomp = ydecomp;
       end
-                
+               
+      function out = get.nPred(obj)
+         out = size(obj.ypred_, 1);
+      end
+      
+      
+      function out = get.nComp(obj)
+         out = size(obj.ypred_, 3);
+      end
+      
       function plot(obj, varargin)
-         [nresp, ncomp, varargin] = regres.getPlotParams(obj.nResp, obj.nComp, varargin{:});
+         [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.respNames, varargin{:});
          if ~isempty(obj.stat)
             subplot(2, 2, 1)
             obj.plotxresiduals(ncomp, varargin{:});

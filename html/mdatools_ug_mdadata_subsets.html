@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Sorting data and making subsets</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdatools_ug_mdadata_subsets.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Sorting data and making subsets</h1><!--introduction--><!--/introduction--><p>In this section and onwards we will use a <i>People</i> dataset instead of generating numbers. The dataset consists of measurements of 12 variables done for 32 persons (16 males and 16 females, half from Scandinavia, half from Mediterranian region). The variables include height, weight, shoesize, income, beer and wine consumption and so on. For details, please, see <i>K. Esbensen. Multivariate data analysis in practice. Camo, 2005</i>.</p><p>The data can be sorted using one or several columns:</p><pre class="codeinput">load <span class="string">people</span>
+      --><title>Sorting data and making subsets</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-05"><meta name="DC.source" content="mdatools_ug_mdadata_subsets.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h1>Sorting data and making subsets</h1><!--introduction--><!--/introduction--><p>In this section and onwards we will use a <i>People</i> dataset instead of generating numbers. The dataset consists of measurements of 12 variables done for 32 persons (16 males and 16 females, half from Scandinavia, half from Mediterranian region). The variables include height, weight, shoesize, income, beer and wine consumption and so on. For details, please, see <i>K. Esbensen. Multivariate data analysis in practice. Camo, 2005</i>.</p><p>The data can be sorted using one or several columns:</p><pre class="codeinput">load <span class="string">people</span>
 
 show(people)
 
@@ -145,6 +145,7 @@ show(people(1:3, 1:2:end-2))
 </pre><pre class="codeoutput">
 
 People:
+People dataset
 
                                             Variables
        Height  Weight  Hairleng  Shoesize  Age   Income  Beer  Wine  Sex  Swim  Region   IQ
@@ -155,6 +156,7 @@ Peter     184      84        -1        44   33  3.3e+04   350   102   -1    92  
 
 
 People:
+People dataset
 
                    Variables
         Height  Hairleng  Age  Beer  Sex
@@ -169,6 +171,7 @@ show(people({<span class="string">'Lars'</span>, <span class="string">'Lene'</sp
 </pre><pre class="codeoutput">
 
 People:
+People dataset
         Height
        -------
   Lars     198
@@ -180,6 +183,7 @@ Rasmus     183
 
 
 People:
+People dataset
 
                                            Variables
       Height  Weight  Hairleng  Shoesize  Age   Income  Beer  Wine  Sex  Swim  Region   IQ
@@ -189,6 +193,7 @@ Lars     198      92        -1        48   48  4.5e+04   420   115   -1    98   
 
 
 People:
+People dataset
 
         Variables
       Height  Weight
@@ -202,6 +207,7 @@ show(people(<span class="string">'Lars:Lene'</span>, <span class="string">'Heigh
 </pre><pre class="codeoutput">
 
 People:
+People dataset
 
                            Variables
         Height  Weight  Hairleng  Shoesize  Age   Income
@@ -213,6 +219,7 @@ Rasmus     183      83        -1        44   37  3.4e+04
 
 
 People:
+People dataset
 
                                              Variables
         Height  Weight  Hairleng  Shoesize  Age   Income  Beer  Wine  Sex  Swim  Region   IQ
@@ -225,6 +232,7 @@ Rasmus     183      83        -1        44   37  3.4e+04   320    98   -1    91 
 
 
 People:
+People dataset
 
                            Variables
         Height  Weight  Hairleng  Shoesize  Age   Income
@@ -264,6 +272,7 @@ show(people(<span class="string">'$1 &lt; 180 &amp; $3 == -1'</span>, 1:4));
 </pre><pre class="codeoutput">
 
 People:
+People dataset
 
                       Variables
           Height  Weight  Hairleng  Shoesize
@@ -288,6 +297,7 @@ Giuliana     162      50         1        36
 
 
 People:
+People dataset
 
                    Variables
        Height  Weight  Hairleng  Shoesize
@@ -297,6 +307,7 @@ Gitte     172      64         1        39
 
 
 People:
+People dataset
 
                       Variables
           Height  Weight  Hairleng  Shoesize
@@ -316,7 +327,7 @@ disp(people.rowNames(i)');
 
     'Britta'
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Sorting data and making subsets 
 %

@@ -26,6 +26,8 @@ function c = getmycolors(n)
    if nargin == 1
       if n == 1
          c = c(1, :);
+      elseif n == 3
+         c = [c(1, :); [252 163 64]/255; c(end, :)];
       else
          x = round(linspace(1, size(c, 1), n));
          c = c(x, :);
