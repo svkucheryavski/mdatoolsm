@@ -10,17 +10,10 @@ and GUI tools allowing to explore models and datasets interactively. The project
 developing and e.g. GUI is in alpha version and has limited functionality, however most of the
 command line methods work well in the current version.
 
-<<<<<<< HEAD
-It is recommended to start learning the toolbox with a [Quick start]() guide, which gives
-a brief overview of basic methods with a lot of examples. Its is also available in Matlab by
-`web mdatools_quick.html`). It allows you to start working with the toolbox after 30 minutes
-learning. Then just continue with User guide (`web mdatools.html`) to get acquainted with all
-=======
 It is recommended to start learning the toolbox with a guide, which gives 
 a brief overview of basic methods with a lot of examples (`web mdatools_quick.html`).
 It allows you to start working with the toolbox after 30 minutes 
 learning. Then just continue with User guide (`web mdatools.html`) to get acquainted with all 
->>>>>>> 52244808c834b092fb83c5a8c489e5b50eb4d501
 available features and details.
 
 The toolbox was tested using MATLAB 2012b and 2014b and should also work on
