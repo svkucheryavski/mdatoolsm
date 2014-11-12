@@ -1,5 +1,5 @@
 %% Toolbox for Multivariate Data Analysis
-% _current version: 0.0.8 (3.11.2014)_
+% _current version: 0.0.9 (12.11.2014)_
 % 
 % *mdatools* is a free and open source toolbox for analysis of spectral and
 % other kind of experimental data based on methods widespread in 
