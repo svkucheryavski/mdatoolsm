@@ -197,10 +197,10 @@ classdef regres < res
             elseif isnumeric(varargin{1})               
                % numeric value, consider as number of components or (if
                % only one component is used, number of class.
-               if nComp == 1
-                  nresp = varargin{1};
-               else
+               if nResp == 1
                   ncomp = varargin{1};
+               else
+                  nresp = varargin{1};
                end   
                varargin(1) = [];
             end   

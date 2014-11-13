@@ -490,7 +490,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
             elseif (numel(rowNames) ~= nRows)
                error('Number of names should be the same as number of objects!');
             elseif isnumeric(rowNames)
-               obj.rowNamesAll = textgen('', rowNames);
+               rowNames = textgen('', rowNames);
+               if size(rowNames, 1) < size(rowNames, 2)
+                  rowNames = rowNames';
+               end   
+               obj.rowNamesAll = rowNames;
             elseif iscell(rowNames) && ischar([rowNames{:}])
                obj.rowNamesAll = rowNames;
             else
@@ -1295,7 +1299,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          f = find(a.factorCols);
          out.factorCols = a.factorCols;
          for i = 1:numel(f)
-            l = [fl{:, f}]';
+            l = vertcat(fl{:, f});
             out.factorLevelNames{i} = unique(l(:), 'stable'); 
          end         
       end

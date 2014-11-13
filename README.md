@@ -25,7 +25,7 @@ in this case please report to <svkucheryavski@gmail.com>.
 
 ## Installation ##
 
-The current version is _0.0.9_ (from 12.11.2014). Next version is going to be published in late
+The current version is _0.0.10_ (from 13.11.2014). Next version is going to be published in late
 November and will include mostly bug fixings and small improvements for the code as well as
 more methods.
 
