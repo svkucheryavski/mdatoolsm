@@ -960,11 +960,16 @@ classdef mdadata < handle & matlab.mixin.Copyable
             error('Only one column at time can be marked as a factor!');
          end
          
-         levels = unique(obj.valuesAll(:, ind));
+         levels = unique(obj.valuesAll(:, ind), 'stable');
          if nargin < 3
             levelNames = textgen('', levels);
          elseif numel(levelNames) ~= numel(levels)   
             error('Number of level names should correspond to the number of levels!')
+         else
+            % resort level names according to order of level values
+            [~, ind1] = sort(levels);
+            [~, ind2] = sort(ind1);            
+            levelNames = levelNames(ind2);            
          end   
          
          obj.factorCols(ind) = true;
@@ -2601,13 +2606,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
          data.rowFullNames = srowFullNames;
          objFactorCols = col_ind(ismember(col_ind, find(obj.factorCols)));
          dataFactorCols = find(obj.factorCols(col_ind));
-         
+                  
          for i = 1:numel(dataFactorCols)
             objLevels = unique(values(:, objFactorCols(i)), 'stable');
             dataLevels = unique(svalues(:, dataFactorCols(i)), 'stable');
             levels = obj.factorLevelNames{objFactorCols(i)}(ismember(objLevels, dataLevels));
-            data.factor(dataFactorCols(i), levels');
-%            data.factor(dataFactorCols(i), objLevels);
+            
+            data.factorCols(dataFactorCols(i)) = true;            
+            data.factorLevelNames{dataFactorCols(i)} = levels';
          end
          
          data.excludecols(sexcludedCols);

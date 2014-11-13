@@ -4,7 +4,7 @@ classdef classmodel < handle
       function newc = getClassFromFactor(c, className)
          factorLevelNames = c.factorLevelNames{1};
          factorLevels = unique(c.valuesAll, 'stable');
-         
+                  
          if ischar(className)
             ind = ismember(factorLevelNames, className);
             if ~any(ind)
@@ -24,11 +24,7 @@ classdef classmodel < handle
          newc = mdadata(newc, c.rowNamesAll, c.colNames, c.dimNames, c.name);
          newc.rowFullNames = c.rowFullNamesAll;
          newc.colFullNames = c.colFullNames;
-         if newc.valuesAll(1, 1) == 0
-            newc.factor(1, {'None', className});
-         else
-            newc.factor(1, {className, 'None'});
-         end
+         newc.factor(1, {'None', className});
          newc.excluderows(c.excludedRows);
       end   
    end   

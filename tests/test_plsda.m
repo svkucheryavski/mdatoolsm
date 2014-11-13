@@ -1,6 +1,6 @@
 function m = test_plsda(type, casen)
    clc
-   close all
+   clear classes
 
    if nargin < 1
       type = 'people';
@@ -14,6 +14,7 @@ function m = test_plsda(type, casen)
       case 'people'
          ncomp = 3;
          d = load('people');
+         d.people.sort('Region', 'descend')
          oX = d.people(:, 1:10);
          oc = d.people(:, 11);
          oc.factor(1, {'A', 'B'});
@@ -67,7 +68,6 @@ function m = test_plsda(type, casen)
    
       case 3
          fprintf('3. Test set validation\n')   
-
          Xc = X(cind, :);
          cc = c(cind, :);
 
@@ -99,15 +99,14 @@ function m = test_plsda(type, casen)
 
       case 5
          fprintf('5. Test set and cross-validation for data with factors and hidden values\n')   
-         
+
          for i = 1:numel(factorCols);
             X.factor(factorCols{i}, factorLevels{i});
          end
          X.excludecols(excludedCols);      
-
          Xc = X(cind, :);
          cc = c(cind, :);
-
+         
          Xt = X(~cind, :);
          ct = c(~cind, :);
 
@@ -124,9 +123,10 @@ function m = test_plsda(type, casen)
          summary(m.calres);
          summary(m.cvres);
          summary(m.testres);
-         showPlotsForModel(m, cname);
+         
+%         showPlotsForModel(m, cname);
 %         showPlotsForResult(m.calres);
-         showPlotsForResult(m.cvres, cname, 'CV');
+%         showPlotsForResult(m.cvres, cname, 'CV');
 %         showPlotsForResult(m.testres);
    end
 end

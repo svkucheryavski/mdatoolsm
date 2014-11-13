@@ -38,7 +38,7 @@ function varargout = plotclassification(obj, varargin)
       
       ind_none = ind_none & ~ind;      
    end
-   refData
+      
    if any(ind_none)
       plotData = [plotData; [x(ind_none), zeros(sum(ind_none), 1)]];
       plotObjNames = [plotObjNames; objNames(ind_none)];

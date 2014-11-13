@@ -30,7 +30,7 @@ classdef mdaplsda < mdapls & classmodel
             Xtest = test{1};
             ctest = test{2};
             ytest = splitfactor(ctest, 1);
-            ytest = ytest(:, 2:end);
+            ytest = ytest(:, className);
             varargin = {varargin{:}, 'TestSet', {Xtest, ytest}};
          end
          
