@@ -25,7 +25,7 @@ in this case please report to <svkucheryavski@gmail.com>.
 
 ## Installation ##
 
-The current version is _0.0.11_ (from 13.11.2014). Next version is going to be published in late
+The current version is _0.0.12_ (from 25.11.2014). Next version is going to be published in late
 November and will include mostly bug fixings and small improvements for the code as well as
 more methods.
 
@@ -34,8 +34,8 @@ Download zip archive for the latest release and unzip it to the folder you use t
 for example to _Documents/MATLAB_ or _Documents/MATLAB/Toolboxes_. Open the folder in MATLAB
 environment and run `install.m` script, which will do the rest.
 
-If you upgrade from previous version, run `uninstall` on the old version first, then remove old
-folder, unzip the new version and follow the instructions above.
+If you upgrade from previous version, run `uninstall` on the old version first (it will clear the path
+list and remove folder with toolbox), then unzip the new version and follow the instructions above.
 
 ## Bug reports and suggestions ##
 

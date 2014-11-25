@@ -8,7 +8,6 @@ ssh_toc = [helpdir 'assets/mdastyles_toc.xsl'];
 
 ssh_methods = [helpdir 'assets/mdastyles_methods.xsl'];   
 
-
 %% front page and quck start
 publish('mdatools.m', 'format', 'html', 'outputDir', helpdir, 'stylesheet', ssh_toc);
 publish('mdatools_quick.m', 'format', 'html', 'outputDir', helpdir, 'stylesheet', ssh);
@@ -31,8 +30,8 @@ publish('mdatools_ug_mdadata_gplots.m', 'format', 'html', 'outputDir', helpdir, 
 
 %% classes and functions
 %publish_class('mdadata', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
-%publish_class('mdaimage', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
-publish_class('prep', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
+publish_class('mdaimage', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
+%publish_class('prep', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
 %publish_class('mdapca', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
 %publish_class('mdapls', 'format', 'html', 'outputDir', [helpdir 'classes'], 'stylesheet', ssh_methods);
 

@@ -1,6 +1,6 @@
 function test_prep()
    d = load('simdata');
-   s = d.spectra;
+   s = d.spectra(:, 2:end);
    s = s + mdadata(0.01*randn(size(s)));
    p = prep();
    p.add('savgol', 1, 21, 2)

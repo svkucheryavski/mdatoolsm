@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>mdatools_ug_mdadata_groups</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-05"><meta name="DC.source" content="mdatools_ug_mdadata_groups.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h2>Factors and groups<a name="1"></a></h2><p>Dataset class has a posibility to mark one or several columns as factors. Factor is a qualitative variable, it has fixed values (levels) and normally can not be treated as quantitative variable.</p><p>Factors can be used for splitting datasets, combine data values into groups, calculate statistics and show plots for the groups. Besides that, one can calculate qualitative statistics for factors, such as frequencies, contingency table, chi-square test for association and so on. All mathematic operators and functions as well as methods for quantitative statistic will ignore factors in calculations.</p><p>To add a factor you need to have a column in the dataset with discrete numeric values, such as variables <i>Sex</i> and <i>Region</i> in the <i>People</i> data. It is possible to define text values for each of the levels. Keep level names as simple as possible and avoid using spaces and other special symbols. The column name for a factor is marked with an asterisk when dataset is displaying.</p><pre class="codeinput">   load <span class="string">people</span>
+      --><title>mdatools_ug_mdadata_groups</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="mdatools_ug_mdadata_groups.m"><link rel="stylesheet" href="assets/mdatools.css" type="text/css"><script src="assets/jquery.js"></script></head><body><script>var show_toc = false; var is_method = false;</script><script src="assets/mdatools.js"></script><div class="content"><h2>Factors and groups<a name="1"></a></h2><p>Dataset class has a posibility to mark one or several columns as factors. Factor is a qualitative variable, it has fixed values (levels) and normally can not be treated as quantitative variable.</p><p>Factors can be used for splitting datasets, combine data values into groups, calculate statistics and show plots for the groups. Besides that, one can calculate qualitative statistics for factors, such as frequencies, contingency table, chi-square test for association and so on. All mathematic operators and functions as well as methods for quantitative statistic will ignore factors in calculations.</p><p>To add a factor you need to have a column in the dataset with discrete numeric values, such as variables <i>Sex</i> and <i>Region</i> in the <i>People</i> data. It is possible to define text values for each of the levels. Keep level names as simple as possible and avoid using spaces and other special symbols. The column name for a factor is marked with an asterisk when dataset is displaying.</p><pre class="codeinput">   load <span class="string">people</span>
 
    d = people(1:8, :);
    show(d)
@@ -131,19 +131,19 @@ d.factor(<span class="string">'Hairleng'</span>, {<span class="string">'Short'</
 show(d.getgroups({<span class="string">'Sex'</span>, <span class="string">'Hairleng'</span>}))
 </pre><pre class="codeoutput">
 
-                       Groups (Sex, Hairleng)
-        Male, Short  Male, Long  Female, Short  Female, Long
-       ------------ ----------- -------------- -------------
-  Lars            1           0              0             0
- Peter            1           0              0             0
-Rasmus            1           0              0             0
-  Lene            0           0              1             0
- Mette            0           0              0             1
- Gitte            0           0              0             1
-  Jens            1           0              0             0
-  Erik            1           0              0             0
- Lotte            0           0              0             1
- Heidi            0           0              0             1
+                 Groups (Sex, Hairleng)
+        Male, Short  Female, Short  Female, Long
+       ------------ -------------- -------------
+  Lars            1              0             0
+ Peter            1              0             0
+Rasmus            1              0             0
+  Lene            0              1             0
+ Mette            0              0             1
+ Gitte            0              0             1
+  Jens            1              0             0
+  Erik            1              0             0
+ Lotte            0              0             1
+ Heidi            0              0             1
 
 </pre><p>The <tt>getgroups()</tt> is widely used in statistic and graphical methods. Here we will show how to use groups for calculation of quantitative statistics and in the next section graphical methods will be discussed.</p><p>The idea is rather simple, if one provide a dataset with one or several factors as a second argument of any statistical method, the statistics will be calculated for first column of original data and the values from this column will be split into the groups according to combination of the factor levels. Here is an example:</p><pre class="codeinput">clc
 
@@ -310,7 +310,7 @@ Standardized residuals (Region, Sex):
 A  -0.156   0.156
 B   0.156  -0.156
 
-</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Factors and groups
 %

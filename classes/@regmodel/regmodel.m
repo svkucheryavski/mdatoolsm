@@ -11,6 +11,7 @@ classdef regmodel < handle
       calres
       cvres
       testres
+      alpha
       nComp
    end
    
@@ -22,6 +23,14 @@ classdef regmodel < handle
    methods
       
       function obj = regmodel(X, y, ncomp, varargin)
+         
+         if X.nNumCols < 1
+            error('Matrix with predictors (X) must contain at least one quantitative variable!');
+         end
+         
+         if y.nNumCols < 1
+            error('Matrix with responses (y) must contain at least one quantitative variable!');
+         end
          
          if nargin < 3
             obj.nComp = min([X.nRows - 1, X.nCols]);
@@ -67,8 +76,10 @@ classdef regmodel < handle
          
          % check if cross-validation is needed and run the cv
          if ~isempty(obj.cv) 
-            obj.cvres = obj.crossval(X, y, varargin{:});
+            res = obj.crossval(X, y, varargin{:});
+            obj.cvres = res.res;            
             obj.cvres.info = 'Results for cross-validation';
+            obj.regcoeffs.computejkstat(res.jkcoeffs, obj.alpha);
          end         
          
       end
@@ -91,6 +102,14 @@ classdef regmodel < handle
             obj.cv = v;
          else
             obj.cv = [];
+         end
+         
+         % set up alpha for jack-knife procedure
+         [v, varargin] = getarg(varargin, 'Alpha');
+         if ~isempty(v)
+            obj.alpha = v;
+         else
+            obj.alpha = 0.05;
          end
          
          % set up preprocessing

@@ -406,8 +406,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
          %%%% check if colNames are provided and generate the names if needed
          
          if isempty(colNames)
-         % no colnames - generate them as 'V1', 'V2', ...   
-            obj.colNamesAll = textgen('V', 1:nCols);
+         % no colnames - generate them as '1', '2', ...   
+            obj.colNamesAll = textgen('', 1:nCols);
          else   
             if ischar(colNames) && nCols == 1
                colNames = {colNames};
@@ -851,7 +851,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
       end   
       
-      function removecols(obj, ind)
+      function removecols(obj, rind)
       % 'removecols' remove columns from a dataset
       %
       %   data.removecols(ind);
@@ -860,15 +860,17 @@ classdef mdadata < handle & matlab.mixin.Copyable
       % The index of column can be numeric or text, one can also
       % specify a sequence of columns have to be removed.
       %
-         if isempty(ind)
+         if isempty(rind)
             return
          end
          
-         ind = getfullcolind(obj, ind);
-         
+         ind = false(obj.nColsAll, 1);
+         ind(getfullcolind(obj, rind)) = true;
+
+         fullNames = obj.colFullNamesAll;
          obj.valuesAll(:, ind) = [];
-         obj.colFullNames(ind) = [];      
-         obj.colNamesAll(ind) = [];
+         obj.colNamesAll = obj.colNamesAll(~ind);
+         obj.colFullNamesAll = fullNames(~ind);      
          obj.factorCols(ind) = [];        
          obj.factorLevelNames(ind) = [];        
          obj.excludedCols(ind) = [];
@@ -960,7 +962,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             error('Only one column at time can be marked as a factor!');
          end
          
-         levels = unique(obj.valuesAll(:, ind), 'stable');
+         levels = unique(obj.valuesAll(:, ind));
          if nargin < 3
             levelNames = textgen('', levels);
          elseif numel(levelNames) ~= numel(levels)   
@@ -1030,7 +1032,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end 
          
          values = obj.valuesAll(:, ind);
-         levels = unique(values, 'stable');
+         levels = unique(values);
          levelNames = obj.factorLevelNames{ind};
          nlevels = numel(levels);
          
@@ -1099,7 +1101,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          [nRows, nFactors] = size(values);
          
          % get factor values as level indices (1, 2, 3)
-         [~, ~, values] = unique(values, 'stable');
+         [~, ~, values] = unique(values);
          values = reshape(values, nRows, nFactors);
          
          % get factor values as names
@@ -1121,11 +1123,13 @@ classdef mdadata < handle & matlab.mixin.Copyable
          fullNames = cell(nComb, 1);
          shortNames = cell(nComb, 1);
          for i = 1:nComb
-            v = values(:, 1) == comb(i, 1);
+            levels = unique(values(:, 1));
+            v = values(:, 1) == levels(comb(i, 1));
             fullName = [levelNames{1}{comb(i, 1)}];
             shortName = [levelNames{1}{comb(i, 1)}];
             for j = 2:nFactors
-               v = v & values(:, j) == comb(i, j);
+               levelsj = unique(values(:, j));
+               v = v & values(:, j) == levelsj(comb(i, j));
                fullName = [fullName ', ' levelNames{j}{comb(i, j)}];
                shortName = [shortName levelNames{j}{comb(i, j)}];
             end   
@@ -1138,6 +1142,12 @@ classdef mdadata < handle & matlab.mixin.Copyable
          dimName = ['Groups (' dimName(1:end-2) ')'];
          groups = mdadata(groups, obj.rowNames, {}, {obj.dimNames{1}, dimName});
          groups.colFullNames = fullNames;
+         
+         % remove columns with all false values
+         nulind = find(~any(logical(groups.values)));    
+         if ~isempty(nulind)
+            groups.removecols(nulind);
+         end   
       end
             
       %%% overrides for standard math methods
@@ -1229,9 +1239,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
             colNames = b.colNames;
             colFullNames = b.colFullNames;
          end   
-         
          out = op(a, b, @horzcat, a.rowNames, a.rowFullNames , ...
             [a.colNames, colNames], [a.colFullNames, colFullNames], a.dimNames, true);
+         
+         factorCols = [a.factorCols; b.factorCols];
+         factorLevelNames = [a.factorLevelNames; b.factorLevelNames];
          
          for i = 1:numel(varargin)
             b = varargin{i};
@@ -1242,38 +1254,52 @@ classdef mdadata < handle & matlab.mixin.Copyable
                colNames = b.colNames;
                colFullNames = b.colFullNames;
             end   
+            
             out = op(out, b, @horzcat, out.rowNames, out.rowFullNames , [out.colNames, colNames],...
                [out.colFullNames, colFullNames], out.dimNames, true);
+            factorCols = [factorCols; b.factorCols];
+            factorLevelNames = [factorLevelNames; b.factorLevelNames];    
          end   
+         out.factorCols = factorCols;
+         out.factorLevelNames = factorLevelNames;
       end
       
       function out = vertcat(a, b, varargin)
-         
-         aExcludedRows = a.excludedRows;
-         bExcludedRows = b.excludedRows;
-         
-         a.includerows(aExcludedRows);
-         b.includerows(bExcludedRows);
-         
-         if sum(ismember(a.rowNames, b.rowNames)) > 0
-            rowNames = strcat('O', b.rowNames);
-            rowFullNames = strcat('O', b.rowFullNames );
-         else
-            rowNames = b.rowNames;
-            rowFullNames = b.rowFullNames ;
-         end   
-         
-         af = a.factorCols;         
-         bf = b.factorCols;
-         fl = [a.factorLevelNames; b.factorLevelNames];
-         
-         if ~all(af == bf)
-            error('Factor columns in data "a" should correspond to factor columns in data "b"!')
+         if isempty(a)
+            out = b;
+            f = find(b.factorCols);
+            factorCols = b.factorCols;
+            fln = [b.factorLevelNames];            
+         else   
+            f = find(a.factorCols);
+            factorCols = a.factorCols;
+            
+            aExcludedRows = a.excludedRows;
+            bExcludedRows = b.excludedRows;
+
+            a.includerows(aExcludedRows);
+            b.includerows(bExcludedRows);
+
+            if sum(ismember(a.rowNames, b.rowNames)) > 0
+               rowNames = strcat('O', b.rowNames);
+               rowFullNames = strcat('O', b.rowFullNames );
+            else
+               rowNames = b.rowNames;
+               rowFullNames = b.rowFullNames ;
+            end   
+
+            af = a.factorCols;         
+            bf = b.factorCols;
+            fln = [a.factorLevelNames b.factorLevelNames];
+
+            if ~all(af == bf)
+               error('Factor columns in data "a" should correspond to factor columns in data "b"!')
+            end
+
+            out = op(a, b, @vertcat, [a.rowNames; rowNames], [a.rowFullNames ; rowFullNames ],...
+               a.colNames, a.colFullNames, a.dimNames, true);
+            out.excluderows([aExcludedRows; bExcludedRows]);
          end
-         
-         out = op(a, b, @vertcat, [a.rowNames; rowNames], [a.rowFullNames ; rowFullNames ],...
-            a.colNames, a.colFullNames, a.dimNames, true);
-         out.excluderows([aExcludedRows; bExcludedRows]);
          
          for i = 1:numel(varargin)
             outExcludedRows = out.excludedRows;
@@ -1284,7 +1310,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             
             b = varargin{i};
             bf = b.factorCols;
-            fl = [fl; b.factorLevelNames];
+            fln = [fln b.factorLevelNames];
             
             if ~all(af == bf)
                error('Factor columns in data "a" should correspond to factor columns in data "b"!')
@@ -1300,12 +1326,20 @@ classdef mdadata < handle & matlab.mixin.Copyable
                out.colNames, out.colFullNames, out.dimNames, true);
             out.excluderows([outExcludedRows; bExcludedRows]);
          end   
-         
-         f = find(a.factorCols);
-         out.factorCols = a.factorCols;
+
+         out.factorCols = factorCols;
          for i = 1:numel(f)
-            l = vertcat(fl{:, f});
-            out.factorLevelNames{i} = unique(l(:), 'stable'); 
+            % concatenate level names and keep only unique in the same
+            % order as they were added in
+            ln = vertcat(fln{f(i), :});
+            ln = unique(ln(:), 'stable'); 
+            
+            % get unique level values in the same order they were added in
+            lv = unique(out.valuesAll(:, f(i)), 'stable');
+            
+            % sort level values and resort names accordingly
+            [~, ind] = sort(lv);
+            out.factorLevelNames{f(i)} = ln(ind);
          end         
       end
       
@@ -1418,7 +1452,13 @@ classdef mdadata < handle & matlab.mixin.Copyable
       end
       
       function out = eq(obj, val)
-         out = eq(obj.values, val);
+         if obj.nCols == 1 && isfactor(obj, 1) && ischar(val)
+            vals = unique(obj.values);
+            val = find(ismember(obj.factorLevelNames{1}, val), 1);
+            out = eq(obj.values, vals(val));
+         else   
+            out = eq(obj.values, val);
+         end   
       end
       
       function out = ne(obj, val)
@@ -2608,8 +2648,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          dataFactorCols = find(obj.factorCols(col_ind));
                   
          for i = 1:numel(dataFactorCols)
-            objLevels = unique(values(:, objFactorCols(i)), 'stable');
-            dataLevels = unique(svalues(:, dataFactorCols(i)), 'stable');
+            objLevels = unique(values(:, objFactorCols(i)));
+            dataLevels = unique(svalues(:, dataFactorCols(i)));
+            
             levels = obj.factorLevelNames{objFactorCols(i)}(ismember(objLevels, dataLevels));
             
             data.factorCols(dataFactorCols(i)) = true;            
@@ -2822,10 +2863,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
             end   
          end   
          
+         if ~ishold
+            cla;
+         end
+                  
          % show plot - we use PLOT() instead of SCATTER() for speed      
          if isempty(cgroup) || numel(unique(cgroup)) == 1
             hp = plot(double(x), double(y), 'Color', mc, 'Marker', mr, 'MarkerFaceColor', mfc, ...
-               'MarkerEdgeColor', mec, 'MarkerSize', ms, 'LineStyle', 'none');      
+               'MarkerEdgeColor', mec, 'MarkerSize', ms, 'LineStyle', 'none');              
          else
             ind = fix((cgroup - min(cgroup)) / (max(cgroup) - min(cgroup)) * (size(cmap, 1) - 1)) + 1;                  
             hp = zeros(size(cmap, 1), 1);
@@ -2900,8 +2945,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          box on
 
          % correct axis limits
-         if strcmp(get(gca, 'NextPlot'), 'replace')
-            correctaxislim(5)
+         if ~ishold
+            axis tight
+            correctaxislim(10)
          end
                
          % show colorbar
@@ -3078,6 +3124,20 @@ classdef mdadata < handle & matlab.mixin.Copyable
             doReduce = true;
          end   
          
+         % set default marker size
+         mr = getarg(varargin, 'Marker');
+         if ~isempty(mr)
+            [ms, varargin] = getarg(varargin, 'MarkerSize');
+            if isempty(ms)
+               if strcmp(mr, '.')
+                  ms = 16;
+               else   
+                  ms = 8;
+               end
+               varargin = [varargin, 'MarkerSize', ms];
+            end   
+         end
+         
          % check if excluded variables will be shown
          [v, varargin] = getarg(varargin, 'ShowExcluded');         
          if ~isempty(v) 
@@ -3121,9 +3181,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
             x = 1:nCols;
             
             if showExcluded
-               xticklabel = obj.colNamesAllWithoutFactors;
+               xticklabel = obj.colFullNamesAllWithoutFactors;
             else   
-               xticklabel = obj.colNamesWithoutFactors;
+               xticklabel = obj.colFullNamesWithoutFactors;
             end   
          end
          
@@ -3157,6 +3217,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
             clear('v', 's', 'ind');
          end   
          
+         if ~ishold
+            cla;
+         end
          if isempty(cgroup)
             hold on
             for i = 1:size(serIncl, 1);
@@ -3373,7 +3436,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
             xtick = unique(round(linspace(1, numel(x), 12)));
          end
          
-         
+         if ~ishold
+            cla;
+         end
+
          y = values(1, :);     
          h = bar(double(x), double(y), 0.95, varargin{:}); 
             
@@ -3404,10 +3470,12 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          if ~strcmp(showLabels, 'none')
             if isempty(labels)
-                  labels = num2str(y', sigfig);
+               labels = cellstr(num2str(y', sigfig));
             end
             
-            mdadata.showlabels(x, y, labels, 'top');
+            indtop = y >= 0;
+            mdadata.showlabels(x(indtop), y(indtop), labels(indtop), 'top');
+            mdadata.showlabels(x(~indtop), y(~indtop), labels(~indtop), 'bottom');
             
             if strcmp(get(gca, 'NextPlot'), 'replace')
                correctaxislim([3 3 0 10], xlim);
@@ -3452,6 +3520,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   colorbar
       %
       
+         if ~ishold
+            cla;
+         end
       
          h = imagesc(obj.numValues);
          set(gca, 'XTick', 1:obj.nNumCols, 'XTickLabel', obj.colNamesWithoutFactors);
@@ -3498,8 +3569,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   matrixplot(people(1:8, {'Height', 'Weight', 'Beer', 'Wine'}))
       %
       %
-      
-      
+
+         if ~ishold
+            cla;
+         end
+            
          h = mesh(obj.numValues);
          set(gca, 'XTick', 1:obj.nNumCols, 'XTickLabel', obj.colNamesWithoutFactors);
          if ~isempty(obj.rowNames)
@@ -3582,6 +3656,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   gbar(data, 'FaceColor', 'rb', 'Labels', 'on', 'LegendLocation', 'best')
       %
       
+         if ~ishold
+            cla;
+         end
+         
          nGroups = obj.nRows;
          
          bw = getarg(varargin, 'BarWidth');
@@ -3762,6 +3840,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %
       %
       
+         if ~ishold
+            cla;
+         end
+         
          % check if factors are provided
          if numel(varargin) > 0 
             if isa(varargin{1}, 'mdadata')
@@ -3783,7 +3865,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          if isempty(groups)
             groups = mdadata(eye(nGroups), obj.rowNames, obj.rowNames);
          end
-         
+                  
          % check if excluded variables will be shown
          [v, varargin] = getarg(varargin, 'ShowExcluded');
          
@@ -3913,7 +3995,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             ms = repmat(15, nGroups, 1);
          else
             if numel(ms) == 1
-               ms = repmat(15, nGroups, 1);
+               ms = repmat(ms, nGroups, 1);
             elseif numel(ms) ~= nGroups
                error('Argument "MarkerSize" should have one value or values for each groups!');
             end   
@@ -3923,7 +4005,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          if numel(x) < 12
             xtick = x;
          else
-            xtick = unique(round(linspace(1, numel(x), 12)));
+            tickind = unique(round(linspace(1, numel(x), 12)));
+            xtick = x(tickind);
+            xticklabel = xticklabel(tickind);
          end
          
          hold on
@@ -3932,22 +4016,25 @@ classdef mdadata < handle & matlab.mixin.Copyable
          for iGroup = 1:nGroups
             indR = groups.values(:, iGroup) == 1;
             hk = [];
-            for i = 1:size(serIncl, 1);
-               indC = indIncl(serIncl(i, 1):serIncl(i, 2));
-               if indC(1) > 1
-                  indC = [indC(1) - 1; indC];
-               end
-               if indC(end) < nCols
-                  indC = [indC; indC(end) + 1];
-               end   
-               hk = [hk; plot(x(indC), values(indR, indC)',...
-                  'Color', lc(iGroup, :), 'LineWidth', lw(iGroup), 'LineStyle', ls{iGroup},...
-                  'Marker', mr{iGroup}, 'MarkerSize', ms(iGroup, :))];               
-            end          
-            h{iGroup} = hk;
-            hl(iGroup) = hk(1);
+            if any(indR)
+               for i = 1:size(serIncl, 1);
+                  indC = indIncl(serIncl(i, 1):serIncl(i, 2));
+                  if indC(1) > 1
+                     indC = [indC(1) - 1; indC];
+                  end
+                  if indC(end) < nCols
+                     indC = [indC; indC(end) + 1];
+                  end   
+                  hk = [hk; plot(x(indC), values(indR, indC)',...
+                     'Color', lc(iGroup, :), 'LineWidth', lw(iGroup), 'LineStyle', ls{iGroup},...
+                     'Marker', mr{iGroup}, 'MarkerSize', ms(iGroup, :))];               
+               end          
+               h{iGroup} = hk;
+               hl(iGroup) = hk(1);
+            end   
          end
          hold off
+         indl = ~(hl == 0);         
          
          if showExcluded && any(obj.excludedCols)
             lc = obj.EXCLUDED_COLOR;
@@ -3969,7 +4056,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          box on
                   
          if showLegend
-            legend(hl, groups.colFullNames(), 'Location', lp, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
+            legend(hl(indl), groups.colFullNames(indl), 'Location', lp, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
          end
          
          if strcmp(get(gca, 'NextPlot'), 'replace')
@@ -3977,7 +4064,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
          
          if nargout > 0
-            varargout{1} = h;
+            varargout{1} = h(indl);
          end   
       end
       
@@ -4037,6 +4124,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   gscatter(people, people(:, 'Sex'), 'LegendLocation', 'best')
       %
       %
+         if ~ishold
+            cla;
+         end
       
          % check if factors are provided
          if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
@@ -4196,6 +4286,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   hist(people(:, 'Height'), people(:, 'Sex'), 'ShowNormal', 'on');
       %
       %
+
+         if ~ishold
+            cla;
+         end
       
          % check arguments for groups and nbins
          if nargin == 1
@@ -4508,7 +4602,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   figure
       %   errorbar(people(:, {'Height', 'Weight'}), people(:, 'Sex'))
       %
-     
+         
+         if ~ishold
+            cla;
+         end
+
          % check if factors are provided and generate groups
          if nargin > 1 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
@@ -4698,6 +4796,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   figure
       %   boxplot(people(:, {'Height', 'Weight'}), people(:, 'Sex'), 'Labels', 'on')
       %
+
+         if ~ishold
+            cla;
+         end
             
          values = obj.numValues;
          
@@ -4914,6 +5016,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   qqplot(people(:, 'IQ'), people(:, 'Sex'))
       %
       %
+
+         if ~ishold
+            cla;
+         end
       
          % check arguments for groups and nbins
          if nargin > 1 && isa(varargin{1}, 'mdadata') 
@@ -5146,7 +5252,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
                colNames{i} = ['* ' colNames{i} ];
                
                % get factor values as indices
-               [~, ~, v] = unique(values(:, i), 'stable');
+               [~, ~, v] = unique(values(:, i));
                
                % calculate maximal width for the field
                factors = obj.getfactorlevels(i);
@@ -5221,14 +5327,17 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          [val, ind] = sortrows(obj.values, columns);
          
-         try
+%         try
             row_ind = ~ind2bool(obj.excludedRows, obj.nRowsAll);
             col_ind = ~ind2bool(obj.excludedCols, obj.nColsAll);
             obj.valuesAll(row_ind, col_ind) = val;
-            obj.rowNames(row_ind) = obj.rowNames(ind);
-         catch
-            error('Error during sorting the dataset rows!');
-         end   
+            if ~isempty(obj.rowNames)
+               obj.rowNames(row_ind) = obj.rowNames(ind);
+               obj.rowFullNames(row_ind) = obj.rowFullNames(ind);
+            end   
+%         catch
+%            error('Error during sorting the dataset rows!');
+%         end   
          
          if nargout > 0
             varargout{1} = 1;

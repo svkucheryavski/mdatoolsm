@@ -29,9 +29,9 @@ disp('Dim names are:')
 disp(d.dimNames)
 
 %%
-% Function |show()|�shows dataset values as a table with column and row
-% names. As one can see column names were generated as |'V1'|, |'V2'| and
-% so on and row names are their order numbers. Default dimnames values are 
+% Function |show()| shows dataset values as a table with column and row
+% names. As one can see column names were generated as |'1'|, |'2'| and
+% so on and row names remain empty. Default dimnames values are 
 % |'Objects'| and |'Variables'| and dataset name remains empty. The row
 % names and column names must be unique!
 %

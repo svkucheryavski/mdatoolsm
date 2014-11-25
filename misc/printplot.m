@@ -16,10 +16,10 @@ function printplot(cf, figname, figsize, type, res)
    
    if strcmp(type, 'eps')
       set(cf, 'renderer', 'painters')
-      show(cf, '-depsc', figname);
+      print(cf, '-depsc', figname);
    elseif strcmp(type, 'png')
-      show(cf, '-dpng', res, figname);
+      print(cf, '-dpng', res, figname);
    elseif strcmp(type, 'tiff')
-      show(cf, '-dtiff', res, figname);
+      print(cf, '-dtiff', res, figname);
    end   
 end

@@ -64,5 +64,5 @@ function m = simpls(X, y, nComp, cv)
    m.coeffs = B;
    m.weights = W;
    m.xloadings = P;
-   m.yloadings = Q;
+   m.yloadings = Q;   
 end

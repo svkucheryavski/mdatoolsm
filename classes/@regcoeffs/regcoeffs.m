@@ -1,20 +1,78 @@
 classdef regcoeffs < handle
+% 'regcoeffs' is a class for storing and manipulation of regression coefficients. 
+%
+% The object is a universal way to deal with regression coefficients for any linear 
+% regression model (e.g. PLS1, PLS2, MLR, etc). Any model has an object 'regcoeffs',
+% which is the object of this class and all properties and methods described below can 
+% be used with this object. 
+%
+%
+% Properties:
+% -----------
+%  values - regression coefficient values for given response and number of
+%  components.
+%
+%  pvalues - p-values for t-test if regression coefficient is equal to
+%  zero. Available only if cross-validation is used when building a model.
+%
+%  ci - confidence intervals for regression coefficients. Available only 
+%  if cross-validation is used when building a model.
+%
+%
+% Methods:
+% --------
+%  plot - makes like or bar plot for regression coefficients
+%  summary - shows regression coefficient values with statistics
+%
+%
+% Examples:
+% ---------
+%
+%   % make PLS model to predict Height for People data
+%   load people
+%   X = people(:, 2:12);
+%   y = people(:, 1);
+%   m = mdapls(X, y, 2, 'Scale', 'on', 'CV', {'full'});
+%
+%   % show values and statistics with default settings
+%   show(m.regcoeffs.values);
+%   show(m.regcoeffs.pvalues);
+%   show(m.regcoeffs.ci);
+%
+%   % show the same but for model with one component
+%   show(m.regcoeffs.values, 1);
+%   show(m.regcoeffs.pvalues, 1);
+%   show(m.regcoeffs.ci, 1);
+%   
+%   % if several responses available, one shall specify response 
+%   % by its name or number
+%   show(m.regcoeffs.values, 1, 1);
+%   show(m.regcoeffs.pvalues, 'Height', 1);
+%   show(m.regcoeffs.ci, 'Height', 1);
+%
+%   % summary works similar way
+%   summary(m.regcoeffs);
+%   summary(m.regcoeffs, 1);
+%   summary(m.regcoeffs, 'Height', 1);
+%
+%   % regcoeffs plot
+%   plot(m.regcoeffs);
+%   plot(m.regcoeffs, 1);
+%   plot(m.regcoeffs, 1, 'Type', 'bar');
+%
+%
 
    properties (SetAccess = 'protected', Hidden = true)
       values_
       pvalues_
       ci_
    end
-   
-   properties (Dependent = true)
-      pvalues
-      ci
-   end
-   
+      
    properties (Dependent = true, Hidden = true)
       nResp
       nPred
       nComp
+      respNames
    end
       
 	methods
@@ -23,8 +81,8 @@ classdef regcoeffs < handle
          obj.values_ = values;
       end
       
-      function out = get.pvalues(obj)
-         out = obj.values_.values;
+      function out = get.respNames(obj)
+         out = obj.values_.wayNames{2};
       end
       
       function out = get.nPred(obj)
@@ -46,67 +104,90 @@ classdef regcoeffs < handle
          out = obj.values_(varargin{:}).values;
       end
       
+      function out = ci(obj, varargin)
+         if isempty(varargin)
+            varargin = {':', obj.nComp};
+         end
+         
+         out1 = obj.ci_{1}(varargin{:}).values;
+         fnames = out1.colFullNames;
+         out1.colNames = strcat(out1.colNames, 'lo');
+         out1.colFullNames = strcat(fnames, ' (lo)');
+         
+         out2 = obj.ci_{2}(varargin{:}).values;
+         fnames = out2.colFullNames;
+         out2.colNames = strcat(out2.colNames, 'up');
+         out2.colFullNames = strcat(fnames, ' (up)');
+         
+         out = [out1 out2];
+         out.name = 'Confidence intervals';
+      end
+      
+      function out = pvalues(obj, varargin)
+         if isempty(varargin)
+            varargin = {':', obj.nComp};
+         end   
+         varargin
+         out = obj.pvalues_(varargin{:}).values;
+      end
+      
       function out = valuesAll(obj, varargin)
          out = obj.values_(varargin{:}).values_;
       end
       
       function computejkstat(obj, values, alpha)
-         [nPred, nComp, nResp, nRep] = size(values);
+         nRep = size(values, 4);
 
          t = mdatinv(1 - alpha/2, nRep - 1);
 
-         ciLo = zeros(nPred, nComp, nResp);
-         ciUp = zeros(nPred, nComp, nResp);
-         pvalues = zeros(nPred, nComp, nResp);
-      
-         for iResp = 1:nResp
-            for iComp = 1:nComp
-               v = values(:, iComp, iResp, :);
-               m = mean(v);
-               ssq = sum(bsxfun(@minus, v, m).^2);
-               se = sqrt((nRep - 1)/nRep * ssq);
-               
-               ciLo(:, iResp, iComp) = [m - t * se, m + t * se];
-               ciUp(:, iResp, iComp) = [m - t * se, m + t * se];
-               tvals = m/se;
-               tmin = min([tvals, -tvals]);
-               pvalues(:, iComp, iResp) = 2 * pt(tmin, nobj - 1);
-            end
-         end
+         m = mean(values, 4);
+         ssq = sum(bsxfun(@minus, values, m).^2, 4);
+         se = sqrt((nRep - 1)/nRep * ssq);
          
-         pvalues = mdadata3(pvalues, obj.values.wayNames, obj.values.wayFullNames, obj.values.dimNames);
+         ciLo = m - t * se;
+         ciUp = m + t * se;
+
+         tvals = m./se;        
+         tmin = min(cat(4, tvals, -tvals), [], 4);
+         
+         pvalues = 2 * mdatcdf(tmin, nRep - 1);
+         
+         pvalues = mdadata3(pvalues, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
          pvalues.name = 'P-values for regression coefficients';
-         obj.pvalues = pvalues;
-         
-         ciLo = mdadata3(ciLo, obj.values.wayNames, obj.values.wayFullNames, obj.values.dimNames);
+         obj.pvalues_ = pvalues;
+                  
+         ciLo = mdadata3(ciLo, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
          ciLo.name = 'Confidence intervals (lower) for regression coefficients';
-         ciUp = mdadata3(ciUp, obj.values.wayNames, obj.values.wayFullNames, obj.values.dimNames);
+         
+         ciUp = mdadata3(ciUp, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
          ciUp.name = 'Confidence intervals (upper) for regression coefficients';
-         obj.ci = {ciLo, ciUp};
+         obj.ci_ = {ciLo, ciUp};
       end
       
-      function summary(obj, resp, comp)
-         if nargin < 3
-            comp = obj.nComp;
-         end
-         
-         if nargin < 2
-            resp = 1;
-         end
-         
-         if numel(comp) > 1 || numel(resp) > 1
-            error('Specify response and number of components to show the coefficients for!')
-         end
+      function summary(obj, varargin)
+      % 'summary' shows summary statistics for regression coefficients.   
+      %
+      %   summary(m.regcoeffs);
+      %   summary(m.regcoeffs, ncomp);
+      %   summary(m.regcoeffs, resp, ncomp);
+      %
+      %
+      %  Here 'resp' is a number or name of response variable to show the
+      %  statistics for (if more than one is used) and 'ncomp' - number of
+      %  components.
+      %
+      
+         [resp, comp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.respNames, varargin{:});
          
          v = obj.values_(:, resp, comp).values; 
                   
          if ~isempty(obj.pvalues_)
-            p = obj.pvalues_(:, resp, comp).values;
-            cil = obj.ci_{1}(:, resp, comp).values;
-            ciu = obj.ci_{2}(:, resp, comp).values;
+            p = obj.pvalues(:, resp, comp);
+            ci = obj.ci(:, resp, comp);
          
-            out = [v p cil ciu];
+            out = [v ci p];
             out.name = 'Summary statistics for regression coefficients';
+            out.dimNames = {'', ''};
             show(out);
          else
             disp('Summary statistics is not available.')
@@ -114,19 +195,8 @@ classdef regcoeffs < handle
          
       end
       
-      function varargout = plot(obj, resp, comp, varargin)
-         
-         if nargin < 3
-            comp = obj.nComp;
-         end
-         
-         if nargin < 2
-            resp = 1;
-         end
-         
-         if numel(comp) > 1 && numel(resp) > 1
-            error('Specify response and number of components to show the coefficients for!')
-         end
+      function varargout = plot(obj, varargin)
+         [resp, comp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.respNames, varargin{:});
          
          [type, varargin] = getarg(varargin, 'Type');
          if isempty(type)
@@ -140,6 +210,8 @@ classdef regcoeffs < handle
          [mr, varargin] = getarg(varargin, 'Marker');
          if isempty(mr) && obj.nPred < 20
             mr = '.';
+         else
+            mr = 'none';
          end                  
          
          [showLines, varargin] = getarg(varargin, 'AxisLines');
@@ -150,21 +222,35 @@ classdef regcoeffs < handle
          end   
          
          [showCI, varargin] = getarg(varargin, 'CI');
-         if (~isempty(showLines) && strcmp(showLines, 'off')) || isempty(obj.ci_)
+         if isempty(showCI)
+            if obj.nPred < 20 && ~isempty(obj.ci_)
+               showCI = true;
+            else
+               showCI = false;
+            end
+         elseif strcmp(showCI, 'off')
             showCI = false;
          else
             showCI = true;
-         end   
+         end 
          
-         if ~showCI
-            if strcmp(type, 'line')
-               h = gplot(obj.values(:, resp, comp)', varargin{:}, 'Marker', mr);
-            elseif strcmp(type, 'bar')   
-               h = gbar(obj.values(:, resp, comp)', varargin{:});
-            else
-               error('Wrong plot type!');
-            end
+         values = obj.values(:, resp, comp)';
+         if strcmp(type, 'line')
+            h = plot(values, varargin{:}, 'Marker', mr);
+         elseif strcmp(type, 'bar')   
+            h = bar(values, varargin{:});
          else
+            error('Wrong plot type!');
+         end
+         
+         if showCI
+            hold on            
+            ci = obj.ci(:, resp, comp); 
+            v = values.values;
+            l = v - ci(:, 1).values';
+            u = ci(:, 2).values' - v;
+            errorbar(1:size(v, 2), v, l, u, '.', 'Color', mdalight(mdadata.getmycolors(1)))
+            hold off
          end
          
          if numel(comp) == 1 && comp ~= obj.nComp

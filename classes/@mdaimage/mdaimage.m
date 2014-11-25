@@ -24,6 +24,7 @@ classdef mdaimage < mdadata
 %  'height' - height of image in pixels
 %  'image' - an array with pixel values for all channels
 %
+%
 % Examples:
 % ---------
 %

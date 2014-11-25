@@ -119,15 +119,10 @@ function m = test_plsda(type, casen)
          m = mdaplsda(Xc, cc, cname, ncomp, 'TestSet', {Xt, ct}, 'CV', {'rand', 8, 4}, 'Prep', {p, prep()}, 'Scale', scale);
          m.info = info;
          plotclassification(m, 'Labels', 'names', 'ShowExcluded', 'on');
-         summary(m);
-         summary(m.calres);
-         summary(m.cvres);
-         summary(m.testres);
-         
-%         showPlotsForModel(m, cname);
-%         showPlotsForResult(m.calres);
-%         showPlotsForResult(m.cvres, cname, 'CV');
-%         showPlotsForResult(m.testres);
+         showPlotsForModel(m, cname);
+         showPlotsForResult(m.calres, cname, 'Cal');
+         showPlotsForResult(m.cvres, cname, 'CV');
+         showPlotsForResult(m.testres, cname, 'Test');
    end
 end
 

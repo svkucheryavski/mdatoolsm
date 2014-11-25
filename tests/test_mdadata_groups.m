@@ -154,3 +154,4 @@ show(ch)
 res = crossresid(data);
 show(res)
 
+%% 

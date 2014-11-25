@@ -37,26 +37,8 @@ function varargout = parseind(ind, n, names, colnames, values)
       
       if (ischar(ind))
       % indices are provided as a string   
-         
-         if isempty(names)
-         % text indices provided but names are not available
-            error('Names are not available!')
-         end
-         
-         if ~isempty(strfind(ind, ':'))
-         % sequence of names, e.g. 'A1:A10'
-            s = strsplit(ind, ':');
-            if numel(s) ~= 2
-               error(errmsg)
-            end
-            ind1 = find(ismember(names, s{1})); 
-            ind2 = find(ismember(names, s{2})); 
-            if isempty(ind1) || isempty(ind2) 
-               error(errmsg)
-            end               
-            ind = ind1:ind2;
-            
-         elseif ~isempty(regexp(ind, '[<>=~&|]', 'ONCE'))
+                  
+         if ~isempty(regexp(ind, '[<>=~&|]', 'ONCE'))
          % logical expression
          
             if isempty(colnames) 
@@ -75,9 +57,29 @@ function varargout = parseind(ind, n, names, colnames, values)
             % evaluate the logical expression
             ind = eval(a);
          else
-         % name of a column or of an a row
-            ind = find(ismember(names, ind));
-         end   
+            if isempty(names)
+            % text indices provided but names are not available
+               error('Names are not available!')
+            end
+            
+            if ~isempty(strfind(ind, ':'))
+            % sequence of names, e.g. 'A1:A10'
+               s = strsplit(ind, ':');
+               if numel(s) ~= 2
+                  error(errmsg)
+               end
+               ind1 = find(ismember(names, s{1})); 
+               ind2 = find(ismember(names, s{2})); 
+               if isempty(ind1) || isempty(ind2) 
+                  error(errmsg)
+               end               
+               ind = ind1:ind2;
+
+            else
+            % name of a column or of an a row
+               ind = find(ismember(names, ind));
+            end   
+         end    
       elseif iscell(ind)   
       % one or several names in a cell array
          

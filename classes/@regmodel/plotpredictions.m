@@ -19,6 +19,9 @@ function plotpredictions(obj, varargin)
    
    hold off
    box on
+   axis tight
+   correctaxislim(5);
+   
    if numel(legendStr) > 1
       mdadata.legend(h, legendStr)
    end   

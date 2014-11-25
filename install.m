@@ -21,7 +21,7 @@ function install()
       end   
       addpath(path);
       savepath;
-      builddocsearchdb([path '/html']);
+      %builddocsearchdb([path '/html']);
    catch e
       error('Error occured during the installation of "mdatools":\n%s', e.message);
    end

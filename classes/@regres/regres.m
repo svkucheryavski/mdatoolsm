@@ -184,6 +184,7 @@ classdef regres < res
       
          nresp = 1;
          ncomp = nComp;
+         
          if numel(varargin) == 1
             if iscell(varargin{1}) || ischar(varargin{1})
                % response name is specified

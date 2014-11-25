@@ -6,12 +6,13 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>mdaimage</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-03"><meta name="DC.source" content="mdaimage.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdaimage</h1><!--introduction--><p><tt>mdaimage</tt> is an extenstion of <tt>mdadata</tt> class for working with images.</p><!--/introduction--><pre class="codeinput">   img = mdaimge(im);
+      --><title>mdaimage</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="mdaimage.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdaimage</h1><!--introduction--><p><tt>mdaimage</tt> is an extenstion of <tt>mdadata</tt> class for working with images.</p><!--/introduction--><pre class="codeinput">   img = mdaimge(im);
    img = mdaimage(im, channelNames);
    img = mdaimage(im, channelNames, dimNames, name);
 </pre><p>The <tt>mdaimage</tt> class extends possibilities given by <tt>mdadata</tt> allowing to manipulate with datasets as images. It inherits all methods and properties of the <tt>mdadata</tt>.</p><p>There are several differences in how to work with image objects. First of all, it has no row names (number of rows corresponds to number of pixels and is too large for handling the names). Besides that, when subset the <tt>mdaimage</tt> object, one must use three indices (rows, columns and channels) instead of two. If only two indices are used, the subset will be <tt>mdadata</tt> object.</p><h2>Properties (additional)<a name="3"></a></h2><p><table class="properties-list">
 <tr><td class="name">width</td><td class="text">width of image in pixels</td></tr>
 <tr><td class="name">height</td><td class="text">height of image in pixels</td></tr>
+<tr><td class="name">image</td><td class="text">an array with pixel values for all channels</td></tr>
 </table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   im = imread(<span class="string">'test.jpg'</span>);
    img = mdaimage(im, {<span class="string">'Red'</span>, <span class="string">'Green'</span>, <span class="string">'Blue'</span>});
 
@@ -56,6 +57,7 @@ To make changes, update the MATLAB code and republish this document.
 % <html><table class="properties-list">
 % <tr><td class="name">width</td><td class="text">width of image in pixels</td></tr>
 % <tr><td class="name">height</td><td class="text">height of image in pixels</td></tr>
+% <tr><td class="name">image</td><td class="text">an array with pixel values for all channels</td></tr>
 % </table></html>
 %
 %

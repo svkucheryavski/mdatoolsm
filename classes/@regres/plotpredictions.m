@@ -32,7 +32,7 @@ function varargout = plotpredictions(obj, varargin)
 
    if showLine && ~isempty(obj.stat)
       b = polyfit(plotData.values(:, 1), plotData.values(:, 2), 1);
-      x = xlim();
+      x = [min(plotData.values(:, 1)) max(plotData.values(:, 1))];
       y = b(2) + b(1) * x;
 
       if numel(h.plot) == 1
@@ -45,6 +45,8 @@ function varargout = plotpredictions(obj, varargin)
    end
    
    if ~ishold
+      axis tight
+      correctaxislim(5);
       box on
       title('Predictions');
    end

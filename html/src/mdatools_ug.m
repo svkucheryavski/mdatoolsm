@@ -2,7 +2,7 @@
 %
 % This tutorial explains how "mdatools" works with a lot of 
 % examples. It is recommended to start learning the toolbox from 
-% <mdatools_ug_quick.html Quck start> guide, as it explains 
+% <mdatools_quick.html Quck start> guide, as it explains 
 % the basic features in a simple way, and the proceed with
 % more detailed description.
 %

@@ -76,11 +76,14 @@ classdef mdamlr < regmodel
          end   
       end
       
-      function cvres = crossval(obj, oX, oy, varargin)
+      function res = crossval(obj, oX, oy, varargin)
       % 'crossval' cross-validation of MLR model
       
          X = copy(oX);
          y = copy(oy);
+         
+         nResp = 1;
+         nComp = 1;
 
          % remove excluded rows from datast
          excludedRows = find(X.excludedRows);
@@ -97,6 +100,7 @@ classdef mdamlr < regmodel
          [nSeg, seglen, nRep] = size(idx);
       
          ycv = zeros(nObj, 1, 1);  
+         jkcoeffs = zeros(X.nNumCols, nResp, nComp, nSeg);
          
          % loop over repetitions and segments
          for iRep = 1:nRep
@@ -109,28 +113,32 @@ classdef mdamlr < regmodel
                   vind = false(nObj, 1);
                   vind(ind) = true;   
             
-                  Xcal = X(~vind, :);
-                  ycal = y(~vind, :);
-                  Xval = X(vind, :);
-                  yval = y(vind, :);
+                  Xcal = X(~vind, :).numValues;
+                  ycal = y(~vind, :).numValues;
+                  Xval = X(vind, :).numValues;
+                  yval = y(vind, :).numValues;
                   
                   prep = {copy(obj.prep{1}) copy(obj.prep{1})};
-                  m = mdamlr(Xcal, ycal, 'Prep', prep, 'Scale', 'off', 'Center', 'off');
-                  res = m.predict(Xval, yval, true);
+                  m = mdamlr.cvfit(Xcal, ycal, prep);
+                  res = mdamlr.cvpred(Xval, yval, m);
                   
-                  ycv(vind, :, :) = ycv(vind, :, :) + res;
+                  jkcoeffs(:, :, :, iSeg) = jkcoeffs(:, :, :, iSeg) + m.coeffs;
+                  ycv(vind, :, :) = ycv(vind, :, :) + res.ycv;
                end
             end
          end
          
-         ycv = ycv ./ nRep;
+         ycv = ycv / nRep;
+         jkcoeffs = jkcoeffs / nRep;
          
          wayNames = {X.rowNames, y.colNames, {'x'}};
          wayFullNames = {X.rowFullNames, y.colFullNames, {'x'}};
          dimNames = {X.dimNames{1}, 'Responses', ''};
          name = 'Predicted values';
          ycv = mdadata3(ycv, wayNames, wayFullNames, dimNames, name);
-         cvres = mlrres(ycv, y);
+
+         res.res = mlrres(ycv, y);
+         res.jkcoeffs = jkcoeffs;
       end
       
       function plot(obj)
@@ -140,4 +148,9 @@ classdef mdamlr < regmodel
          plotregcoeffs(obj);
       end   
    end
+   
+   methods (Static = true)
+      m = cvfit(X, y, prep);
+      res = cvpred(X, y, m);
+   end   
 end   

@@ -6,11 +6,14 @@ classdef mdapls < regmodel
       xloadings
       yloadings
       weights
+      vipscores
+      selratio
    end
    
    methods
       function obj = mdapls(X, y, ncomp, varargin)
          obj = obj@regmodel(X, y, ncomp, varargin{:});
+         obj.setVIPScores();         
       end   
       
       function fit(obj, oX, oy)
@@ -80,10 +83,11 @@ classdef mdapls < regmodel
          yl.rowFullNames = respFullNames;
          yl.colFullNames = compFullNames;
          obj.yloadings = yl;
-         
+
+         obj.setSelratio(X);
       end
       
-      function res = predict(obj, oX, oyref, cv, makeres)
+      function res = predict(obj, oX, oyref, makeres)
          
          if nargin < 5
             makeres = true;
@@ -131,51 +135,42 @@ classdef mdapls < regmodel
             yscores = yrefc.valuesAll * obj.yloadings.valuesAll;
          end
             
-         if cv 
-         % just return the predicted values   
-            res.ycv = ypred;
-            res.y = yrefc;
-            res.X = X;
-            res.xscores = xscores;
-         else   
-            
-            % set up 3-way dataset for predictions (nPred x nResp x nComp)
-            % we use empty name for components here         
-            wayNames = {X.rowNamesAll, yref.colNames, obj.weights.colNames};
-            wayFullNames = {X.rowFullNamesAll, yref.colFullNamesAll, obj.weights.colFullNames};
-            dimNames = {X.dimNames{1}, 'Responses', 'Components'};
-            name = 'Predicted values';
-            ypred = mdadata3(ypred, wayNames, wayFullNames, dimNames, name);
-            ypred.excluderows(X.excludedRows);
-            
-            xdecomp = ldecomp(xscores, obj.xloadings, X);
+         % set up 3-way dataset for predictions (nPred x nResp x nComp)
+         % we use empty name for components here         
+         wayNames = {X.rowNamesAll, yref.colNames, obj.weights.colNames};
+         wayFullNames = {X.rowFullNamesAll, yref.colFullNamesAll, obj.weights.colFullNames};
+         dimNames = {X.dimNames{1}, 'Responses', 'Components'};
+         name = 'Predicted values';
+         ypred = mdadata3(ypred, wayNames, wayFullNames, dimNames, name);
+         ypred.excluderows(X.excludedRows);
 
-            if ~isempty(yref)
-               [yT2, yQ2, ~, ytnorm] = ldecomp.getDistances(xscores, obj.yloadings, yrefc);
-               % mdadata for Y scores
-               yscores = mdadata(yscores, X.rowNamesAll, obj.weights.colFullNames);
-               yscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
-               yscores.name = 'Y scores';
-               yscores.excluderows(X.excludedRows);
-            
-               ydecomp = ldecomp(yscores, obj.yloadings, yrefc, ytnorm, sum(yrefc.values(:).^2), yQ2, yT2);
-            else
-               ydecomp = [];
-            end   
-            
-            if makeres
-               res = plsres(xdecomp, ydecomp, ypred, yref);
-            else
-               res.xdecomp = xdecomp;
-               res.ydecomp = ydecomp;
-               res.ypred = ypred;
-               res.yref = yref;
-            end   
+         xdecomp = ldecomp(xscores, obj.xloadings, X);
+
+         if ~isempty(yref)
+            [yT2, yQ2, ~, ytnorm] = ldecomp.getDistances(xscores, obj.yloadings, yrefc);
+            % mdadata for Y scores
+            yscores = mdadata(yscores, X.rowNamesAll, obj.weights.colFullNames);
+            yscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
+            yscores.name = 'Y scores';
+            yscores.excluderows(X.excludedRows);
+
+            ydecomp = ldecomp(yscores, obj.yloadings, yrefc, ytnorm, sum(yrefc.values(:).^2), yQ2, yT2);
+         else
+            ydecomp = [];
+         end   
+
+         if makeres
+            res = plsres(xdecomp, ydecomp, ypred, yref);
+         else
+            res.xdecomp = xdecomp;
+            res.ydecomp = ydecomp;
+            res.ypred = ypred;
+            res.yref = yref;
          end   
       end
       
-      function cvres = crossval(obj, oX, oy, varargin)
-      % 'crossval' cross-validation of MLR model
+      function res = crossval(obj, oX, oy, varargin)
+      % 'crossval' cross-validation of PLS model
       
          X = copy(oX);
          y = copy(oy);
@@ -201,6 +196,7 @@ classdef mdapls < regmodel
          xT2 = zeros(nObj, nComp);  
          yQ2 = zeros(nObj, nComp);  
          yT2 = zeros(nObj, nComp);  
+         jkcoeffs = zeros(X.nNumCols, nResp, nComp, nSeg);
          
          % loop over repetitions and segments
          for iRep = 1:nRep
@@ -213,31 +209,31 @@ classdef mdapls < regmodel
                   vind = false(nObj, 1);
                   vind(ind) = true;   
             
-                  Xcal = X(~vind, :);
-                  ycal = y(~vind, :);
-                  Xval = X(vind, :);
-                  yval = y(vind, :);
+                  Xcal = X(~vind, :).numValues;
+                  ycal = y(~vind, :).numValues;
+                  Xval = X(vind, :).numValues;
+                  yval = y(vind, :).numValues;
 
                   prep = {copy(obj.prep{1}) copy(obj.prep{2})};
-                  m = mdapls(Xcal, ycal, nComp, 'Prep', prep, 'Scale', 'off', 'Center', 'off');
-                  res = m.predict(Xval, yval, true);
                   
-                  tnormX = m.calres.xdecomp.tnorm;
-                  tnormY = m.calres.ydecomp.tnorm;
+                  m = mdapls.cvfit(Xcal, ycal, nComp, prep);
+                  res = mdapls.cvpred(Xval, yval, m);
+                  
+                  [T2x, Q2x, ~, ~] = ldecomp.getDistances(mdadata(res.xscores), mdadata(m.xloadings), mdadata(res.X), mdadata(m.xtnorm));
+                  xQ2(vind, :) = xQ2(vind, :) + Q2x.valuesAll;
+                  xT2(vind, :) = xT2(vind, :) + T2x.valuesAll;
 
-                  [T2, Q2, ~, ~] = ldecomp.getDistances(res.xscores, m.xloadings, res.X, tnormX);
-                  xQ2(vind, :) = xQ2(vind, :) + Q2.valuesAll;
-                  xT2(vind, :) = xT2(vind, :) + T2.valuesAll;
-
-                  [T2, Q2, ~, ~] = ldecomp.getDistances(res.xscores, m.yloadings, res.y, tnormY);
-                  yQ2(vind, :) = yQ2(vind, :) + Q2.valuesAll;
-                  yT2(vind, :) = yT2(vind, :) + T2.valuesAll;
-            
+                  [T2y, Q2y, ~, ~] = ldecomp.getDistances(mdadata(res.xscores), mdadata(m.yloadings), mdadata(res.y), mdadata(m.ytnorm));
+                  yQ2(vind, :) = yQ2(vind, :) + Q2y.valuesAll;
+                  yT2(vind, :) = yT2(vind, :) + T2y.valuesAll;
+                  
+                  jkcoeffs(:, :, :, iSeg) = jkcoeffs(:, :, :, iSeg) + m.coeffs;
                   ycv(vind, :, :) = ycv(vind, :, :) + res.ycv;
                end
             end
          end
          
+         jkcoeffs = jkcoeffs ./ nRep;
          ycv = ycv ./ nRep;
          yQ2 = yQ2 ./ nRep;
          yT2 = yT2 ./ nRep;
@@ -269,9 +265,77 @@ classdef mdapls < regmodel
          yQ2 = mdadata(yQ2, yT2.rowNames, yT2.colNames, yT2.dimNames, 'Q2 residuals');
          yQ2.rowFullNames = yT2.rowFullNamesAll;
          yQ2.colFullNames = yT2.colFullNamesAll;
-         ydecomp = ldecomp([], [], [], obj.calres.xdecomp.tnorm, obj.calres.xdecomp.totvar, xQ2, xT2, []);
+         ydecomp = ldecomp([], [], [], obj.calres.ydecomp.tnorm, obj.calres.ydecomp.totvar, yQ2, yT2, []);
 
-         cvres = plsres(xdecomp, ydecomp, ycv, y);
+         res.res = plsres(xdecomp, ydecomp, ycv, y);
+         res.jkcoeffs = jkcoeffs;
+      end
+      
+      function setVIPScores(obj)
+         nPred = obj.regcoeffs.nPred;
+         nResp = obj.regcoeffs.nResp;
+         nComp = obj.nComp;
+
+         vipscores = zeros(nPred, nResp);
+
+         w = obj.weights(:, 1:nComp).values;
+         xloads = obj.xloadings(:, 1:nComp).values;
+         xscores = obj.calres.xdecomp.scores(:, 1:nComp).values;
+
+         % regression coefficients for working with scores instead of x
+         % T = X * WPW 
+         % T * WPW' = X * WPW * WPW'
+         % T * WPW' * (WPW * WPW')^-1 = X
+         % YP = X * b 
+         % YP = T * WPW' * (WPW * WPW')^-1 * b
+         % YP = T * bT, where bT = WPW' * (WPW * WPW)^-1 * b
+         wpw = w * pinv(xloads' * w);
+         
+         % normalise weights
+         n = 1./sqrt(sum(w.^2));
+         if nComp > 1
+            n = diag(n);                     
+         end   
+         wnorm = w * n;
+   
+         for iResp = 1:nResp
+            b = obj.regcoeffs.values(:, iResp, nComp).values;
+            bscores = (wpw' * pinv(wpw * wpw')) * b;         
+            ss = (bscores.^2) .* sum(xscores.^2)';
+            vipscores(:, iResp) = nResp * wnorm.^2 * ss / sum(ss);
+         end
+         
+         vipscores = mdadata(vipscores, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
+         vipscores.dimNames = {obj.regcoeffs.values_.dimNames{1}, obj.regcoeffs.values_.dimNames{2}};
+         vipscores.name = 'VIP scores';
+         obj.vipscores = vipscores;
+      end
+      
+      function setSelratio(obj, X)
+         nPred = obj.regcoeffs.nPred;
+         nResp = obj.regcoeffs.nResp;
+         nComp = obj.nComp;
+         X = X.numValues;
+         selratio = zeros(nPred, nResp);
+         
+         for iResp = 1:nResp
+            b = obj.regcoeffs.values(:, iResp, nComp).values;
+            bnorm = sqrt(sum(b.^2));
+            w = b/bnorm;
+            
+            ttp = X * w;
+            ptp = (ttp' * X) / (ttp' * ttp);
+   
+            expvar = ttp * ptp;
+            resvar = var(X - expvar);
+            expvar = var(expvar);
+            selratio(:, iResp) = expvar ./ resvar;
+         end
+         
+         selratio = mdadata(selratio, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
+         selratio.dimNames = {obj.regcoeffs.values_.dimNames{1}, obj.regcoeffs.values_.dimNames{2}};
+         selratio.name = 'Selectivity ratio';
+         obj.selratio = selratio;         
       end
       
       function plot(obj, varargin)
@@ -289,5 +353,7 @@ classdef mdapls < regmodel
    
    methods (Static = true)
       m = simpls(X, y, ncomp)
+      res = cvfit(X, y, ncomp, prep)
+      res = cvpred(X, y, m)
    end   
 end   

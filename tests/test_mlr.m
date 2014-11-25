@@ -130,7 +130,7 @@ function test_mlr(type, casen)
          Xt.excluderows(excludedRows(~cind));
          yt.excluderows(excludedRows(~cind));
 
-         m = mdamlr(Xc, yc, 'TestSet', {Xt, yt}, 'CV', {'rand', 8, 4}, 'Prep', {p, prep()}, 'Scale', scale);
+         m = mdamlr(Xc, yc, 'TestSet', {Xt, yt}, 'CV', {'rand', 16, 2}, 'Prep', {p, prep()}, 'Scale', scale);
          m.info = info;
 
          summary(m);

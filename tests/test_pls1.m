@@ -3,11 +3,11 @@ function m = test_pls1(type, casen)
    close all
 
    if nargin < 1
-      type = 'people';
+      type = 'spectra';
    end
    
    if nargin < 2
-      casen = 3;
+      casen = 5;
    end
    
    switch type
@@ -27,7 +27,7 @@ function m = test_pls1(type, casen)
          center = 'on';
          p = prep();
       case 'spectra'
-         ncomp = 4;
+         ncomp = 3;
          d = load('simdata');
          oX = d.spectra;
          oy = d.conc(:, 3);
@@ -133,17 +133,13 @@ function m = test_pls1(type, casen)
          Xt.excluderows(excludedRows(~cind));
          yt.excluderows(excludedRows(~cind));
 
-         m = mdapls(Xc, yc, ncomp, 'TestSet', {Xt, yt}, 'CV', {'rand', 8, 4}, 'Prep', {p, prep()}, 'Scale', scale);
+         m = mdapls(Xc, yc, ncomp, 'TestSet', {Xt, yt}, 'CV', {'full'}, 'Prep', {p, prep()}, 'Scale', scale);
          m.info = info;
 
-         summary(m);
-         summary(m.calres);
-         summary(m.cvres);
-         summary(m.testres);
          showPlotsForModel(m, 'mcg');
-%         showPlotsForResult(m.calres);
-%         showPlotsForResult(m.cvres);
-%         showPlotsForResult(m.testres);
+         showPlotsForResult(m.calres, 'calres');
+         showPlotsForResult(m.cvres, 'cvres');
+         showPlotsForResult(m.testres, 'testres');
    end
 end
 
@@ -155,11 +151,12 @@ function showPlotsForModel(m, col)
    summary(m)
    
    % overview plot
-   figure('Name', 'Model overview')
-   plot(m)
+   f = figure('Visible', 'off');
+   plot(m);
+   printplot(f, [mfilename('fullpath') '/plsmodel - overview.png'], [1024 768], 'png', '-r90');
 
    % prediction and regcoeffs plots
-   figure('Name', 'Model: predictions')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotpredictions(m);   
    subplot(2, 2, 2)
@@ -168,8 +165,9 @@ function showPlotsForModel(m, col)
    plotpredictions(m, 1, 1);   
    subplot(2, 2, 4)
    plotpredictions(m, 2, 'Labels', 'names', 'ShowExcluded', 'on');
-      
-   figure('Name', 'Model: regression coefficients')
+   printplot(f, [mfilename('fullpath') '/plsmodel - predictions.png'], [1024 768], 'png', '-r90');
+   
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotregcoeffs(m);
    subplot(2, 2, 2)
@@ -178,8 +176,9 @@ function showPlotsForModel(m, col)
    plotregcoeffs(m, 1, 2, 'Type', 'line');
    subplot(2, 2, 4)
    plotregcoeffs(m, 1, 'Type', 'bar', 'Labels', 'names', 'CI', 'off');
+   printplot(f, [mfilename('fullpath') '/plsmodel - regcoeffs.png'], [1024 768], 'png', '-r90');
 
-   figure('Name', 'Model: Y residuals')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotyresiduals(m);
    subplot(2, 2, 2)
@@ -188,9 +187,10 @@ function showPlotsForModel(m, col)
    plotyresiduals(m, 1, 2, 'Labels', 'names');
    subplot(2, 2, 2)
    plotyresiduals(m, 1, 'Labels', 'names', 'Color', col, 'ShowExcluded', 'on');
+   printplot(f, [mfilename('fullpath') '/plsmodel - yresiduals.png'], [1024 768], 'png', '-r90');
 
    % Scores
-   figure('Name', 'Model: scores')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotxscores(m);
    subplot(2, 2, 2)
@@ -199,9 +199,10 @@ function showPlotsForModel(m, col)
    plotxyscores(m);
    subplot(2, 2, 4)
    plotxyscores(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
+   printplot(f, [mfilename('fullpath') '/plsmodel - scores.png'], [1024 768], 'png', '-r90');
    
    % explained variance for X
-   figure('Name', 'Model: explained variance for X')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotxexpvar(m);
    subplot(2, 2, 2)
@@ -210,9 +211,10 @@ function showPlotsForModel(m, col)
    plotxcumexpvar(m);
    subplot(2, 2, 4)
    plotxcumexpvar(m, 'Type', 'bar');
+   printplot(f, [mfilename('fullpath') '/plsmodel - xexpvar.png'], [1024 768], 'png', '-r90');
 
    % explained variance for Y
-   figure('Name', 'Model: explained variance for Y')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotyexpvar(m);
    subplot(2, 2, 2)
@@ -221,9 +223,10 @@ function showPlotsForModel(m, col)
    plotycumexpvar(m);
    subplot(2, 2, 4)
    plotycumexpvar(m, 'Type', 'bar');
+   printplot(f, [mfilename('fullpath') '/plsmodel - yexpvar.png'], [1024 768], 'png', '-r90');
    
    % RMSE
-   figure('Name', 'Model: RMSE and X residuals')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotrmse(m);
    subplot(2, 2, 2)
@@ -232,18 +235,33 @@ function showPlotsForModel(m, col)
    plotxresiduals(m)
    subplot(2, 2, 4)
    plotxresiduals(m, 'Labels', 'names')
+   printplot(f, [mfilename('fullpath') '/plsmodel - rmse and xresid.png'], [1024 768], 'png', '-r90');
 
+   % Vipscores and selratio
+   f = figure('Visible', 'off');
+   subplot(2, 2, 1)
+   plotvipscores(m);
+   subplot(2, 2, 2)
+   plotvipscores(m, 1, 'Type', 'line');
+   subplot(2, 2, 3)
+   plotselratio(m);
+   subplot(2, 2, 4)
+   plotselratio(m, 1, 'Type', 'line');
+   printplot(f, [mfilename('fullpath') '/plsmodel - varsel.png'], [1024 768], 'png', '-r90');
+
+   delete(f);
 end
 
-function showPlotsForResult(res)
+function showPlotsForResult(res, name)
    summary(res)
       
    % plot overview
-   figure('Name', 'Result overview')
+   f = figure('Visible', 'off');
    plot(res)
+   printplot(f, [mfilename('fullpath') '/pls - ' name ' - overview'], [1024 768], 'png', '-r90');
       
    % prediction and regcoeffs plots
-   figure('Name', 'Result: predictions and residuals')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotpredictions(res);
    subplot(2, 2, 2)
@@ -252,9 +270,10 @@ function showPlotsForResult(res)
    plotyresiduals(res);
    subplot(2, 2, 4)
    plotyresiduals(res, 'Labels', 'names', 'ShowExcluded', 'on');
+   printplot(f, [mfilename('fullpath') '/pls - ' name ' - predictions and yresiduals'], [1024 768], 'png', '-r90');
 
    % Scores
-   figure('Name', 'Result: scores')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotxscores(res);
    subplot(2, 2, 2)
@@ -263,9 +282,10 @@ function showPlotsForResult(res)
    plotxyscores(res);
    subplot(2, 2, 4)
    plotxyscores(res, 2, 'Labels', 'names', 'Colorby', res.ypred(:, 1, 1), 'ShowExcluded', 'on');
+   printplot(f, [mfilename('fullpath') '/pls - ' name ' - scores'], [1024 768], 'png', '-r90');
    
    % explained variance for X
-   figure('Name', 'Result: explained variance for X')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotxexpvar(res);
    subplot(2, 2, 2)
@@ -274,9 +294,10 @@ function showPlotsForResult(res)
    plotxcumexpvar(res);
    subplot(2, 2, 4)
    plotxcumexpvar(res, 'Type', 'bar', 'Labels', 'values', 'FaceColor', 'r');
+   printplot(f, [mfilename('fullpath') '/pls - ' name ' - xexpvar'], [1024 768], 'png', '-r90');
 
    % explained variance for Y
-   figure('Name', 'Result: explained variance for Y')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotyexpvar(res);
    subplot(2, 2, 2)
@@ -285,9 +306,10 @@ function showPlotsForResult(res)
    plotycumexpvar(res);
    subplot(2, 2, 4)
    plotycumexpvar(res, 'Type', 'bar', 'Labels', 'values', 'FaceColor', 'r');
+   printplot(f, [mfilename('fullpath') '/pls - ' name ' - yexpvar'], [1024 768], 'png', '-r90');
    
    % RMSE
-   figure('Name', 'Result: RMSE and X residuals')
+   f = figure('Visible', 'off');
    subplot(2, 2, 1)
    plotrmse(res);
    subplot(2, 2, 2)
@@ -296,6 +318,8 @@ function showPlotsForResult(res)
    plotxresiduals(res)
    subplot(2, 2, 4)
    plotxresiduals(res, 'Labels', 'names', 'Color', 'r')
+   printplot(f, [mfilename('fullpath') '/pls - ' name ' - rmse and xresiduals'], [1024 768], 'png', '-r90');
    
+   delete(f);
 end
 

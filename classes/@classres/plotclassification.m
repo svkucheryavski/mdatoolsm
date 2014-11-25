@@ -11,7 +11,7 @@ function varargout = plotclassification(obj, varargin)
    cpred.includerows(excludedRows);
    
    if isempty(cpred.wayFullNames{1})
-      objNames = textgen('', 1:cpred.nObj);
+      objNames = textgen('', 1:size(cpred, 1));
    else   
       objNames = cpred.wayFullNames{1};
    end
@@ -20,15 +20,16 @@ function varargout = plotclassification(obj, varargin)
    
    x = (1:size(values, 1))';
    ind_none = true(size(x, 1), 1);
+   
+   plotData = [];
+   refData = [];
+   plotObjNames = {};
+   plotExcludedRows = [];
+   refData = [];
+   
    for i = classes
       ind = values(:, i) == 1;
-      if i == classes(1)
-         plotData = [x(ind), i * ones(sum(ind), 1)];
-         plotObjNames = objNames(ind);
-         refData = cref(ind, :);
-         per = excludedRows & ind;
-         plotExcludedRows = per(ind);
-      else
+      if any(ind)
          plotData = [plotData; [x(ind), i * ones(sum(ind), 1)]];
          plotObjNames = [plotObjNames; objNames(ind)];
          refData = [refData; cref(ind, :)];
@@ -50,8 +51,11 @@ function varargout = plotclassification(obj, varargin)
    plotData = mdadata(plotData);
    plotData.dimNames = {'Objects', 'Classes'};
    plotData.rowFullNamesAll = plotObjNames;
-   plotData.excluderows(plotExcludedRows);
-   refData.excluderows(plotExcludedRows);
+   
+   if any(plotExcludedRows)
+      plotData.excluderows(plotExcludedRows);
+      refData.excluderows(plotExcludedRows);
+   end
    
    h = gscatter(plotData, refData, varargin{:});
    

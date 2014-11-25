@@ -11,7 +11,7 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
       excludedRows      
    end
    
-	properties (Access = 'protected')
+	properties 
       name 
    end
    
@@ -126,7 +126,6 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          end   
          
          out = squeeze(values);
-         
          out = mdadata(out, obj.wayNamesAll{dimin(1)}, obj.wayNamesAll{dimin(2)});
          out.rowFullNames = obj.wayFullNamesAll{dimin(1)};
          out.colFullNames = obj.wayFullNamesAll{dimin(2)};        
