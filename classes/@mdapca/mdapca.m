@@ -103,7 +103,7 @@ classdef mdapca < handle
    
    properties (Access = 'private')
       MAX_NCOMP = 20;
-      METHODS = {'svd', 'nipals'};
+      METHODS = {'svd', 'nipals', 'ica'};
    end
       
    properties (SetAccess = 'protected')
@@ -164,7 +164,7 @@ classdef mdapca < handle
          else
             nc = 999;
          end
-         obj.nComp = min([nc, obj.MAX_NCOMP, data.nRows- 1, data.nNumCols]);
+         obj.nComp = min([nc, obj.MAX_NCOMP, data.nRows - 1, data.nNumCols]);
          
          % set up number cross-validation
          [v, varargin] = getarg(varargin, 'CV');
@@ -234,7 +234,15 @@ classdef mdapca < handle
          obj.prep.apply(data);
       
          loads = zeros(data.nNumColsAll, obj.nComp);
-         [loads(~excludedCols, :), eigenvals] = mdapca.pcasvd(data.numValues, obj.nComp);
+         
+         switch obj.method
+            case 'svd'
+               [loads(~excludedCols, :), eigenvals] = mdapca.pcasvd(data.numValues, obj.nComp);
+            case 'ica'
+               [loads(~excludedCols, :), eigenvals] = mdapca.pcaica(data.numValues, obj.nComp);               
+            otherwise
+               error('Unknown name for PCA algorithm: %s', obj.method);
+         end
          
          compnames = textgen('Comp ', 1:obj.nComp);         
          
@@ -404,6 +412,47 @@ classdef mdapca < handle
    end
    
    methods (Static = true)
+      function [loadings, eigenvals] = pcaica(x, nComp)
+         eps = 1e-4; 
+         maxIters = 100; 
+
+         [m, ~] = size(x);
+
+         % generate random weights 
+         w = rand(nComp, m);
+         for i = 1:nComp
+            w(i, :) = w(i, :) / norm(w(i, :));
+         end
+
+         err = ones(nComp, 1);
+         its = 0;
+
+         while ((max(err) > eps) && (its < maxIters))
+            its = its + 1;
+            w_old = w;
+    
+            for i = 1:nComp
+               si = w_old(i, :) * x;
+        
+               g = si .* exp(-0.5 * (si.^2));
+               gp = -1.0 * ((si.^2) .* exp(-0.5 * (si.^2)));
+        
+               w(i, :) = mean(x .* repmat(g, m, 1), 2)' - mean(gp) * w_old(i, :);       
+               w(i,:) = w(i,:) / norm(w(i,:));
+            end
+    
+            [u, s, ~] = svd(w, 'econ');
+            sinv = diag(1./diag(s));
+            w = u * sinv * u' * w;
+    
+            for i = 1:nComp
+               err(i) = 1 - w(i,:) * w_old(i,:)';
+            end
+         end   
+         loadings = (w * x)';      
+         eigenvals = zeros(nComp, 1);
+      end
+      
       function [loadings, eigenvals] = pcasvd(x, nComp)
          if nargin < 2 
             nComp = min([size(x, 1) - 1, size(x, 2), pca.MAX_NCOMP]);

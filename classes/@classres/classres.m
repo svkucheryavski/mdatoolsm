@@ -105,7 +105,6 @@ classdef classres < res
          
          for i = 1:obj.nClasses
             c = squeeze(cpred(:, i, :));
-            
             fn(:, i) = sum(bsxfun(@times, yref(:, i) == 1, c == -1));
             fp(:, i) = sum(bsxfun(@times, yref(:, i) == -1, c == 1));
             tp(:, i) = sum(bsxfun(@times, yref(:, i) == 1, c == 1));

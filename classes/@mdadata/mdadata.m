@@ -140,7 +140,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
 %
 
    properties (Constant = true, Hidden = true)
-      LEGEND_EDGE_COLOR = [0.8 0.8 0.8]
+      LEGEND_EDGE_COLOR = [0.2 0.2 0.2]
       EXCLUDED_COLOR = [0.9 0.9 0.9];
       AXIS_LINE_COLOR = [0.8 0.8 0.8];
       LABELS_COLOR = [0.6 0.6 0.6];
@@ -236,7 +236,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             rowNames = {};
          end   
          
-         obj.valuesAll = values;
+         obj.valuesAll = double(values);
          obj.colNamesAll = colNames;
          obj.rowNamesAll = rowNames;
          obj.dimNames = dimNames; 
@@ -974,6 +974,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
             levelNames = levelNames(ind2);            
          end   
          
+         if size(levelNames, 1) < size(levelNames, 2)
+            levelNames = levelNames';
+         end
+         
          obj.factorCols(ind) = true;
          obj.factorLevelNames{ind} = levelNames;
          
@@ -1096,27 +1100,32 @@ classdef mdadata < handle & matlab.mixin.Copyable
             error('Only factors can be used to make groups!')
          end   
          
-         values = obj.values(:, ind);
+         valuesAll = obj.valuesAll(:, ~obj.excludedCols);
+         valuesAll = valuesAll(:, ind);
+         
          colNames = obj.colNames(ind);
-         [nRows, nFactors] = size(values);
+         nFactors = numel(ind);
          
          % get factor values as level indices (1, 2, 3)
-         [~, ~, values] = unique(values);
-         values = reshape(values, nRows, nFactors);
+         values = zeros(obj.nRowsAll, nFactors);
+         for i = 1:numel(ind)             
+            [~, ~, values(:, i)] = unique(valuesAll(:, ind(i)));
+         end   
+         values = values(~obj.excludedRows, :);
          
          % get factor values as names
          levelNames = obj.factorLevelNames(ind);
-         levels = cellfun(@(x)(numel(unique(x))), num2cell(values, 1));
+         nlevels = cellfun(@(x)(numel(unique(x))), num2cell(values, 1));
          
          % set up a vector with level sequences for each factor
          arg = cell(nFactors, 1);
          for i = 1:nFactors
-            arg{i} = 1:levels(i);
+            arg{i} = 1:nlevels(i);
          end   
          
          % get all possible combinations of levels
          comb = allcomb(arg{:});
-
+         
          % for each combination get vector of logical values for rows
          nComb = size(comb, 1);
          groups = zeros(obj.nRows, nComb);
@@ -1124,20 +1133,21 @@ classdef mdadata < handle & matlab.mixin.Copyable
          shortNames = cell(nComb, 1);
          for i = 1:nComb
             levels = unique(values(:, 1));
-            v = values(:, 1) == levels(comb(i, 1));
-            fullName = [levelNames{1}{comb(i, 1)}];
-            shortName = [levelNames{1}{comb(i, 1)}];
+            ind = levels(comb(i, 1));
+            v = values(:, 1) == ind;
+            fullName = [levelNames{1}{ind}];
+            shortName = [levelNames{1}{ind}];
             for j = 2:nFactors
-               levelsj = unique(values(:, j));
-               v = v & values(:, j) == levelsj(comb(i, j));
-               fullName = [fullName ', ' levelNames{j}{comb(i, j)}];
-               shortName = [shortName levelNames{j}{comb(i, j)}];
+               levelsj = unique(values(:, j));               
+               indj = levelsj(comb(i, j));
+               v = v & values(:, j) == indj;               
+               fullName = [fullName ', ' levelNames{j}{indj}];
+               shortName = [shortName levelNames{j}{indj}];
             end   
             fullNames{i} = fullName;
             shortNames{i} = shortName;
             groups(:, i) = v;
          end   
-         
          dimName = sprintf('%s, ', colNames{:});
          dimName = ['Groups (' dimName(1:end-2) ')'];
          groups = mdadata(groups, obj.rowNames, {}, {obj.dimNames{1}, dimName});
@@ -1264,82 +1274,71 @@ classdef mdadata < handle & matlab.mixin.Copyable
          out.factorLevelNames = factorLevelNames;
       end
       
-      function out = vertcat(a, b, varargin)
-         if isempty(a)
-            out = b;
-            f = find(b.factorCols);
-            factorCols = b.factorCols;
-            fln = [b.factorLevelNames];            
-         else   
-            f = find(a.factorCols);
-            factorCols = a.factorCols;
+      function out = vertcat(a, varargin)
+
+        out = copy(a);       
+        outExcludedRows = out.excludedRows;         
+        out.includerows(outExcludedRows);
+        
+        fCols = out.factorCols;
+        fColsInd = find(fCols);
+        fln = out.factorLevelNames';
+        flv = cellfun(@unique, num2cell(out.values, 1), 'UniformOutput', false);
+        
+        for i = 1:numel(varargin)            
+            % include exclided rows for previous object
             
-            aExcludedRows = a.excludedRows;
+            % include exclided rows for concatenated object
+            b = copy(varargin{i});
             bExcludedRows = b.excludedRows;
-
-            a.includerows(aExcludedRows);
             b.includerows(bExcludedRows);
-
+            
+            % check factor columns
+            bf = find(b.factorCols);            
+            if ~all(fColsInd == bf)
+               error('Factor columns in data "a" should correspond to factor columns in data "b"!')
+            else
+                fln = [fln; b.factorLevelNames'];
+                flv = [flv; cellfun(@unique, num2cell(b.values, 1), 'UniformOutput', false)];
+            end
+            
+            % add "O" to row names if they are not unique
             if sum(ismember(a.rowNames, b.rowNames)) > 0
                rowNames = strcat('O', b.rowNames);
                rowFullNames = strcat('O', b.rowFullNames );
             else
                rowNames = b.rowNames;
                rowFullNames = b.rowFullNames ;
-            end   
-
-            af = a.factorCols;         
-            bf = b.factorCols;
-            fln = [a.factorLevelNames b.factorLevelNames];
-
-            if ~all(af == bf)
-               error('Factor columns in data "a" should correspond to factor columns in data "b"!')
             end
-
-            out = op(a, b, @vertcat, [a.rowNames; rowNames], [a.rowFullNames ; rowFullNames ],...
-               a.colNames, a.colFullNames, a.dimNames, true);
-            out.excluderows([aExcludedRows; bExcludedRows]);
-         end
-         
-         for i = 1:numel(varargin)
-            outExcludedRows = out.excludedRows;
-            bExcludedRows = b.excludedRows;
-         
-            out.includerows(outExcludedRows);
-            b.includerows(bExcludedRows);
-            
-            b = varargin{i};
-            bf = b.factorCols;
-            fln = [fln b.factorLevelNames];
-            
-            if ~all(af == bf)
-               error('Factor columns in data "a" should correspond to factor columns in data "b"!')
-            end
-            
-            if sum(ismember(out.rowFullNames , b.rowFullNames )) > 0
-               rowNames = strcat('O', b.rowFullNames );
-            else
-               rowNames = b.rowFullNames ;
-            end   
-            
+                        
+            % merge datasets
             out = op(out, b, @vertcat, [out.rowNames; rowNames], [out.rowFullNames ; rowFullNames ],...
                out.colNames, out.colFullNames, out.dimNames, true);
-            out.excluderows([outExcludedRows; bExcludedRows]);
-         end   
-
-         out.factorCols = factorCols;
-         for i = 1:numel(f)
+            outExcludedRows = [outExcludedRows; bExcludedRows];
+        end
+        
+        out.excluderows(outExcludedRows);        
+        out.factorCols = fCols;
+        
+        % process all factors
+        for i = 1:numel(fColsInd)
             % concatenate level names and keep only unique in the same
             % order as they were added in
-            ln = vertcat(fln{f(i), :});
+            ln = vertcat(fln{:, fColsInd(i)});            
             ln = unique(ln(:), 'stable'); 
             
-            % get unique level values in the same order they were added in
-            lv = unique(out.valuesAll(:, f(i)), 'stable');
+            % concatenate level values and keep only unique in the same
+            % order as they were added in
+            lv = vertcat(flv{:, fColsInd(i)});
+            lv = unique(lv(:), 'stable');
             
-            % sort level values and resort names accordingly
+            if numel(lv) ~= numel(ln)
+                error('Number of levels does not correspond to number of level names!');
+            end
+            
+            % sort level values and resort names accordingly            
             [~, ind] = sort(lv);
-            out.factorLevelNames{f(i)} = ln(ind);
+            out.factorLevelNames{fColsInd(i)} = ln(ind);
          end         
       end
       
@@ -2654,7 +2653,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             levels = obj.factorLevelNames{objFactorCols(i)}(ismember(objLevels, dataLevels));
             
             data.factorCols(dataFactorCols(i)) = true;            
-            data.factorLevelNames{dataFactorCols(i)} = levels';
+            data.factorLevelNames{dataFactorCols(i)} = levels;
          end
          
          data.excludecols(sexcludedCols);
@@ -2844,6 +2843,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
             colNames = obj.colFullNamesWithoutFactors(1:2);
          end
          
+         nanind = isnan(x) | isnan(y);
+         x(nanind) = [];
+         y(nanind) = [];
+         
          if doReduce && numel(x) > obj.REDUCE_ROWS_LIMIT
             if hasDensity && ~isempty(cgroup)
                % it is call from densscatter, density already provided
@@ -3029,7 +3032,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
          values = obj.numValues;
          x = values(:, 1);
          y = values(:, 2);
-
+         nanind = isnan(x) | isnan(y);
+         x(nanind) = [];
+         y(nanind) = [];
+         
          d = mdadata.getsampledensity(x, y, nbins);
         
          % remove Color argument if provided
@@ -5211,7 +5217,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          else
             rowlength = 0;
          end
+         
          values = obj.values;
+         valuesAll = obj.valuesAll(:, ~obj.excludedCols);
 
          if ~isempty(obj.colFullNames)
             colNames = obj.colFullNames;
@@ -5222,9 +5230,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          nCols = obj.nCols;
          nRows = obj.nRows;
          
-         if nRows > 100
-            warning('The data is too long, will show first 100 rows only.')
-            nRows = 100;
+         if nRows > 200
+            warning('The data is too long, will show first 200 rows only.')
+            nRows = 200;
             values = values(1:nRows, :);
             if ~isempty(rowNames)
                rowNames = rowNames(1:nRows);
@@ -5252,7 +5260,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
                colNames{i} = ['* ' colNames{i} ];
                
                % get factor values as indices
-               [~, ~, v] = unique(values(:, i));
+               [~, ~, v] = unique(valuesAll(:, i));
+               v = v(~obj.excludedRows);
                
                % calculate maximal width for the field
                factors = obj.getfactorlevels(i);

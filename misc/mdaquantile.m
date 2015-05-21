@@ -1,4 +1,4 @@
-function out = quantile(x, n, m)
+function out = mdaquantile(x, n, m)
    if nargin < 3
       m = 100;
    end

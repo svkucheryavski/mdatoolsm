@@ -25,9 +25,7 @@ in this case please report to <svkucheryavski@gmail.com>.
 
 ## Installation ##
 
-The current version is _0.0.12_ (from 25.11.2014). Next version is going to be published in late
-November and will include mostly bug fixings and small improvements for the code as well as
-more methods.
+The current version is _0.0.13_ (from 21.05.2015). 
 
 Installation is easy and the procedure is similar to most of the others 3rd party MATLAB Toolboxes.
 Download zip archive for the latest release and unzip it to the folder you use to keep you MATLAB code,

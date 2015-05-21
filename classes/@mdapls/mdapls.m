@@ -89,14 +89,10 @@ classdef mdapls < regmodel
       
       function res = predict(obj, oX, oyref, makeres)
          
-         if nargin < 5
+         if nargin < 4
             makeres = true;
          end
-         
-         if nargin < 4
-            cv = false;
-         end
-         
+                  
          if nargin < 3
             yref = [];
          else   

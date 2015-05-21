@@ -18,7 +18,7 @@ classdef mdaplsda < mdapls & classmodel
          end   
          
          c = classmodel.getClassFromFactor(c, className);
-         y = splitfactor(c, 1);
+         y = splitfactor(c, 1);         
          y = y(:, className);
          
          % check if test set is provided and apply model to the test set
@@ -34,7 +34,7 @@ classdef mdaplsda < mdapls & classmodel
             varargin = {varargin{:}, 'TestSet', {Xtest, ytest}};
          end
          
-         obj = obj@mdapls(X, y, ncomp, varargin{:});         
+         obj = obj@mdapls(X, y, ncomp, varargin{:});   
          obj.className = className;
          obj.calres = predict(obj, X, c);
          obj.calres.info = 'Results for calibration set';
@@ -58,19 +58,19 @@ classdef mdaplsda < mdapls & classmodel
          end
       end   
             
-      function res = predict(obj, X, cref, cv)
+      function res = predict(obj, X, cref, makeres)
          
          if nargin < 3
             cref = [];
          end   
          
          if nargin < 4
-            cv = false;
+            makeres = false;
          end
-                  
+               
          st = dbstack(1);
          if strcmp(st(1).name, 'regmodel.regmodel')
-            res = predict@mdapls(obj, X, cref, cv, false);
+            res = predict@mdapls(obj, X, cref, makeres);
             return;                        
          end
          
@@ -88,7 +88,7 @@ classdef mdaplsda < mdapls & classmodel
             yref = yref(:, obj.className);
          end 
          
-         res = predict@mdapls(obj, X, yref, false, false);
+         res = predict@mdapls(obj, X, yref, makeres);
          cpred = mdaplsda.classify(res.ypred);
          res = plsdares(res, cpred, cref);
       end 
@@ -120,7 +120,7 @@ classdef mdaplsda < mdapls & classmodel
       function cpred = classify(y)
          values = y.values_;
          cpred = -ones(size(values));         
-         cpred(values >= 0) = 1;
+         cpred(values >= 0) = 1;         
          cpred = mdadata3(cpred, y.wayNamesAll, y.wayFullNamesAll, y.dimNames);
          cpred.excluderows(y.excludedRows);
       end

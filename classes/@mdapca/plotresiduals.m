@@ -39,7 +39,7 @@ function varargout = plotresiduals(obj, varargin)
    slim = obj.limits.values(:, ncomp);
    lim = axis();
    dx = (lim(2) - lim(1)) / 10;
-   dy = (lim(2) - lim(1)) / 10;
+   dy = (lim(4) - lim(3)) / 10;
    lim(2) = max(lim(2), slim(1) + dx);
    lim(4) = max(lim(4), slim(2) + dy);
    line([slim(1) slim(1)], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);

@@ -47,7 +47,7 @@ classdef prepItem < handle
                         if isnumeric(values{i})
                            res = ismember(values{i}, [limits{:}]);
                         else
-                           res = ~ismember(values{i}, limits);
+                           res = ismember(values{i}, limits);
                         end
                         
                         if ~res

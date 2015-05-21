@@ -181,8 +181,8 @@ classdef mdaimage < mdadata
             clim = varargin{1};
          else
             clim = [min(obj.values) max(obj.values)];
-         end   
-
+         end
+                  
          cmap = getarg(varargin, 'Colormap');
          if isempty(cmap)
             cmap = @mdadata.getmycolors;
@@ -191,8 +191,13 @@ classdef mdaimage < mdadata
          alpha = ones(obj.width * obj.height, 1);
          alpha(obj.excludedRows) = 0;
          alpha = reshape(alpha, obj.height, obj.width);
-         h = imagesc(obj.image, clim);
-         colormap(cmap(64));
+
+         if clim(2) ~= clim(1)
+            h = imagesc(obj.image, clim);
+         else
+            h = imagesc(obj.image);
+         end
+         colormap(cmap(128));
          set(h, 'AlphaData', alpha);
          axis off
          title(obj.colFullNames{1});

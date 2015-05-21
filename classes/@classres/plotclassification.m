@@ -11,7 +11,7 @@ function varargout = plotclassification(obj, varargin)
    cpred.includerows(excludedRows);
    
    if isempty(cpred.wayFullNames{1})
-      objNames = textgen('', 1:size(cpred, 1));
+      objNames = textgen('', 1:size(cpred, 1))';
    else   
       objNames = cpred.wayFullNames{1};
    end
@@ -31,8 +31,19 @@ function varargout = plotclassification(obj, varargin)
       ind = values(:, i) == 1;
       if any(ind)
          plotData = [plotData; [x(ind), i * ones(sum(ind), 1)]];
-         plotObjNames = [plotObjNames; objNames(ind)];
-         refData = [refData; cref(ind, :)];
+         
+         if isempty(plotObjNames)
+            plotObjNames = objNames(ind);
+         else
+            plotObjNames = [plotObjNames; objNames(ind)];
+         end
+         
+         if isempty(refData)
+            refData = cref(ind, :);
+         else   
+            refData = [refData; cref(ind, :)];
+         end
+         
          per = excludedRows & ind;
          plotExcludedRows = [plotExcludedRows; per(ind)];
       end
@@ -52,6 +63,7 @@ function varargout = plotclassification(obj, varargin)
    plotData.dimNames = {'Objects', 'Classes'};
    plotData.rowFullNamesAll = plotObjNames;
    
+   plotExcludedRows = logical(plotExcludedRows);
    if any(plotExcludedRows)
       plotData.excluderows(plotExcludedRows);
       refData.excluderows(plotExcludedRows);

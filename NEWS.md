@@ -1,14 +1,7 @@
-Coming later
-============
-* combining several PLS-DA models for multiple classes classification (`mdaplsdam`)
-* combining several SIMCA models for multiple classes classification (`mdasimcam`)
-* documentation for MLR and PLS classes and methods 
-* documentation for PLS-DA and SIMCA classes and methods 
-
-Next release (v. 0.0.13)
-========================
-* SIMCA one-class classification (`mdasimca`, `simcares`)
-* documentation for PCA class and methods
+v. 0.0.13
+=========
+* fixed a bug lead to wrong factor levels when concatenate datasets
+* small bugs fixes and code improvements
 
 v. 0.0.12
 =========
