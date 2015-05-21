@@ -31,7 +31,6 @@ classdef prepAlsbasecorr < prepItem
 
 
          out = zeros(size(values));
-         size(values)
          for i = 1:size(values, 1)
             b = obj.alsbasecorr(values(i, ~excludedCols), obj.options{:}); 
             out(i, ~excludedCols) = values(i, ~excludedCols) - b';

@@ -3,7 +3,7 @@ function test_pca(type, casen)
    close all
 
    if nargin < 1
-      type = 'people';
+      type = 'spectra';
    end
    
    if nargin < 2

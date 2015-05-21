@@ -63,7 +63,6 @@ function dens = getsampledensity(x, y, nbins, varargin)
    % solve problem with 2D filtering without using toolboxes
    
    %h = conv2(h, fspecial('gaussian', round([nbins/12 nbins/12]), smoothness));
-   
    dens = h((x - 1) * nbins + y);
 
    % quantize density values

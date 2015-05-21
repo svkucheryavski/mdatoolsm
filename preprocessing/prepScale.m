@@ -22,8 +22,12 @@ classdef prepScale < prepItem
             stds = obj.values{1};
          end
          
-         if any(stds < 0.0001)
-            warning('Standard deviation values are too small, skipping scaling.');
+         if any(stds < 0.001)
+            warning('Some standard deviation values are too small and will be ignored.');
+            ind = stds < 0.001;
+            out = zeros(size(values));
+            out(:, ind) = values(:, ind);
+            out(:, ~ind) = bsxfun(@rdivide, values(:, ~ind), stds(~ind));
          else   
             out = bsxfun(@rdivide, values, stds);
          end   

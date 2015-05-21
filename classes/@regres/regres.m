@@ -91,8 +91,7 @@ classdef regres < res
          
          nComp = obj.nComp;
          nResp = obj.nResp;
-         
-         
+
          ypred = obj.ypred_.values_(~obj.ypred_.excludedRows, :, :);
          yref = obj.yref.values;
          rmse = zeros(nComp, nResp);
@@ -102,13 +101,13 @@ classdef regres < res
          
          for i = 1:nResp
             y = squeeze(ypred(:, i, :));
-            rmse(:, i) = regres.rmse(y, yref(:, i));
-            bias(:, i) = regres.bias(y, yref(:, i));
-            slope(:, i) = regres.slope(y, yref(:, i));
-            r2(:, i) = regres.r2(y, yref(:, i));
+            rmse(:, i) = regres.getRMSE(y, yref(:, i));
+            bias(:, i) = regres.getBias(y, yref(:, i));
+            slope(:, i) = regres.getSlope(y, yref(:, i));
+            r2(:, i) = regres.getR2(y, yref(:, i));
             rpd(:, i) = std(yref(:, i))./sqrt(rmse(:, i).^2 - bias(:, i).^2);
          end
-                  
+
          dimNames = {'', ''};
          rowNames = obj.ypred_.wayNames{3};
          colNames = obj.ypred_.wayNames{2};
@@ -144,17 +143,17 @@ classdef regres < res
    end
    
    methods (Static = true)
-      function out = rmse(y, yref)
+      function out = getRMSE(y, yref)
          out = bsxfun(@minus, y, yref);
          out = squeeze(sum(out.^2));
          out = sqrt(out / (size(y, 1) - 1));
       end
       
-      function out = bias(y, yref)
+      function out = getBias(y, yref)
          out = mean(bsxfun(@minus, y, yref))';
       end
       
-      function out = slope(y, yref)
+      function out = getSlope(y, yref)
          out = zeros(size(y, 2), 1);
          for i = 1:size(y, 2)
             p = polyfit(yref, y(:, i), 1);
@@ -162,7 +161,7 @@ classdef regres < res
          end 
       end
       
-      function out = r2(y, yref)
+      function out = getR2(y, yref)
          out = mdacorr([yref, y]).^2;
          out = out(1, 2:end);
       end      

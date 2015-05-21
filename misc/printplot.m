@@ -15,7 +15,7 @@ function printplot(cf, figname, figsize, type, res)
    set(cf, 'PaperPositionMode', 'auto');
    
    if strcmp(type, 'eps')
-      set(cf, 'renderer', 'painters')
+%      set(cf, 'renderer', 'painters')
       print(cf, '-depsc', figname);
    elseif strcmp(type, 'png')
       print(cf, '-dpng', res, figname);

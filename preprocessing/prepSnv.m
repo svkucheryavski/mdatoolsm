@@ -19,7 +19,14 @@ classdef prepSnv < prepItem
          means = mean(values, 2);
          stds = std(values, 0, 2);
          values = bsxfun(@minus, values', means');
-         out = bsxfun(@rdivide, values, stds')';
+         
+         ind = stds < 0.001;
+         if any(ind)
+            out = zeros(size(values'));
+            out(~ind, :) = bsxfun(@rdivide, values(:, ~ind), stds(~ind)')';
+         else
+            out = bsxfun(@rdivide, values, stds')';
+         end
        end   
    end   
 end   
