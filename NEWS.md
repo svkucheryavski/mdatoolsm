@@ -3,6 +3,8 @@ v. 0.0.14
 * PCA like model can be now obtained ICA algorithm
 * new preprocessing methods: "whitening", "norm" and "ref2abs"
 * bugs fixes and code improvements
+* documentation (HTML) has been moved to GitBook
+* old GUI tools were removed, new under developing
 
 v. 0.0.13
 =========

@@ -5,27 +5,24 @@
 _mdatools_ is a free open source toolbox for analysis of multivariate
 experimental data based on methods widespread in [Chemometrics](http://en.wikipedia.org/wiki/Chemometrics).
 The toolbox can work with conventional two-way datasets (where rows are objects or measurements and
-columns are variables) as well as with colour and hyperspectral images. It has both command line
-and GUI tools allowing to explore models and datasets interactively. The project is currently under
-developing and e.g. GUI is in alpha version and has limited functionality, however most of the
-command line methods work well in the current version.
+columns are variables) as well as with colour and hyperspectral images. Currently only command line
+tools are available, old GUI version has been removed from the project and new is now under developing.
 
-It is recommended to start learning the toolbox with a guide, which gives 
-a brief overview of basic methods with a lot of examples (`web mdatools_quick.html`).
-It allows you to start working with the toolbox after 30 minutes 
-learning. Then just continue with User guide (`web mdatools.html`) to get acquainted with all 
-available features and details.
+All documentation is [available](https://www.gitbook.com/book/svkucheryavski/mdatoolsm/details) at GitBook. 
+It is recommended to start learning the toolbox with a 
+quick start guide, which gives a brief overview of basic methods with a lot of examples.
+It allows you to start working with the toolbox after 30 minutes learning. Then just continue with 
+the user guide to get acquainted with all available features and details.
 
-The toolbox was tested using MATLAB 2012b and 2014b and should also work on
+The toolbox was tested using MATLAB 2012b and 2015b and should also work on
 versions in between. For the basic functionality you do not need any additional toolboxes
-installed, however for GUI tools Image Processing toolbox is needed (this will be fixed in future
-releases). All methods were tested using well-known datasets, but there still could be some bugs,
+installed. All methods were tested using well-known datasets, but there still could be some bugs,
 in this case please report to <svkucheryavski@gmail.com>.
 
 
 ## Installation ##
 
-The current version is _0.0.13_ (from 21.05.2015). 
+The current version is _0.0.14_ (from 16.10.2015). 
 
 Installation is easy and the procedure is similar to most of the others 3rd party MATLAB Toolboxes.
 Download zip archive for the latest release and unzip it to the folder you use to keep you MATLAB code,
