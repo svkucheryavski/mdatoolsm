@@ -1,5 +1,5 @@
 function f = getserind(seq)
-% 'genserinf' detect series in a vector of values and return a matrix with 
+% 'genserind' detect series in a vector of values and return a matrix with 
 % first and last elements for each series. If there are single elements,
 % which are not member of any series the first and last elements are the
 % same.

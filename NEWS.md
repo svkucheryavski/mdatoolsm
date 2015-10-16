@@ -1,3 +1,9 @@
+v. 0.0.14
+=========
+* PCA like model can be now obtained ICA algorithm
+* new preprocessing methods: "whitening", "norm" and "ref2abs"
+* bugs fixes and code improvements
+
 v. 0.0.13
 =========
 * fixed a bug lead to wrong factor levels when concatenate datasets

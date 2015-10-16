@@ -41,8 +41,8 @@ classdef mdapca < handle
 %  for T2 and Q2 residuals (default 0.05).
 %
 %  "Method" - which method to use for calculation of principal
-%  components. Default value is "svd" (Singular Value Decomposition),
-%  later more methods will be available.
+%  components. Default value is "svd" (Singular Value Decomposition), 
+%  also "ica" (independent component analysis) available.
 %
 %
 % Properties (general):
