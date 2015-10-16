@@ -15,9 +15,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
 % The 'mdadata' objects can be manipulated in a similar way as matrices,
 % including subsetting, arithmetic and logical operations as well as some 
 % mathematical functions can be applied directly to the objects. The result of
-% any operation is also an mdadata object. Look at the 
-% <a href="mdadata_gs.html">Getting started</a> guide 
-% for more details, with a lot of examples.
+% any operation is also an mdadata object.
 %
 %
 % Properties (main):
@@ -124,18 +122,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
 % observations. In this case the groups will be shown using different
 % colors or plot properties (marker, line style) and legend can added.
 %
-%  'gscatter' - GUI version of scatter plot 
-%  'gplot' - GUI version of line plot
-%  'gbar' - GUI version for bar plot
-%
-%
-% Methods for interactive graphics:
-% ---------------------------------
-% most of the plotting methods have also GUI version, which allows to analyse
-% data interactively, e.g. switch columns, look at statistics, exclude
-% objects and variables, etc. 
-%
-%  'guiplot' - GUI tool for most of the plots 
+%  'gscatter' - group version of scatter plot 
+%  'gplot' - group version of line plot
+%  'gbar' - group version for bar plot
 %
 %
 

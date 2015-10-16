@@ -2,7 +2,7 @@ function install()
    path = mfilename('fullpath');
 
    if ~strcmp(path(end-15:end-8), 'mdatools')
-      error('Change folder to "mdadata" and then run "install"!');
+      error('Change or rename folder to "mdatools" and then run "install"!');
    end
 
    path = path(1:end-8);
@@ -11,7 +11,6 @@ function install()
       'data',...
       'gui',...
       'misc',...
-      'html',...
       'preprocessing'...
    };
 
@@ -21,7 +20,6 @@ function install()
       end   
       addpath(path);
       savepath;
-      %builddocsearchdb([path '/html']);
    catch e
       error('Error occured during the installation of "mdatools":\n%s', e.message);
    end
