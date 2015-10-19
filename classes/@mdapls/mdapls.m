@@ -295,7 +295,7 @@ classdef mdapls < regmodel
          wnorm = w * n;
    
          for iResp = 1:nResp
-            b = obj.regcoeffs.values(:, iResp, nComp).values;
+            b = obj.regcoeffs.values(1:end, iResp, nComp).values;
             bscores = (wpw' * pinv(wpw * wpw')) * b;         
             ss = (bscores.^2) .* sum(xscores.^2)';
             vipscores(:, iResp) = nResp * wnorm.^2 * ss / sum(ss);
@@ -315,7 +315,7 @@ classdef mdapls < regmodel
          selratio = zeros(nPred, nResp);
          
          for iResp = 1:nResp
-            b = obj.regcoeffs.values(:, iResp, nComp).values;
+            b = obj.regcoeffs.values(1:end, iResp, nComp).values;
             bnorm = sqrt(sum(b.^2));
             w = b/bnorm;
             

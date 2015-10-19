@@ -234,7 +234,7 @@ classdef regcoeffs < handle
             showCI = true;
          end 
          
-         values = obj.values(:, resp, comp)';
+         values = obj.values(1:end, resp, comp)';
          if strcmp(type, 'line')
             h = plot(values, varargin{:}, 'Marker', mr);
          elseif strcmp(type, 'bar')   

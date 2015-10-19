@@ -1,3 +1,7 @@
+v.0.0.15
+========
+* fixed compatibility issues with R2015b
+
 v. 0.0.14
 =========
 * PCA like model can be now obtained ICA algorithm
