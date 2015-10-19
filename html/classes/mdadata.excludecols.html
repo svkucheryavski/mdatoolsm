@@ -1,0 +1,46 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.excludecols</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="mdadata.excludecols.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.excludecols</h1><!--introduction--><p><tt>exlcludecols</tt> exclude (hide) columns from the dataset</p><p>The method allows to hide columns without removing them from dataset. The hidden columns will not be counted in any operations, calculations, etc.</p><!--/introduction--><h2>Examples<a name="1"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+   d = people(1:5, 1:8);
+
+   disp(d)
+
+   d.excludecols(2);
+   disp(d)
+
+   d.excludecols({<span class="string">'Height'</span>, <span class="string">'Shoesize'</span>})
+   disp(d)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.excludecols
+% |exlcludecols| exclude (hide) columns from the dataset
+%
+% The method allows to hide columns without removing them from
+% dataset. The hidden columns will not be counted in any operations,
+% calculations, etc. 
+%
+%% Examples
+% 
+%% 
+%  
+   load people
+   d = people(1:5, 1:8);
+   
+   disp(d)
+
+   d.excludecols(2);
+   disp(d)
+
+   d.excludecols({'Height', 'Shoesize'})
+   disp(d)
+ 
+%%
+
+##### SOURCE END #####
+--></body></html>

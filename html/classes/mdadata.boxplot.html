@@ -1,0 +1,72 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.boxplot</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="mdadata.boxplot.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.boxplot</h1><!--introduction--><p><tt>boxplot</tt> makes a box and whiskers plot for dataset columns</p><!--/introduction--><pre class="codeinput">   boxplot(data);
+   boxplot(data, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
+
+   boxplot(data, factors);
+   boxplot(data, factors, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">);</span>
+</pre><p>Optional argument <tt>factors</tt> is a dataset with qualitative variables (factors) used to split data values into groups and show box and whiskers separately for each group on the same axis. In this case the plot will be made only for the first column of data.</p><h2>Parameters<a name="3"></a></h2><p><table class="properties-list">
+<tr><td class="name">Whisker</td><td class="text">a factor <tt>w</tt> that influences length of the whiskers.   The whiskers correspond to max and min values, after removing   outliers. The default value for w is 1.5, which corresponds   to 2.7 std interval (99.3% of most common values) if values are   normally distributed. </td></tr>
+<tr><td class="name">Labels</td><td class="text">show or not labels for outliers. Possible values are   <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects and <tt>'numbers'</tt>  for their numbers. </td></tr>
+</table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+
+   <span class="comment">% normal box plot for columns</span>
+   figure
+   boxplot(people(:, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>, <span class="string">'Swim'</span>}));
+
+   <span class="comment">% box plot for groups</span>
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>})
+   figure
+   boxplot(people(:, {<span class="string">'Height'</span>, <span class="string">'Weight'</span>}), people(:, <span class="string">'Sex'</span>), <span class="string">'Labels'</span>, <span class="string">'on'</span>)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.boxplot
+% |boxplot| makes a box and whiskers plot for dataset columns
+%
+%% 
+%  
+   boxplot(data);
+   boxplot(data, 'ParamName', ParamValue, ...);
+
+   boxplot(data, factors);
+   boxplot(data, factors, 'ParamName', ParamValue, ...);
+ 
+%%
+% Optional argument |factors| is a dataset with qualitative variables
+% (factors) used to split data values into groups and show box and
+% whiskers separately for each group on the same axis. In this case the 
+% plot will be made only for the first column of data.
+%
+%% Parameters
+% 
+%
+% <html><table class="properties-list">
+% <tr><td class="name">Whisker</td><td class="text">a factor <tt>w</tt> that influences length of the whiskers.   The whiskers correspond to max and min values, after removing   outliers. The default value for w is 1.5, which corresponds   to 2.7 std interval (99.3% of most common values) if values are   normally distributed. </td></tr>
+% <tr><td class="name">Labels</td><td class="text">show or not labels for outliers. Possible values are   <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects and <tt>'numbers'</tt>  for their numbers. </td></tr>
+% </table></html>
+%
+%
+%% Examples
+% 
+%% 
+%  
+   
+   load people
+   
+   % normal box plot for columns
+   figure
+   boxplot(people(:, {'Height', 'Weight', 'Swim'}));
+
+   % box plot for groups
+   people.factor('Sex', {'Male', 'Female'})
+   figure
+   boxplot(people(:, {'Height', 'Weight'}), people(:, 'Sex'), 'Labels', 'on')
+
+##### SOURCE END #####
+--></body></html>

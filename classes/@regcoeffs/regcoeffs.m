@@ -245,7 +245,7 @@ classdef regcoeffs < handle
          
          if showCI
             hold on            
-            ci = obj.ci(:, resp, comp); 
+            ci = obj.ci(1:end, resp, comp); 
             v = values.values;
             l = v - ci(:, 1).values';
             u = ci(:, 2).values' - v;

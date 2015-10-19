@@ -1,0 +1,97 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>prep</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="prep.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>prep</h1><!--introduction--><p><tt>prep</tt> is a class for data preprocessing.</p><!--/introduction--><pre class="codeinput">   p = prep();
+</pre><p>The main purpose of the <tt>prep</tt> class is to give a possibility for building a list of preprocessing methods, changing their options and applying the methods to a dataset. Actually <tt>prep</tt> object can be applied both to datasets (including <tt>mdaimage</tt> images) as well as to matrices. When it is applied to dataset the data values will be changed in the existent object, there is now need to create a new variable. If it is applied to a conventional Matlab matrix one has to reassign the values.</p><p>It remembers all parameters, including those, calculated at first run. For example if mean centering is used, when a preprocessing object applied to a dataset a vector of mean values will be calculated and stored in the object. So when we use it next time, the mean values will not be calculated again. This is essential, e.g. when we calibrate model and the apply it to a new data. If one want to clear all calculations and apply the list of methods to a new data from the scratch, just take a copy of the object.</p><h2>Examples<a name="3"></a></h2><pre class="codeinput">   load <span class="string">simdata</span>;
+
+   <span class="comment">% set up list with preprocessing methods and apply</span>
+   p = prep();
+   p.add(<span class="string">'savgol'</span>, 0, 5, 1);
+   p.add(<span class="string">'snv'</span>);
+   p.apply(spectra);
+
+   figure
+   plot(spectra)
+
+   <span class="comment">% displaying the preprocessing object</span>
+   show(p)
+</pre><h2>Methods<a name="5"></a></h2><p><table class="methods-list">
+<tr><td id="prep.add" class="name"><span>&plus;</span>add</td><td class="text">adds a method to the object</td></tr>
+<tr><td id="prep.remove" class="name"><span>&plus;</span>remove</td><td class="text">removes a method from the object</td></tr>
+<tr><td id="prep.show" class="name"><span>&plus;</span>show</td><td class="text">shows information about the object</td></tr>
+<tr><td id="prep.apply" class="name"><span>&plus;</span>apply</td><td class="text">apply list of methods from the object to a data</td></tr>
+</table></p><h2>Preprocessing methods<a name="6"></a></h2><p><tt>p.add('center')</tt> - mean centering of data.</p><p><tt>p.add('scale')</tt> - standardization (scaling to standard deviation).</p><p><tt>p.add('snv')</tt> - standard normal variate preprocessing to correct scatter effects.</p><p><tt>p.add('savgol', d, w, p)</tt> - Savitzky-Golay transformation, d is derivative (default 0), w is width of filter window (default 3, only odd numbers), p is polynomial order (default 1).</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% prep
+% |prep| is a class for data preprocessing.
+%
+%% 
+%  
+   p = prep();
+ 
+%%
+% The main purpose of the |prep| class is to give a possibility for 
+% building a list of preprocessing methods, changing their options and 
+% applying the methods to a dataset. Actually |prep| object can be applied both 
+% to datasets (including |mdaimage| images) as well as to matrices.
+% When it is applied to dataset the data values will be changed in the
+% existent object, there is now need to create a new variable. If it is
+% applied to a conventional Matlab matrix one has to reassign the values.
+%
+% It remembers all parameters, including those, calculated at first run.
+% For example if mean centering is used, when a preprocessing object
+% applied to a dataset a vector of mean values will be calculated and
+% stored in the object. So when we use it next time, the mean values will
+% not be calculated again. This is essential, e.g. when we calibrate model
+% and the apply it to a new data. If one want to clear all calculations and
+% apply the list of methods to a new data from the scratch, just take a
+% copy of the object.
+%
+%% Examples
+% 
+%
+%% 
+%  
+   load simdata;
+
+   % set up list with preprocessing methods and apply
+   p = prep();
+   p.add('savgol', 0, 5, 1);
+   p.add('snv');
+   p.apply(spectra);
+
+   figure
+   plot(spectra)
+
+   % displaying the preprocessing object 
+   show(p)
+ 
+%% Methods
+% 
+% <html><table class="methods-list">
+% <tr><td id="prep.add" class="name"><span>&plus;</span>add</td><td class="text">adds a method to the object</td></tr>
+% <tr><td id="prep.remove" class="name"><span>&plus;</span>remove</td><td class="text">removes a method from the object</td></tr>
+% <tr><td id="prep.show" class="name"><span>&plus;</span>show</td><td class="text">shows information about the object</td></tr>
+% <tr><td id="prep.apply" class="name"><span>&plus;</span>apply</td><td class="text">apply list of methods from the object to a data</td></tr>
+% </table></html>
+%
+%
+%% Preprocessing methods
+% 
+% |p.add('center')| - mean centering of data.
+%
+% |p.add('scale')| - standardization (scaling to standard deviation).
+%
+% |p.add('snv')| - standard normal variate preprocessing to correct scatter effects.
+%
+% |p.add('savgol', d, w, p)| - Savitzky-Golay transformation, d is derivative (default 0), w is
+% width of filter window (default 3, only odd numbers), p is polynomial order (default 1).
+%
+
+##### SOURCE END #####
+--></body></html>

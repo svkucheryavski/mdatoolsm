@@ -1,0 +1,75 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.gbar</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="mdadata.gbar.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.gbar</h1><!--introduction--><p><tt>gbar</tt> makes a group bar plot</p><!--/introduction--><pre class="codeinput">   gbar(data)
+   gbar(data, <span class="string">'ParamName'</span>, ParamValue, <span class="keyword">...</span><span class="comment">)</span>
+</pre><p>The method makes a bar plot for two or more data rows considered as groups. By default, each group has its own color.</p><h2>Parameters<a name="3"></a></h2><p><table class="properties-list">
+<tr><td class="name">Labels</td><td class="text">show or not labels for the bars. Possible  values are <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects, <tt>'numbers'</tt>  for their numbers and <tt>'values'</tt> for the bar values (height). This   option does not work with HG2 graphics engine (Matlab 2014b), the   solution is coming in next release.</td></tr>
+<tr><td class="name">LabelsSigfig</td><td class="text">how many significant figures to use for the label values.</td></tr>
+<tr><td class="name">Legend</td><td class="text">shor or nor legend for the groups. Possible values are  <tt>'on'</tt> (default) and <tt>'off'</tt>.</td></tr>
+<tr><td class="name">LegendLocation</td><td class="text">if legend is on, defines location for the legend.   The values are similar to what are used in <tt>legend()</tt> function.</td></tr>
+<tr><td class="name">EdgeColor</td><td class="text">one value or a vector with values (one for each group)   for the bar edge color. If color is specified using RGB values, the  parameter should be a matrix with as many rows as many groups  exist.</td></tr>
+<tr><td class="name">FaceColor</td><td class="text">one value or a vector with values (one for each group)   for the bar face color. If color is specified using RGB values, the  parameter should be a matrix with as many rows as many groups  exist.</td></tr>
+</table></p><h2>Examples<a name="4"></a></h2><pre class="codeinput">   <span class="comment">% prepare a dataset</span>
+   v = [75 40 32; 68 35 31];
+   data = mdadata(v, {<span class="string">'Cal'</span>, <span class="string">'Val'</span>}, {<span class="string">'PC1'</span>, <span class="string">'PC2'</span>, <span class="string">'PC3'</span>},<span class="keyword">...</span>
+     {<span class="string">'Explained variance'</span>, <span class="string">'Components'</span>}, <span class="string">'Explained variance'</span>);
+
+   <span class="comment">% group plot without factors</span>
+   figure
+   subplot(1, 2, 1)
+   gbar(data)
+
+   subplot(1, 2, 2)
+   gbar(data, <span class="string">'FaceColor'</span>, <span class="string">'rb'</span>, <span class="string">'Labels'</span>, <span class="string">'on'</span>, <span class="string">'LegendLocation'</span>, <span class="string">'best'</span>)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.gbar
+% |gbar| makes a group bar plot 
+%
+%% 
+%  
+   gbar(data)
+   gbar(data, 'ParamName', ParamValue, ...)
+ 
+%%
+% The method makes a bar plot for two or more data rows considered as 
+% groups. By default, each group has its own color. 
+%
+%% Parameters
+% 
+% <html><table class="properties-list">
+% <tr><td class="name">Labels</td><td class="text">show or not labels for the bars. Possible  values are <tt>'none'</tt> (default), <tt>'names'</tt> for name of objects, <tt>'numbers'</tt>  for their numbers and <tt>'values'</tt> for the bar values (height). This   option does not work with HG2 graphics engine (Matlab 2014b), the   solution is coming in next release.</td></tr>
+% <tr><td class="name">LabelsSigfig</td><td class="text">how many significant figures to use for the label values.</td></tr>
+% <tr><td class="name">Legend</td><td class="text">shor or nor legend for the groups. Possible values are  <tt>'on'</tt> (default) and <tt>'off'</tt>.</td></tr>
+% <tr><td class="name">LegendLocation</td><td class="text">if legend is on, defines location for the legend.   The values are similar to what are used in <tt>legend()</tt> function.</td></tr>
+% <tr><td class="name">EdgeColor</td><td class="text">one value or a vector with values (one for each group)   for the bar edge color. If color is specified using RGB values, the  parameter should be a matrix with as many rows as many groups  exist.</td></tr>
+% <tr><td class="name">FaceColor</td><td class="text">one value or a vector with values (one for each group)   for the bar face color. If color is specified using RGB values, the  parameter should be a matrix with as many rows as many groups  exist.</td></tr>
+% </table></html>
+%
+%
+%% Examples
+% 
+%% 
+%  
+     
+   % prepare a dataset
+   v = [75 40 32; 68 35 31];
+   data = mdadata(v, {'Cal', 'Val'}, {'PC1', 'PC2', 'PC3'},...
+     {'Explained variance', 'Components'}, 'Explained variance');
+   
+   % group plot without factors
+   figure
+   subplot(1, 2, 1)
+   gbar(data)
+   
+   subplot(1, 2, 2)
+   gbar(data, 'FaceColor', 'rb', 'Labels', 'on', 'LegendLocation', 'best')
+
+##### SOURCE END #####
+--></body></html>

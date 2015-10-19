@@ -1,0 +1,75 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mdadata.ttest</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-11-25"><meta name="DC.source" content="mdadata.ttest.m"><link rel="stylesheet" href="../assets/mdatools.css" type="text/css"></head><body><script src="../assets/jquery.js"></script><script>var show_toc = false; var is_method = true;</script><script src="../assets/mdatools.js"></script><div class="content"><h1>mdadata.ttest</h1><!--introduction--><p><tt>ttest</tt> calculates one-sample t-test p-value for each column of dataset or for the first column, which values are split into groups.</p><!--/introduction--><pre class="codeinput">   p = ttest(data);
+   p = ttest(data, mu);
+   p = ttest(data, factors);
+   p = ttest(data, factors, mu);
+</pre><p>By default, method calculates p-value for each column of the <tt>data</tt> object. However if a dataset with factors is also provided the method will calculate the value only for the first column of <tt>data</tt> by splitting its values into groups, corresponded to all possible combination of the factors.</p><p>Argument <tt>mu</tt> is the tested average. By default it is 0. The p-values are calculated for each tail and both.</p><h2>Examples<a name="3"></a></h2><pre class="codeinput">   load <span class="string">people</span>
+
+   <span class="comment">% calculate p-values for each column</span>
+   p = ttest(people);
+   show(p)
+
+   <span class="comment">% mark columns "Sex" and "Region" as a factors</span>
+   people.factor(<span class="string">'Sex'</span>, {<span class="string">'Male'</span>, <span class="string">'Female'</span>})
+   people.factor(<span class="string">'Region'</span>, {<span class="string">'A'</span>, <span class="string">'B'</span>})
+
+   <span class="comment">% calculate p-values for "Height" separately for each sex and region.</span>
+   s = ttest(people(:, <span class="string">'Height'</span>), people(:, {<span class="string">'Sex'</span>, <span class="string">'Region'</span>}));
+   show(s)
+
+   s = ttest(people(:, <span class="string">'Height'</span>), people(:, {<span class="string">'Sex'</span>, <span class="string">'Region'</span>}), 170);
+   show(s)
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% mdadata.ttest
+% |ttest| calculates one-sample t-test p-value for each column of dataset or 
+% for the first column, which values are split into groups.
+%
+%% 
+%  
+   p = ttest(data);
+   p = ttest(data, mu);
+   p = ttest(data, factors);
+   p = ttest(data, factors, mu);
+ 
+%%
+% By default, method calculates p-value for each column of the
+% |data| object. However if a dataset with factors is also provided the
+% method will calculate the value only for the first column of
+% |data| by splitting its values into groups, corresponded to all
+% possible combination of the factors.
+%
+% Argument |mu| is the tested average. By default it is 0. 
+% The p-values are calculated for each tail and both.
+%
+%% Examples
+% 
+%
+%% 
+%  
+   load people
+
+   % calculate p-values for each column
+   p = ttest(people);
+   show(p)
+
+   % mark columns "Sex" and "Region" as a factors
+   people.factor('Sex', {'Male', 'Female'})
+   people.factor('Region', {'A', 'B'})
+
+   % calculate p-values for "Height" separately for each sex and region.
+   s = ttest(people(:, 'Height'), people(:, {'Sex', 'Region'}));
+   show(s)
+   
+   s = ttest(people(:, 'Height'), people(:, {'Sex', 'Region'}), 170);
+   show(s)
+
+##### SOURCE END #####
+--></body></html>
