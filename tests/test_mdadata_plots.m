@@ -66,7 +66,7 @@
 
    % group by logical values
    subplot(1, 3, 2)
-   scatter(people(:, 1:2), 'Colorby', v > 300);
+   scatter(people(:, 1:2), 'Colorby', people(:, 'Sex'));
    
    % group by one-column mdadata object
    subplot(1, 3, 3)

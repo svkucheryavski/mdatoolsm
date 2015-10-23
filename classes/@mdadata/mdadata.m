@@ -2871,7 +2871,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
                   (size(cmap, 1) - 1)) + 1; 
             end
             
-            disp(ind)
             hp = zeros(size(cmap, 1), 1);
             hold on
             for k = 1:size(cmap, 1)
