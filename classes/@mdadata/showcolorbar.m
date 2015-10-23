@@ -1,4 +1,4 @@
-function h = showColorbar(cmap, cgroup, colorbarTitle, dx, dy)
+function h = showcolorbar(cmap, cgroup, colorbarTitle, dx, dy)
 % showColorbar shows colorbar on a plot
 %
 % Inputs:
@@ -42,7 +42,13 @@ function h = showColorbar(cmap, cgroup, colorbarTitle, dx, dy)
    % show labels for colorbar elements
    x = linspace(xinit, xinit + (n - 1) * cbWidth, ng);
    y = ones(1, ng) * yinit - cbHeight * 0.75;
-   v = num2str(linspace(min(cgroup), max(cgroup), ng)', 3);
+   
+   v = unique(cgroup);
+   if numel(v) > ng
+      v = num2str(linspace(min(cgroup), max(cgroup), ng)', 3);
+   else
+      v = num2str(v, 3);
+   end
    
    sz = get(gca, 'FontSize');
    h.labels = text(x + cbWidth/2, y, v, 'FontSize', sz * 0.85, 'HorizontalAlignment','center');

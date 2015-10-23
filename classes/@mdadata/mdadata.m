@@ -2864,7 +2864,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
             hp = plot(double(x), double(y), 'Color', mc, 'Marker', mr, 'MarkerFaceColor', mfc, ...
                'MarkerEdgeColor', mec, 'MarkerSize', ms, 'LineStyle', 'none');              
          else
-            ind = fix((cgroup - min(cgroup)) / (max(cgroup) - min(cgroup)) * (size(cmap, 1) - 1)) + 1;                  
+            [ucgroup, ~, ind] = unique(cgroup);
+            if numel(ucgroup) > size(cmap, 1)
+               % number of values in color group larger than number of colors
+               ind = fix((cgroup - min(cgroup)) / (max(cgroup) - min(cgroup)) * ...
+                  (size(cmap, 1) - 1)) + 1; 
+            end
+            
+            disp(ind)
             hp = zeros(size(cmap, 1), 1);
             hold on
             for k = 1:size(cmap, 1)
