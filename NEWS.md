@@ -1,3 +1,7 @@
+v.0.0.16
+========
+* color grouping works better if number of groups is small (up to 8)
+
 v.0.0.15
 ========
 * fixed compatibility issues with R2015b

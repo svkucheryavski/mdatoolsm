@@ -65,6 +65,5 @@ function [cmap, cgroup, args, isColorbar, colorbarTitle] = getplotcolorsettings(
    if isempty(colorbarTitle) || ~isColorbar
       colorbarTitle = '';
    end
-   
 end
 
