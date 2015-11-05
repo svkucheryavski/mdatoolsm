@@ -1,3 +1,7 @@
+v.0.0.17
+========
+* Multiplicative Scatter correction added to preprocessing
+
 v.0.0.16
 ========
 * color grouping works better if number of groups is small (up to 8)
