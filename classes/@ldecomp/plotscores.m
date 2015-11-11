@@ -31,8 +31,10 @@ function varargout = plotscores(obj, varargin)
       h = scatter(obj.scores(:, comp), varargin{:});
    elseif strcmp(type, 'density') ||   strcmp(type, 'densscatter')
       h = densscatter(obj.scores(:, comp), varargin{:});
-%    elseif strcmp(type, 'line')   
-%       h = gplot(obj.scores(:, comp)', varargin{:});
+   elseif strcmp(type, 'line')   
+      h = gplot(obj.scores(:, comp)', varargin{:});
+   elseif strcmp(type, 'bar')   
+      h = gbar(obj.scores(:, comp)', varargin{:});
    else
       error('Wrong plot type!');
    end
