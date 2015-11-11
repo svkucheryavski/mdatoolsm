@@ -38,7 +38,7 @@ classdef mdapca < handle
 %  "TestSet" - an 'mdadata' object for test set validation.
 %
 %  "Alpha" - significance level for calculation of statistical limits
-%  for T2 and Q2 residuals (default 0.05).
+%  for T2 and Q residuals (default 0.05).
 %
 %  "Method" - which method to use for calculation of principal
 %  components. Default value is "svd" (Singular Value Decomposition), 
@@ -309,7 +309,7 @@ classdef mdapca < handle
          idx = mdacrossval(nObj, obj.cv);
          [nSeg, seglen, nRep] = size(idx);
       
-         Q2 = zeros(nObj, obj.nComp);  
+         Q = zeros(nObj, obj.nComp);  
          T2 = zeros(nObj, obj.nComp);   
          
          nComp = min([obj.nComp, nObj - seglen - 1, nVar]);
@@ -329,13 +329,13 @@ classdef mdapca < handle
                   m = mdapca(cal, nComp, 'Prep', obj.prep, 'Scale', 'off', 'Center', 'off');
                   res = m.predict(val);
                   
-                  Q2(vind, :) = Q2(vind, :) + res.Q2.values;
+                  Q(vind, :) = Q(vind, :) + res.Q.values;
                   T2(vind, :) = T2(vind, :) + res.T2.values;
                end
             end
          end
          
-         Q2 = Q2 ./ nRep;
+         Q = Q ./ nRep;
          T2 = T2 ./ nRep;
          
          T2 = mdadata(T2, data.rowNames, obj.loadings.colNames, obj.calres.scores.dimNames);
@@ -343,12 +343,12 @@ classdef mdapca < handle
          T2.rowFullNames = obj.calres.scores.rowFullNames;
          T2.colFullNames = obj.calres.scores.colFullNames;
 
-         Q2 = mdadata(Q2, T2.rowNames, T2.colNames, T2.dimNames, 'Q2 residuals');
-         Q2.rowFullNames = T2.rowFullNamesAll;
-         Q2.colFullNames = T2.colFullNamesAll;
+         Q = mdadata(Q, T2.rowNames, T2.colNames, T2.dimNames, 'Q residuals');
+         Q.rowFullNames = T2.rowFullNamesAll;
+         Q.colFullNames = T2.colFullNamesAll;
          
          % in CV results there are no scores only residuals and variances
-         cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q2, T2, []);
+         cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q, T2, []);
       end
       
       function summary(obj)

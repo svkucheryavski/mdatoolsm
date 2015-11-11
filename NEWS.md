@@ -1,6 +1,9 @@
-v.0.0.17
+v.0.1.0
 ========
 * Multiplicative Scatter correction added to preprocessing
+* any math function (e.g. log, power, etc) can now be added to preprocessing object
+* several changes in names of variables and parameters (e.g. Q2 -> Q)
+* bug fixes and optimization
 
 v.0.0.16
 ========

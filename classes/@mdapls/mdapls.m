@@ -143,14 +143,14 @@ classdef mdapls < regmodel
          xdecomp = ldecomp(xscores, obj.xloadings, X);
 
          if ~isempty(yref)
-            [yT2, yQ2, ~, ytnorm] = ldecomp.getDistances(xscores, obj.yloadings, yrefc);
+            [yT2, yQ, ~, ytnorm] = ldecomp.getDistances(xscores, obj.yloadings, yrefc);
             % mdadata for Y scores
             yscores = mdadata(yscores, X.rowNamesAll, obj.weights.colFullNames);
             yscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
             yscores.name = 'Y scores';
             yscores.excluderows(X.excludedRows);
 
-            ydecomp = ldecomp(yscores, obj.yloadings, yrefc, ytnorm, sum(yrefc.values(:).^2), yQ2, yT2);
+            ydecomp = ldecomp(yscores, obj.yloadings, yrefc, ytnorm, sum(yrefc.values(:).^2), yQ, yT2);
          else
             ydecomp = [];
          end   
@@ -188,9 +188,9 @@ classdef mdapls < regmodel
          [nSeg, seglen, nRep] = size(idx);
       
          ycv = zeros(nObj, nResp, nComp);  
-         xQ2 = zeros(nObj, nComp);  
+         xQ = zeros(nObj, nComp);  
          xT2 = zeros(nObj, nComp);  
-         yQ2 = zeros(nObj, nComp);  
+         yQ = zeros(nObj, nComp);  
          yT2 = zeros(nObj, nComp);  
          jkcoeffs = zeros(X.nNumCols, nResp, nComp, nSeg);
          
@@ -215,12 +215,12 @@ classdef mdapls < regmodel
                   m = mdapls.cvfit(Xcal, ycal, nComp, prep);
                   res = mdapls.cvpred(Xval, yval, m);
                   
-                  [T2x, Q2x, ~, ~] = ldecomp.getDistances(mdadata(res.xscores), mdadata(m.xloadings), mdadata(res.X), mdadata(m.xtnorm));
-                  xQ2(vind, :) = xQ2(vind, :) + Q2x.valuesAll;
+                  [T2x, Qx, ~, ~] = ldecomp.getDistances(mdadata(res.xscores), mdadata(m.xloadings), mdadata(res.X), mdadata(m.xtnorm));
+                  xQ(vind, :) = xQ(vind, :) + Qx.valuesAll;
                   xT2(vind, :) = xT2(vind, :) + T2x.valuesAll;
 
-                  [T2y, Q2y, ~, ~] = ldecomp.getDistances(mdadata(res.xscores), mdadata(m.yloadings), mdadata(res.y), mdadata(m.ytnorm));
-                  yQ2(vind, :) = yQ2(vind, :) + Q2y.valuesAll;
+                  [T2y, Qy, ~, ~] = ldecomp.getDistances(mdadata(res.xscores), mdadata(m.yloadings), mdadata(res.y), mdadata(m.ytnorm));
+                  yQ(vind, :) = yQ(vind, :) + Qy.valuesAll;
                   yT2(vind, :) = yT2(vind, :) + T2y.valuesAll;
                   
                   jkcoeffs(:, :, :, iSeg) = jkcoeffs(:, :, :, iSeg) + m.coeffs;
@@ -231,9 +231,9 @@ classdef mdapls < regmodel
          
          jkcoeffs = jkcoeffs ./ nRep;
          ycv = ycv ./ nRep;
-         yQ2 = yQ2 ./ nRep;
+         yQ = yQ ./ nRep;
          yT2 = yT2 ./ nRep;
-         xQ2 = xQ2 ./ nRep;
+         xQ = xQ ./ nRep;
          xT2 = xT2 ./ nRep;
          
          wayNames = {X.rowNames, y.colNames, obj.xloadings.colNames};
@@ -247,21 +247,21 @@ classdef mdapls < regmodel
          xT2.rowFullNames = X.rowFullNames;
          xT2.colFullNames = obj.xloadings.colFullNames;
 
-         xQ2 = mdadata(xQ2, xT2.rowNames, xT2.colNames, xT2.dimNames, 'Q2 residuals');
-         xQ2.rowFullNames = xT2.rowFullNamesAll;
-         xQ2.colFullNames = xT2.colFullNamesAll;
+         xQ = mdadata(xQ, xT2.rowNames, xT2.colNames, xT2.dimNames, 'Q residuals');
+         xQ.rowFullNames = xT2.rowFullNamesAll;
+         xQ.colFullNames = xT2.colFullNamesAll;
 
-         xdecomp = ldecomp([], [], [], obj.calres.xdecomp.tnorm, obj.calres.xdecomp.totvar, xQ2, xT2, []);
+         xdecomp = ldecomp([], [], [], obj.calres.xdecomp.tnorm, obj.calres.xdecomp.totvar, xQ, xT2, []);
 
          yT2 = mdadata(yT2, X.rowNames, obj.yloadings.colNames, obj.calres.xdecomp.scores.dimNames);
          yT2.name = 'T2 residuals';
          yT2.rowFullNames = X.rowFullNames;
          yT2.colFullNames = obj.yloadings.colFullNames;
 
-         yQ2 = mdadata(yQ2, yT2.rowNames, yT2.colNames, yT2.dimNames, 'Q2 residuals');
-         yQ2.rowFullNames = yT2.rowFullNamesAll;
-         yQ2.colFullNames = yT2.colFullNamesAll;
-         ydecomp = ldecomp([], [], [], obj.calres.ydecomp.tnorm, obj.calres.ydecomp.totvar, yQ2, yT2, []);
+         yQ = mdadata(yQ, yT2.rowNames, yT2.colNames, yT2.dimNames, 'Q residuals');
+         yQ.rowFullNames = yT2.rowFullNamesAll;
+         yQ.colFullNames = yT2.colFullNamesAll;
+         ydecomp = ldecomp([], [], [], obj.calres.ydecomp.tnorm, obj.calres.ydecomp.totvar, yQ, yT2, []);
 
          res.res = plsres(xdecomp, ydecomp, ycv, y);
          res.jkcoeffs = jkcoeffs;
