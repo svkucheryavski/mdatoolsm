@@ -3421,6 +3421,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
 
          if isempty(x)            
             x = 1:nCols;
+            showTicks = true;
+         else
+            showTicks = false;
          end   
 
          if strcmp(showLabels, 'names')
@@ -3464,8 +3467,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
             
          box on
-         set(gca, 'XTick', x(xtick), 'XTickLabel', xticklabels(xtick));
-
+         if showTicks
+             set(gca, 'XTick', x(xtick), 'XTickLabel', xticklabels(xtick));
+         end   
          dx = x(2) - x(1);
          xlim = [min(x) - dx/2 max(x) + dx/2];
          

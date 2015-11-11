@@ -10,14 +10,13 @@ function varargout = plotscores(obj, comp, varargin)
    args = mdadata.getgscatteroptions(3, varargin{:});
    
    hold on
-   h{1} = obj.calres.plotscores(comp, args{1}{:});
+   h(1) = obj.calres.plotscores(comp, args{1}{:});
    legendStr{1} = 'cal';
       
    if ~isempty(obj.testres)
-      h(end + 1) = obj.testres.plotscores(comp, args{3}{:});
+      h(2) = obj.testres.plotscores(comp, args{3}{:});
       legendStr{end + 1} = 'test';
    end
-   
    hold off
    box on
    if numel(legendStr) > 1

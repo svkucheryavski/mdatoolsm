@@ -7,8 +7,11 @@ function varargout = plotcumexpvar(obj, varargin)
    end
    
    [mr, varargin] = getarg(varargin, 'Marker');
-   if strcmp(type, 'line') && isempty(mr)
-      varargin = [varargin 'Marker', '.'];
+   if strcmp(type, 'line') 
+      if isempty(mr)
+         mr = '.';
+      end    
+      varargin = [varargin 'Marker', mr];      
    end   
    
    if strcmp(type, 'line')

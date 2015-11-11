@@ -5,14 +5,18 @@ function varargout = plotexpvar(obj, varargin)
    end
    
    mr = getarg(varargin, 'Marker');
-   if strcmp(type, 'line') && isempty(mr)
-      varargin = [varargin 'Marker', '.'];
+   [mr, varargin] = getarg(varargin, 'Marker');
+   if strcmp(type, 'line') 
+      if isempty(mr)
+         mr = '.';
+      end    
+      varargin = [varargin 'Marker', mr];      
    end   
    
    if strcmp(type, 'line')
-      h = plot(obj.variance(:, 1)', varargin{:});
+      h = plot(obj.variance(:, 1)', 1:obj.variance.nRows, varargin{:});
    elseif strcmp(type, 'bar')   
-      h = bar(obj.variance(:, 1)', varargin{:});
+      h = bar(obj.variance(:, 1)', 1:obj.variance.nRows, varargin{:});
    else
       error('Wrong plot type!');
    end
