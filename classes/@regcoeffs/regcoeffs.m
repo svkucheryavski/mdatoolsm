@@ -127,7 +127,6 @@ classdef regcoeffs < handle
          if isempty(varargin)
             varargin = {':', obj.nComp};
          end   
-         varargin
          out = obj.pvalues_(varargin{:}).values;
       end
       
