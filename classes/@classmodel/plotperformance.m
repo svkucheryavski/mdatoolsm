@@ -3,7 +3,7 @@ function varargout = plotperformance(obj, varargin)
    
    [restype, varargin] = getarg(varargin, 'Restype');
    if isempty(restype)
-      restype = 'missclassified';
+      restype = 'misclassified';
    end   
 
    i = find(strcmp(varargin, 'Type'), 1);

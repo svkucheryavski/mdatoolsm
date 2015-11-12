@@ -1,6 +1,6 @@
 function m = test_simca(type, casen)
    clc
-   clear classes
+   clear
 
    if nargin < 1
       type = 'people';
@@ -12,9 +12,9 @@ function m = test_simca(type, casen)
    
    switch type
       case 'people'
-         ncomp = 3;
+         ncomp = 2;
          d = load('people');
-         d.people.sort('Region', 'descend')
+         d.people.sort('Region', 'descend')         
          oX = d.people(:, 1:10);
          oc = d.people(:, 11);
          oc.factor(1, {'A', 'B'});
@@ -23,11 +23,10 @@ function m = test_simca(type, casen)
          factorLevels = { {'Male', 'Female'}};
          excludedCols = {'Income'};
          excludedRows = 1:8:32;
-         cind = true(oX.nRows, 1);
-         cind(1:4:end) = false;         
+         cind = d.people(:, 'Region') == -1;
          scale = 'on';
          center = 'on';
-         cname = 'B';
+         cname = 'A';
          p = prep();
    end      
    
@@ -35,14 +34,17 @@ function m = test_simca(type, casen)
    exR(excludedRows) = true;
    excludedRows = exR;
          
-   X = copy(oX);
-   c = copy(oc);
-   
+   Xc = oX(cind, :);
+   cc = oc(cind, :);
+
+   Xt = oX;
+   ct = oc;
+      
    switch casen
       case 1
          fprintf('1. Testing simple model\n')   
          
-         m = simca(X, c, cname, ncomp, 'Center', center, 'Scale', scale);
+         m = mdasimca(Xc, cname, ncomp, 'Center', center, 'Scale', scale);
          m.info = info;   
          showPlotsForResult(m.calres, cname, 'Calibration');      
          showPlotsForModel(m, cname);
@@ -51,14 +53,14 @@ function m = test_simca(type, casen)
          fprintf('2. Testing data with excluded colums and rows\n')   
          
          for i = 1:numel(factorCols);
-            X.factor(factorCols{i}, factorLevels{i});
+            Xc.factor(factorCols{i}, factorLevels{i});
          end
          
-         X.excludecols(excludedCols);
-         X.excluderows(excludedRows);
-         c.excluderows(excludedRows);
+         Xc.excludecols(excludedCols);
+         Xc.excluderows(excludedRows(cind));
+         cc.excluderows(excludedRows(cind));
 
-         m = mdaplsda(X, c, cname, ncomp, 'Center', center, 'Scale', scale);
+         m = mdasimca(Xc, cname, ncomp, 'Center', center, 'Scale', scale);
          m.info = info;
 
          summary(m);
@@ -68,56 +70,48 @@ function m = test_simca(type, casen)
    
       case 3
          fprintf('3. Test set validation\n')   
-         Xc = X(cind, :);
-         cc = c(cind, :);
-
-         Xt = X(~cind, :);
-         ct = c(~cind, :);
-
-         m = mdaplsda(Xc, cc, cname, ncomp, 'TestSet', {Xt, ct}, 'Scale', scale);
+         m = mdasimca(Xc, cname, ncomp, 'TestSet', {Xt, ct}, 'Scale', scale);
          m.info = info;
          summary(m);
          summary(m.calres);
          summary(m.testres);
-         showPlotsForResult(m.calres, 'B', 'Calibration');
-         showPlotsForResult(m.testres, 'B', 'Test');
-         showPlotsForModel(m, 'B');
+         
+         showPlotsForResult(m.calres, cname, 'Calibration');
+         showPlotsForResult(m.testres, cname, 'Test');
+         showPlotsForModel(m, cname);
 
       case 4
          fprintf('4. Cross-validation\n')   
-         X = copy(oX);
-         c = copy(oc);
 
-         m = mdaplsda(X, c, ncomp, 'CV', {'rand', 8, 8}, 'Scale', scale);
+         m = mdasimca(Xc, cname, ncomp, 'CV', {'rand', 8, 8}, 'Scale', scale);
          m.info = info;
          summary(m);
          summary(m.calres);
          summary(m.cvres);
-         showPlotsForResult(m.calres);
-         showPlotsForResult(m.cvres);
-         showPlotsForModel(m);
+         showPlotsForResult(m.calres, cname, 'Calibration');
+         showPlotsForResult(m.cvres, cname, 'Cross-validation');
+         showPlotsForModel(m, cname);
 
       case 5
          fprintf('5. Test set and cross-validation for data with factors and hidden values\n')   
 
          for i = 1:numel(factorCols);
-            X.factor(factorCols{i}, factorLevels{i});
+            Xc.factor(factorCols{i}, factorLevels{i});
+            Xt.factor(factorCols{i}, factorLevels{i});
          end
-         X.excludecols(excludedCols);      
-         Xc = X(cind, :);
-         cc = c(cind, :);
-         
-         Xt = X(~cind, :);
-         ct = c(~cind, :);
+         Xc.excludecols(excludedCols);      
+         Xt.excludecols(excludedCols);      
 
          Xc.excluderows(excludedRows(cind));
          cc.excluderows(excludedRows(cind));
 
          Xt.excluderows(excludedRows(~cind));
          ct.excluderows(excludedRows(~cind));
-
-         m = mdaplsda(Xc, cc, cname, ncomp, 'TestSet', {Xt, ct}, 'CV', {'rand', 8, 4}, 'Prep', {p, prep()}, 'Scale', scale);
+         
+         m = mdasimca(Xc, cname, ncomp, 'TestSet', {Xt, ct}, 'CV', {'rand', 8, 4}, 'Prep', ...
+            p, 'Scale', scale);
          m.info = info;
+         
          plotclassification(m, 'Labels', 'names', 'ShowExcluded', 'on');
          showPlotsForModel(m, cname);
          showPlotsForResult(m.calres, cname, 'Cal');
@@ -135,68 +129,51 @@ function showPlotsForModel(m, cname)
    plot(m)
 
    % prediction and regcoeffs plots
-   figure('Name', 'Model: predictions')
-   subplot(2, 2, 1)
-   plotpredictions(m);   
-   subplot(2, 2, 2)
-   plotpredictions(m, 1, 1, 'Labels', 'names', 'ShowExcluded', 'on');
-
    plotclassification(m);
    plotclassification(m, cname);
-   plotclassification(m, cname, 2);
+   plotclassification(m, cname, 1);
    
-   figure('Name', 'Model: regression coefficients')
+   figure('Name', 'Model: loadings')
    subplot(2, 2, 1)
-   plotregcoeffs(m);
+   plotloadings(m);
    subplot(2, 2, 2)
-   plotregcoeffs(m, 1,'Type', 'line');
+   plotloadings(m, 1 ,'Type', 'line');
    subplot(2, 2, 3)
-   plotregcoeffs(m, 1, 2, 'Type', 'line');
+   plotloadings(m, 1:2, 'Type', 'line');
    subplot(2, 2, 4)
-   plotregcoeffs(m, 1, 'Type', 'bar', 'Labels', 'names', 'CI', 'off');
+   plotloadings(m, 1, 'Type', 'bar', 'Labels', 'names');
 
    figure('Name', 'Model: Y residuals')
    subplot(2, 2, 1)
-   plotyresiduals(m);
+   plotresiduals(m);
    subplot(2, 2, 2)
-   plotyresiduals(m, 1, 'Labels', 'names');
-   subplot(2, 2, 1)
-   plotyresiduals(m, 1, 2, 'Labels', 'names');
-   subplot(2, 2, 2)
-   plotyresiduals(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
+   plotresiduals(m, 2, 'Labels', 'names');
+   subplot(2, 2, 3)
+   plotresiduals(m, 1, 2, 'Labels', 'names');
+   subplot(2, 2, 4)
+   plotresiduals(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
 
    % Scores
    figure('Name', 'Model: scores')
    subplot(2, 2, 1)
-   plotxscores(m);
+   plotscores(m);
    subplot(2, 2, 2)
-   plotxscores(m, [2 3], 'Labels', 'names', 'ShowExcluded', 'on');
+   plotscores(m, [1 2], 'Labels', 'names', 'ShowExcluded', 'on');
    subplot(2, 2, 3)
-   plotxyscores(m);
+   plotscores(m);
    subplot(2, 2, 4)
-   plotxyscores(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
+   plotscores(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
    
    % explained variance for X
    figure('Name', 'Model: explained variance for X')
    subplot(2, 2, 1)
-   plotxexpvar(m);
+   plotexpvar(m);
    subplot(2, 2, 2)
-   plotxexpvar(m, 'Type', 'bar');
+   plotexpvar(m, 'Type', 'bar');
    subplot(2, 2, 3)
-   plotxcumexpvar(m);
+   plotcumexpvar(m);
    subplot(2, 2, 4)
-   plotxcumexpvar(m, 'Type', 'bar');
-
-   % explained variance for Y
-   figure('Name', 'Model: explained variance for Y')
-   subplot(2, 2, 1)
-   plotyexpvar(m);
-   subplot(2, 2, 2)
-   plotyexpvar(m, 'Type', 'bar');
-   subplot(2, 2, 3)
-   plotycumexpvar(m);
-   subplot(2, 2, 4)
-   plotycumexpvar(m, 'Type', 'bar');
+   plotcumexpvar(m, 'Type', 'bar');
    
    % Performance
    figure('Name', 'Model: performance')
@@ -221,11 +198,11 @@ function showPlotsForResult(res, cname, name)
    % prediction and regcoeffs plots
    figure('Name', sprintf('Result: predictions (%s)', name))
    subplot(2, 2, 1)
-   plotpredictions(res);
+   plotresiduals(res);
    subplot(2, 2, 2)
    plotclassification(res, 'Labels', 'names', 'ShowExcluded', 'on');
    subplot(2, 2, 3)
-   plotpredictions(res, cname);
+   plotresiduals(res, 1);
    subplot(2, 2, 4)
    plotclassification(res, 'Labels', 'names', 'ShowExcluded', 'on');
 

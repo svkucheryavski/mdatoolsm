@@ -1,7 +1,7 @@
 classdef res < handle
    
    properties 
-      info
+      %info
    end
    
    properties (SetAccess = 'protected')

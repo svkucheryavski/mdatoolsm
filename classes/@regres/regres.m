@@ -1,5 +1,9 @@
 classdef regres < res
       
+   properties
+      info
+   end
+   
    properties (SetAccess = 'protected')
       yref      
    end

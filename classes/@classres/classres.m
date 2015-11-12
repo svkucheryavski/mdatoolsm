@@ -97,7 +97,7 @@ classdef classres < res
          nClasses = obj.nClasses;
          
          cpred = obj.cpred_.values_(~obj.cpred_.excludedRows, :, :);
-         yref = obj.yref.values;
+         cref = obj.cref.values;
          
          fn = zeros(nComp, nClasses);
          fp = zeros(nComp, nClasses);
@@ -105,14 +105,14 @@ classdef classres < res
          
          for i = 1:obj.nClasses
             c = squeeze(cpred(:, i, :));
-            fn(:, i) = sum(bsxfun(@times, yref(:, i) == 1, c == -1));
-            fp(:, i) = sum(bsxfun(@times, yref(:, i) == -1, c == 1));
-            tp(:, i) = sum(bsxfun(@times, yref(:, i) == 1, c == 1));
+            fn(:, i) = sum(bsxfun(@times, cref(:, i) == 1, c == -1));
+            fp(:, i) = sum(bsxfun(@times, cref(:, i) == -1, c == 1));
+            tp(:, i) = sum(bsxfun(@times, cref(:, i) == 1, c == 1));
          end
          
          sensitivity = tp ./ (tp + fn);
          specificity = tp ./ (tp + fp);
-         misclassified = (fp + fn)/size(yref, 1);
+         misclassified = (fp + fn)/size(cref, 1);
                            
          dimNames = {'', ''};
          rowNames = obj.cpred_.wayNames{3};

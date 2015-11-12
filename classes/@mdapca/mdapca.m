@@ -232,7 +232,7 @@ classdef mdapca < handle
          excludedCols = data.excludedCols(~data.factorCols);
          
          obj.prep.apply(data);
-      
+         
          loads = zeros(data.nNumColsAll, obj.nComp);
          
          switch obj.method
@@ -240,6 +240,8 @@ classdef mdapca < handle
                [loads(~excludedCols, :), eigenvals] = mdapca.pcasvd(data.numValues, obj.nComp);
             case 'ica'
                [loads(~excludedCols, :), eigenvals] = mdapca.pcaica(data.numValues, obj.nComp);               
+            case 'nipals'
+               [loads(~excludedCols, :), eigenvals] = mdapca.pcanipals(data.numValues, obj.nComp);               
             otherwise
                error('Unknown name for PCA algorithm: %s', obj.method);
          end
@@ -260,7 +262,7 @@ classdef mdapca < handle
          obj.calres = predict(obj, data, false);
          obj.calres.info = 'Results for calibration set';
          obj.limits = ldecomp.getResLimits(data, obj);
-         obj.tnorm = obj.calres.tnorm;
+         obj.tnorm = obj.calres.tnorm;         
       end   
       
       function out = predict(obj, odata, doPrep)
