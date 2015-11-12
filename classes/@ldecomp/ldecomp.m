@@ -170,11 +170,7 @@ classdef ldecomp < handle
          nVar = data.nNumCols;
          nComp = model.nComp;
          alpha = model.alpha;
-         
-         if nargin < 4
-            alpha = 0.05;
-         end
-         
+                  
          % calculate T2 limits using Hotelling T2 statistics
          T2lim = zeros(1, nComp);
          for i = 1:nComp
