@@ -305,7 +305,7 @@ classdef mdapca < handle
       function cvres = crossval(obj, data, varargin)
       % 'crossval' cross-validation of PCA model
          nObj = data.nRows;
-         nVar = data.nCols;
+         nVar = data.nNumCols;
          
          % get matrix with indices for cv segments
          idx = mdacrossval(nObj, obj.cv);
@@ -313,6 +313,7 @@ classdef mdapca < handle
       
          Q = zeros(nObj, obj.nComp);  
          T2 = zeros(nObj, obj.nComp);   
+         residuals = zeros(nObj, nVar);   
          
          nComp = min([obj.nComp, nObj - seglen - 1, nVar]);
          % loop over repetitions and segments
@@ -333,12 +334,14 @@ classdef mdapca < handle
                   
                   Q(vind, :) = Q(vind, :) + res.Q.values;
                   T2(vind, :) = T2(vind, :) + res.T2.values;
+                  residuals(vind, :) = residuals(vind, :) + res.residuals.values;
                end
             end
          end
          
          Q = Q ./ nRep;
          T2 = T2 ./ nRep;
+         residuals = residuals ./ nRep;
          
          T2 = mdadata(T2, data.rowNames, obj.loadings.colNames, obj.calres.scores.dimNames);
          T2.name = 'T2 residuals';
@@ -348,9 +351,16 @@ classdef mdapca < handle
          Q = mdadata(Q, T2.rowNames, T2.colNames, T2.dimNames, 'Q residuals');
          Q.rowFullNames = T2.rowFullNamesAll;
          Q.colFullNames = T2.colFullNamesAll;
+
+         
+         residuals = mdadata(residuals, Q.rowNamesAll, ...
+             data.colNamesAll(~(data.factorCols | data.excludedCols)),...
+             data.dimNames, 'Residuals');
+         residuals.rowFullNames = Q.rowFullNamesAll;
+         residuals.colFullNames = data.colFullNamesAll(~(data.factorCols | data.excludedCols));
          
          % in CV results there are no scores only residuals and variances
-         cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q, T2, []);
+         cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q, T2, [], residuals);
       end
       
       function summary(obj)

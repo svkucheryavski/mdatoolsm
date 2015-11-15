@@ -6,6 +6,7 @@ classdef ldecomp < handle
    
    properties (SetAccess = 'protected')
       scores
+      residuals
       variance
       modpower
       T2
@@ -18,12 +19,16 @@ classdef ldecomp < handle
    end
    
    methods
-      function obj = ldecomp(scores, loadings, data, tnorm, totvar, Q, T2, modpower)                           
+      function obj = ldecomp(scores, loadings, data, tnorm, totvar, Q, T2, modpower, residuals)                           
 %          if ~isa(scores, 'mdadata') || ~isa(loadings, 'mdadata') || ~isa(data, 'mdadata')
 %             error('The arguments should be objects of class MDADATA!');
 %          end
          
          obj.scores = scores;
+         
+         if nargin < 9
+            residuals = [];
+         end
          
          if nargin < 8
             modpower = [];
@@ -40,9 +45,10 @@ classdef ldecomp < handle
          end   
          
          if nargin < 6
-            [T2, Q, modpower, tnorm] = ldecomp.getDistances(scores, loadings, data, tnorm);            
+            [T2, Q, residuals, modpower, tnorm] = ldecomp.getDistances(scores, loadings, data, tnorm);            
          end
          
+         obj.residuals = residuals;
          obj.T2 = T2;
          obj.Q = Q;
          obj.tnorm = tnorm;
@@ -67,15 +73,14 @@ classdef ldecomp < handle
    
    methods (Static = true)
       
-      function [T2, Q, modpower, tnorm] = getDistances(scores, loadings, data, tnorm)
+      function [T2, Q, res, modpower, tnorm] = getDistances(scores, loadings, data, tnorm)
       % calculate residual distances, modelling power and singular values
       % for scores
-      
          excludedRows = scores.excludedRows;
          
          svalues = scores.valuesAll;
+         lvalues = loadings.values;
          data = data.valuesAll(:, ~(data.excludedCols | data.factorCols));
-         loadings = loadings.values;
          
          if nargin < 4
             tnorm = [];
@@ -104,7 +109,7 @@ classdef ldecomp < handle
          
          % calculate distances for each set of components
          for i = 1:nComp
-            exp = svalues(:, 1:i) * loadings(:, 1:i)';
+            exp = svalues(:, 1:i) * lvalues(:, 1:i)';
             res = data - exp;
          
             Q(:, i) = sum(res.^2, 2);
@@ -113,7 +118,7 @@ classdef ldecomp < handle
             if nObj > i
                modpower(:, i) = 1 - sqrt(sum(res.^2)/(nObj - i - 1))/datasd;
             end
-         end
+         end                  
 
          % set up datasets for output
          if isa(scores, 'mdaimage')            
@@ -121,11 +126,15 @@ classdef ldecomp < handle
             T2 = mdaimage(T2, scores.colNames);
             Q = reshape(Q, scores.height, scores.width, scores.nCols);
             Q = mdaimage(Q, scores.colNames);
+            res = reshape(res, scores.height, scores.width, size(res, 2));
+            res = mdaimage(res, scores.rowNames, loadings.rowNames);            
          else   
             T2 = mdadata(T2, scores.rowNamesAll, scores.colNames);
             T2.rowFullNames = scores.rowFullNamesAll;
             Q = mdadata(Q, scores.rowNamesAll, scores.colNames);
             Q.rowFullNames = scores.rowFullNamesAll;
+            res = mdadata(res, scores.rowNamesAll, loadings.rowNames);
+            res.rowFullNames = scores.rowFullNamesAll;
          end
          
          T2.name = 'T2 residuals';
@@ -138,6 +147,11 @@ classdef ldecomp < handle
          Q.colFullNames = scores.colFullNames;
          Q.excluderows(excludedRows);
 
+         res.name = 'Residuals';
+         res.dimNames = {scores.dimNames{1}, loadings.dimNames{1}};
+         res.colFullNames = loadings.rowFullNames;
+         res.excluderows(excludedRows);
+         
          tnorm = mdadata(tnorm, {'tnorm'}, scores.colNames, {'tnorm', scores.dimNames{2}});
          tnorm.name = 'Singular values for scores';
          tnorm.colFullNamesAll = scores.colFullNamesAll;

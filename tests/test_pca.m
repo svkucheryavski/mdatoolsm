@@ -1,4 +1,4 @@
-function test_pca(type, casen)
+function m = test_pca(type, casen)
    clc
    close all
 
@@ -7,7 +7,7 @@ function test_pca(type, casen)
    end
    
    if nargin < 2
-      casen = 4;
+      casen = 5;
    end
    
    switch type

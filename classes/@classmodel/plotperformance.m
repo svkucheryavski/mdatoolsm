@@ -49,5 +49,6 @@ function varargout = plotperformance(obj, varargin)
    if nargout > 0
       varargout{1} = h;
    end   
+   ylim([-0.05 1.05])
    title([upper(restype(1)) restype(2:end) ' (' obj.calres.classNames{nclass} ')'])
 end
