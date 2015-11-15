@@ -6,10 +6,11 @@ classdef ldecomp < handle
    
    properties (SetAccess = 'protected')
       scores
+      residuals
       variance
       modpower
       T2
-      Q2
+      Q
    end
    
    properties (SetAccess = 'protected', Hidden = true)
@@ -18,12 +19,16 @@ classdef ldecomp < handle
    end
    
    methods
-      function obj = ldecomp(scores, loadings, data, tnorm, totvar, Q2, T2, modpower)                           
+      function obj = ldecomp(scores, loadings, data, tnorm, totvar, Q, T2, modpower, residuals)                           
 %          if ~isa(scores, 'mdadata') || ~isa(loadings, 'mdadata') || ~isa(data, 'mdadata')
 %             error('The arguments should be objects of class MDADATA!');
 %          end
          
          obj.scores = scores;
+         
+         if nargin < 9
+            residuals = [];
+         end
          
          if nargin < 8
             modpower = [];
@@ -40,14 +45,15 @@ classdef ldecomp < handle
          end   
          
          if nargin < 6
-            [T2, Q2, modpower, tnorm] = ldecomp.getDistances(scores, loadings, data, tnorm);            
+            [T2, Q, residuals, modpower, tnorm] = ldecomp.getDistances(scores, loadings, data, tnorm);            
          end
          
+         obj.residuals = residuals;
          obj.T2 = T2;
-         obj.Q2 = Q2;
+         obj.Q = Q;
          obj.tnorm = tnorm;
          obj.modpower = modpower;         
-         obj.variance = ldecomp.getVariance(Q2, obj.totvar);
+         obj.variance = ldecomp.getVariance(Q, obj.totvar);
       end   
 
       function set.info(obj, value)
@@ -67,15 +73,14 @@ classdef ldecomp < handle
    
    methods (Static = true)
       
-      function [T2, Q2, modpower, tnorm] = getDistances(scores, loadings, data, tnorm)
+      function [T2, Q, res, modpower, tnorm] = getDistances(scores, loadings, data, tnorm)
       % calculate residual distances, modelling power and singular values
       % for scores
-      
          excludedRows = scores.excludedRows;
          
          svalues = scores.valuesAll;
+         lvalues = loadings.values;
          data = data.valuesAll(:, ~(data.excludedCols | data.factorCols));
-         loadings = loadings.values;
          
          if nargin < 4
             tnorm = [];
@@ -86,7 +91,7 @@ classdef ldecomp < handle
          [nObj, nComp] = size(svalues);
    
          T2 = zeros(nObj, nComp);
-         Q2 = zeros(nObj, nComp);
+         Q = zeros(nObj, nComp);
          modpower = zeros(nObj, nComp);
       
          % calculate singular values for scores
@@ -104,28 +109,32 @@ classdef ldecomp < handle
          
          % calculate distances for each set of components
          for i = 1:nComp
-            exp = svalues(:, 1:i) * loadings(:, 1:i)';
+            exp = svalues(:, 1:i) * lvalues(:, 1:i)';
             res = data - exp;
          
-            Q2(:, i) = sum(res.^2, 2);
+            Q(:, i) = sum(res.^2, 2);
             T2(:, i) = sum(scoresn(:, 1:i).^2, 2);
       
             if nObj > i
                modpower(:, i) = 1 - sqrt(sum(res.^2)/(nObj - i - 1))/datasd;
             end
-         end
+         end                  
 
          % set up datasets for output
          if isa(scores, 'mdaimage')            
             T2 = reshape(T2, scores.height, scores.width, scores.nCols);
             T2 = mdaimage(T2, scores.colNames);
-            Q2 = reshape(Q2, scores.height, scores.width, scores.nCols);
-            Q2 = mdaimage(Q2, scores.colNames);
+            Q = reshape(Q, scores.height, scores.width, scores.nCols);
+            Q = mdaimage(Q, scores.colNames);
+            res = reshape(res, scores.height, scores.width, size(res, 2));
+            res = mdaimage(res, scores.rowNames, loadings.rowNames);            
          else   
             T2 = mdadata(T2, scores.rowNamesAll, scores.colNames);
             T2.rowFullNames = scores.rowFullNamesAll;
-            Q2 = mdadata(Q2, scores.rowNamesAll, scores.colNames);
-            Q2.rowFullNames = scores.rowFullNamesAll;
+            Q = mdadata(Q, scores.rowNamesAll, scores.colNames);
+            Q.rowFullNames = scores.rowFullNamesAll;
+            res = mdadata(res, scores.rowNamesAll, loadings.rowNames);
+            res.rowFullNames = scores.rowFullNamesAll;
          end
          
          T2.name = 'T2 residuals';
@@ -133,11 +142,16 @@ classdef ldecomp < handle
          T2.colFullNames = scores.colFullNames;
          T2.excluderows(excludedRows);
 
-         Q2.name = 'Q2 residuals';
-         Q2.dimNames = scores.dimNames;
-         Q2.colFullNames = scores.colFullNames;
-         Q2.excluderows(excludedRows);
+         Q.name = 'Q residuals';
+         Q.dimNames = scores.dimNames;
+         Q.colFullNames = scores.colFullNames;
+         Q.excluderows(excludedRows);
 
+         res.name = 'Residuals';
+         res.dimNames = {scores.dimNames{1}, loadings.dimNames{1}};
+         res.colFullNames = loadings.rowFullNames;
+         res.excluderows(excludedRows);
+         
          tnorm = mdadata(tnorm, {'tnorm'}, scores.colNames, {'tnorm', scores.dimNames{2}});
          tnorm.name = 'Singular values for scores';
          tnorm.colFullNamesAll = scores.colFullNamesAll;
@@ -149,16 +163,16 @@ classdef ldecomp < handle
          modpower.excluderows(excludedRows);         
       end
       
-      function variance = getVariance(Q2, totvar)
-         cumresvar = sum(Q2.values, 1) / totvar * 100;
+      function variance = getVariance(Q, totvar)
+         cumresvar = sum(Q.values, 1) / totvar * 100;
          cumexpvar = 100 - cumresvar;
          expvar = [cumexpvar(1), diff(cumexpvar)];   
          
          variance = mdadata([expvar; cumexpvar], {'Expvar', 'Cumexpvar'});
-         variance.dimNames = {'Variance', Q2.dimNames{2}};
+         variance.dimNames = {'Variance', Q.dimNames{2}};
          variance.name = 'Variance';
-         variance.colNames = Q2.colNames;
-         variance.colFullNamesAll = Q2.colFullNamesAll;
+         variance.colNames = Q.colNames;
+         variance.colFullNamesAll = Q.colFullNamesAll;
          variance = variance';
       end
    
@@ -170,11 +184,7 @@ classdef ldecomp < handle
          nVar = data.nNumCols;
          nComp = model.nComp;
          alpha = model.alpha;
-         
-         if nargin < 4
-            alpha = 0.05;
-         end
-         
+                  
          % calculate T2 limits using Hotelling T2 statistics
          T2lim = zeros(1, nComp);
          for i = 1:nComp
@@ -186,7 +196,7 @@ classdef ldecomp < handle
          end
          
          % calculate Q2 limits using F statistics
-         Q2lim = zeros(1, nComp);
+         Qlim = zeros(1, nComp);
          
          conflim = 100 - alpha * 100;   
          cl = 2 * conflim - 100;
@@ -218,13 +228,13 @@ classdef ldecomp < handle
                h1 = ca * sqrt(2 * t2 * h0^2)/t1;
                h2 = t2 * h0 * (h0 - 1)/(t1^2);
                
-               Q2lim(i) = t1 * (1 + h1 + h2)^(1/h0);
+               Qlim(i) = t1 * (1 + h1 + h2)^(1/h0);
             else
-               Q2lim(i) = 0;
+               Qlim(i) = 0;
             end   
          end
          
-         limits = mdadata([T2lim; Q2lim], {'T2', 'Q2'}, colNames, {'Limits', 'Components'});
+         limits = mdadata([T2lim; Qlim], {'T2', 'Q'}, colNames, {'Limits', 'Components'});
          limits.name = 'Statistical limits for residuals';
          limits.colFullNamesAll = colFullNames;         
       end   

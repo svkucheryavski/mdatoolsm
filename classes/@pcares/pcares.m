@@ -19,7 +19,7 @@ classdef pcares < ldecomp
          v = getarg(varargin, 'Labels');         
          sargs = {};
          if isempty(v) 
-            if obj.Q2.nRows < 100
+            if obj.Q.nRows < 100
                sargs = {'Labels', 'names'};
             end            
          else

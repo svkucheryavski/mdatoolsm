@@ -242,13 +242,19 @@ classdef regcoeffs < handle
             error('Wrong plot type!');
          end
          
-         if showCI
+         if showCI && ~isempty(obj.ci_)
             hold on            
             ci = obj.ci(1:end, resp, comp); 
             v = values.values;
             l = v - ci(:, 1).values';
             u = ci(:, 2).values' - v;
-            errorbar(1:size(v, 2), v, l, u, '.', 'Color', mdalight(mdadata.getmycolors(1)))
+            if strcmp(type, 'bar')
+               errorbar(1:size(v, 2), v, l, u, '.', 'Color', mdalight(mdadata.getmycolors(1)))
+            elseif strcmp(type, 'line')
+               plot(1:size(v, 2), v - l, '-', 'Color', mdalight(mdadata.getmycolors(1)))
+               plot(1:size(v, 2), v + u, '-', 'Color', mdalight(mdadata.getmycolors(1)))
+            end
+            
             hold off
          end
          

@@ -43,6 +43,7 @@ function varargout = plotperformance(obj, varargin)
       error('Wrong plot type!');
    end
    
+   ylim([-0.05 1.05])
    if ~ishold
       box on
       title([upper(restype(1)) restype(2:end) ' (' obj.classNames{nclass} ')'])

@@ -38,7 +38,7 @@ classdef mdapca < handle
 %  "TestSet" - an 'mdadata' object for test set validation.
 %
 %  "Alpha" - significance level for calculation of statistical limits
-%  for T2 and Q2 residuals (default 0.05).
+%  for T2 and Q residuals (default 0.05).
 %
 %  "Method" - which method to use for calculation of principal
 %  components. Default value is "svd" (Singular Value Decomposition), 
@@ -232,7 +232,7 @@ classdef mdapca < handle
          excludedCols = data.excludedCols(~data.factorCols);
          
          obj.prep.apply(data);
-      
+         
          loads = zeros(data.nNumColsAll, obj.nComp);
          
          switch obj.method
@@ -240,6 +240,8 @@ classdef mdapca < handle
                [loads(~excludedCols, :), eigenvals] = mdapca.pcasvd(data.numValues, obj.nComp);
             case 'ica'
                [loads(~excludedCols, :), eigenvals] = mdapca.pcaica(data.numValues, obj.nComp);               
+            case 'nipals'
+               [loads(~excludedCols, :), eigenvals] = mdapca.pcanipals(data.numValues, obj.nComp);               
             otherwise
                error('Unknown name for PCA algorithm: %s', obj.method);
          end
@@ -260,7 +262,7 @@ classdef mdapca < handle
          obj.calres = predict(obj, data, false);
          obj.calres.info = 'Results for calibration set';
          obj.limits = ldecomp.getResLimits(data, obj);
-         obj.tnorm = obj.calres.tnorm;
+         obj.tnorm = obj.calres.tnorm;         
       end   
       
       function out = predict(obj, odata, doPrep)
@@ -303,14 +305,15 @@ classdef mdapca < handle
       function cvres = crossval(obj, data, varargin)
       % 'crossval' cross-validation of PCA model
          nObj = data.nRows;
-         nVar = data.nCols;
+         nVar = data.nNumCols;
          
          % get matrix with indices for cv segments
          idx = mdacrossval(nObj, obj.cv);
          [nSeg, seglen, nRep] = size(idx);
       
-         Q2 = zeros(nObj, obj.nComp);  
+         Q = zeros(nObj, obj.nComp);  
          T2 = zeros(nObj, obj.nComp);   
+         residuals = zeros(nObj, nVar);   
          
          nComp = min([obj.nComp, nObj - seglen - 1, nVar]);
          % loop over repetitions and segments
@@ -329,26 +332,35 @@ classdef mdapca < handle
                   m = mdapca(cal, nComp, 'Prep', obj.prep, 'Scale', 'off', 'Center', 'off');
                   res = m.predict(val);
                   
-                  Q2(vind, :) = Q2(vind, :) + res.Q2.values;
+                  Q(vind, :) = Q(vind, :) + res.Q.values;
                   T2(vind, :) = T2(vind, :) + res.T2.values;
+                  residuals(vind, :) = residuals(vind, :) + res.residuals.values;
                end
             end
          end
          
-         Q2 = Q2 ./ nRep;
+         Q = Q ./ nRep;
          T2 = T2 ./ nRep;
+         residuals = residuals ./ nRep;
          
          T2 = mdadata(T2, data.rowNames, obj.loadings.colNames, obj.calres.scores.dimNames);
          T2.name = 'T2 residuals';
          T2.rowFullNames = obj.calres.scores.rowFullNames;
          T2.colFullNames = obj.calres.scores.colFullNames;
 
-         Q2 = mdadata(Q2, T2.rowNames, T2.colNames, T2.dimNames, 'Q2 residuals');
-         Q2.rowFullNames = T2.rowFullNamesAll;
-         Q2.colFullNames = T2.colFullNamesAll;
+         Q = mdadata(Q, T2.rowNames, T2.colNames, T2.dimNames, 'Q residuals');
+         Q.rowFullNames = T2.rowFullNamesAll;
+         Q.colFullNames = T2.colFullNamesAll;
+
+         
+         residuals = mdadata(residuals, Q.rowNamesAll, ...
+             data.colNamesAll(~(data.factorCols | data.excludedCols)),...
+             data.dimNames, 'Residuals');
+         residuals.rowFullNames = Q.rowFullNamesAll;
+         residuals.colFullNames = data.colFullNamesAll(~(data.factorCols | data.excludedCols));
          
          % in CV results there are no scores only residuals and variances
-         cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q2, T2, []);
+         cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q, T2, [], residuals);
       end
       
       function summary(obj)

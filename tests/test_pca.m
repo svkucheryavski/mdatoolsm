@@ -1,13 +1,13 @@
-function test_pca(type, casen)
+function m = test_pca(type, casen)
    clc
    close all
 
    if nargin < 1
-      type = 'spectra';
+      type = 'people';
    end
    
    if nargin < 2
-      casen = 1;
+      casen = 5;
    end
    
    switch type

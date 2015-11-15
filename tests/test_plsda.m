@@ -1,6 +1,28 @@
-function m = test_plsda(type, casen)
+function test_plsda
+   close all
+   clear
    clc
-   clear classes
+
+   types = {'people'};
+   cases = 5;
+   
+   if isdir(mfilename('fullpath'))
+      rmdir(mfilename('fullpath'), 's')
+   end
+   mkdir(mfilename('fullpath'))
+   
+   for t = 1:numel(types)
+      for c = 1:numel(cases)
+         m = do_test(types{t}, cases(c));
+      end
+   end
+   
+   close all
+end
+
+function m = do_test(type, casen)
+   close all
+   clc
 
    if nargin < 1
       type = 'people';
@@ -44,8 +66,8 @@ function m = test_plsda(type, casen)
 
          m = mdaplsda(X, c, cname, ncomp, 'Center', center, 'Scale', scale);
          m.info = info;   
-         showPlotsForResult(m.calres, cname, 'Calibration');      
-         showPlotsForModel(m, cname);
+         showPlotsForResult(m.calres, cname, 'case 1 - calres');      
+         showPlotsForModel(m, cname, 'case 1');
          
       case 2
          fprintf('2. Testing data with excluded colums and rows\n')   
@@ -63,8 +85,8 @@ function m = test_plsda(type, casen)
 
          summary(m);
          summary(m.calres);
-         showPlotsForModel(m, cname);   
-         showPlotsForResult(m.calres, cname, 'Calibration');
+         showPlotsForResult(m.calres, cname, 'case 2 - calres');
+         showPlotsForModel(m, cname, 'case 2');   
    
       case 3
          fprintf('3. Test set validation\n')   
@@ -79,23 +101,23 @@ function m = test_plsda(type, casen)
          summary(m);
          summary(m.calres);
          summary(m.testres);
-         showPlotsForResult(m.calres, 'B', 'Calibration');
-         showPlotsForResult(m.testres, 'B', 'Test');
-         showPlotsForModel(m, 'B');
+         showPlotsForResult(m.calres, cname, 'case 3 - calres');
+         showPlotsForResult(m.testres, cname, 'case 3 - test');
+         showPlotsForModel(m, cname, 'case 3');
 
       case 4
          fprintf('4. Cross-validation\n')   
          X = copy(oX);
          c = copy(oc);
 
-         m = mdaplsda(X, c, ncomp, 'CV', {'rand', 8, 8}, 'Scale', scale);
+         m = mdaplsda(X, c, cname, ncomp, 'CV', {'rand', 8, 8}, 'Scale', scale);
          m.info = info;
          summary(m);
          summary(m.calres);
          summary(m.cvres);
-         showPlotsForResult(m.calres);
-         showPlotsForResult(m.cvres);
-         showPlotsForModel(m);
+         showPlotsForResult(m.calres, cname, 'case 4 - calres');
+         showPlotsForResult(m.cvres, cname, 'case 4 - cvres');
+         showPlotsForModel(m, cname, 'case 4');
 
       case 5
          fprintf('5. Test set and cross-validation for data with factors and hidden values\n')   
@@ -119,20 +141,22 @@ function m = test_plsda(type, casen)
          m = mdaplsda(Xc, cc, cname, ncomp, 'TestSet', {Xt, ct}, 'CV', {'rand', 8, 4}, 'Prep', {p, prep()}, 'Scale', scale);
          m.info = info;
          plotclassification(m, 'Labels', 'names', 'ShowExcluded', 'on');
-         showPlotsForModel(m, cname);
-         showPlotsForResult(m.calres, cname, 'Cal');
-         showPlotsForResult(m.cvres, cname, 'CV');
-         showPlotsForResult(m.testres, cname, 'Test');
+         showPlotsForResult(m.calres, cname, 'case 5 - calres');
+         showPlotsForResult(m.cvres, cname, 'case 5 - cvres');
+         showPlotsForResult(m.testres, cname, 'case 5 - test');
+         showPlotsForModel(m, cname, 'case 5');
    end
 end
 
-function showPlotsForModel(m, cname)
+function showPlotsForModel(m, cname, name)
    
+
    summary(m)
-   
+   name = [name ' model'];
    % overview plot
    figure('Name', 'Model overview')
    plot(m)
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - overview.png'], [1024 768], 'png', '-r90');
 
    % prediction and regcoeffs plots
    figure('Name', 'Model: predictions')
@@ -140,8 +164,10 @@ function showPlotsForModel(m, cname)
    plotpredictions(m);   
    subplot(2, 2, 2)
    plotpredictions(m, 1, 1, 'Labels', 'names', 'ShowExcluded', 'on');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - predictions.png'], [1024 768], 'png', '-r90');
 
    plotclassification(m);
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - classification.png'], [1024 768], 'png', '-r90');
    plotclassification(m, cname);
    plotclassification(m, cname, 2);
    
@@ -154,6 +180,7 @@ function showPlotsForModel(m, cname)
    plotregcoeffs(m, 1, 2, 'Type', 'line');
    subplot(2, 2, 4)
    plotregcoeffs(m, 1, 'Type', 'bar', 'Labels', 'names', 'CI', 'off');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - regcoeffs.png'], [1024 768], 'png', '-r90');
 
    figure('Name', 'Model: Y residuals')
    subplot(2, 2, 1)
@@ -164,6 +191,7 @@ function showPlotsForModel(m, cname)
    plotyresiduals(m, 1, 2, 'Labels', 'names');
    subplot(2, 2, 2)
    plotyresiduals(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - residuals.png'], [1024 768], 'png', '-r90');
 
    % Scores
    figure('Name', 'Model: scores')
@@ -175,6 +203,7 @@ function showPlotsForModel(m, cname)
    plotxyscores(m);
    subplot(2, 2, 4)
    plotxyscores(m, 1, 'Labels', 'names', 'ShowExcluded', 'on');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - scores.png'], [1024 768], 'png', '-r90');
    
    % explained variance for X
    figure('Name', 'Model: explained variance for X')
@@ -186,6 +215,7 @@ function showPlotsForModel(m, cname)
    plotxcumexpvar(m);
    subplot(2, 2, 4)
    plotxcumexpvar(m, 'Type', 'bar');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - xvar.png'], [1024 768], 'png', '-r90');
 
    % explained variance for Y
    figure('Name', 'Model: explained variance for Y')
@@ -197,6 +227,7 @@ function showPlotsForModel(m, cname)
    plotycumexpvar(m);
    subplot(2, 2, 4)
    plotycumexpvar(m, 'Type', 'bar');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - yvar.png'], [1024 768], 'png', '-r90');
    
    % Performance
    figure('Name', 'Model: performance')
@@ -208,6 +239,7 @@ function showPlotsForModel(m, cname)
    plotsensitivity(m, 1)
    subplot(2, 2, 4)
    plotspecificity(m, cname, 'Labels', 'names')
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - preformance.png'], [1024 768], 'png', '-r90');
 
 end
 
@@ -228,6 +260,7 @@ function showPlotsForResult(res, cname, name)
    plotpredictions(res, cname);
    subplot(2, 2, 4)
    plotclassification(res, 'Labels', 'names', 'ShowExcluded', 'on');
+   printplot(gcf, [mfilename('fullpath') '/' name ' - results - predictions.png'], [1024 768], 'png', '-r90');
 
    % Performance
    figure('Name', sprintf('Results: performance (%s)', name))
@@ -239,6 +272,7 @@ function showPlotsForResult(res, cname, name)
    plotsensitivity(res, res.nClasses)
    subplot(2, 2, 4)
    plotspecificity(res, cname)
+   printplot(gcf, [mfilename('fullpath') '/' name ' - results - performance.png'], [1024 768], 'png', '-r90');
    
 end
 

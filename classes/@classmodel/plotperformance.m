@@ -3,7 +3,7 @@ function varargout = plotperformance(obj, varargin)
    
    [restype, varargin] = getarg(varargin, 'Restype');
    if isempty(restype)
-      restype = 'missclassified';
+      restype = 'misclassified';
    end   
 
    i = find(strcmp(varargin, 'Type'), 1);
@@ -49,5 +49,6 @@ function varargout = plotperformance(obj, varargin)
    if nargout > 0
       varargout{1} = h;
    end   
+   ylim([-0.05 1.05])
    title([upper(restype(1)) restype(2:end) ' (' obj.calres.classNames{nclass} ')'])
 end

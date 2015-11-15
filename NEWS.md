@@ -1,6 +1,18 @@
-v.0.0.17
+v.0.1.0
 ========
+* SIMCA one-class classification is implemented
 * Multiplicative Scatter correction added to preprocessing
+* any math function (e.g. log, power, etc) can now be added to preprocessing object
+* several changes in names of variables and parameters (e.g. Q2 residuals -> Q residuals)
+* fixed a bug when changing parameter Alpha in PCA did not change the statistical limits
+* JK confidence intervals on regression coefficients plot are shown as lines if line plot is used
+* any `ldecomp` object (e.g. PCA or PLS results) has a new property residuals, E = X - TP'
+* plots for individual object and variable residuals are available (`plotobjres`, `plotvarres`)
+* small bug fixes and optimization
+* from this release, the release versions will have more sound structure: x.0.0. for major releases 
+(significant changes in code), 0.x.0 for minor releases (new methods or functionality), 
+0.0.x for bug fixes and small improvements
+
 
 v.0.0.16
 ========
