@@ -68,7 +68,7 @@ classdef mdaplsda < mdapls & classmodel
             makeres = false;
          end
                
-         st = dbstack(1);
+         st = dbstack(1);         
          if strcmp(st(1).name, 'regmodel.regmodel')
             res = predict@mdapls(obj, X, cref, makeres);
             return;                        
