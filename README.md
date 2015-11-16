@@ -22,7 +22,7 @@ in this case please report to <svkucheryavski@gmail.com>.
 
 ## Installation ##
 
-The current version is _0.1.0_ (from 16.11.2015). 
+The current version is _0.1.2_ (from 16.11.2015). 
 
 Installation is easy and the procedure is similar to most of the others 3rd party MATLAB Toolboxes.
 Download zip archive for the latest release and unzip it to the folder you use to keep you MATLAB code,
