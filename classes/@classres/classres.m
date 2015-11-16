@@ -117,15 +117,9 @@ classdef classres < res
          dimNames = {'', ''};
          rowNames = obj.cpred_.wayNames{3};
          colNames = obj.cpred_.wayNames{2};
-         if nClasses > 1
-            dimNames{2} = 'Classes';
-         end
          
-         if nComp > 1
-            dimNames{1} = 'Components';
-         else
-            rowNames = {};
-         end
+         dimNames{2} = 'Classes';
+         dimNames{1} = 'Components';
          
          obj.stat.fp = mdadata(fp, rowNames, colNames, dimNames, 'False positives');
          obj.stat.fn  = mdadata(fn, rowNames, colNames, dimNames, 'False negatives');         
@@ -226,12 +220,14 @@ classdef classres < res
             if numel(nclass) == 0 
                if nClasses > 1
                   error('Wrong class name!');
+               else
+                  nclass = 1;
                end   
             else   
                varargin(1) = [];
             end   
          end
-
+         
          if numel(nclass) ~= 1 || nclass < 1 || nclass > nClasses
             error('Wrong value for class index!');
          end   

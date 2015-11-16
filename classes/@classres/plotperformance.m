@@ -48,7 +48,7 @@ function varargout = plotperformance(obj, varargin)
       box on
       title([upper(restype(1)) restype(2:end) ' (' obj.classNames{nclass} ')'])
       if plotData.nCols > 1
-          correctaxislim()
+%          correctaxislim()
       end    
    end
    

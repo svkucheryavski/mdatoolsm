@@ -37,7 +37,7 @@ function varargout = plotperformance(obj, varargin)
    else
       c(end, :) = [];
    end   
-      
+
    if strcmp(type, 'bar')   
       h = gbar(plotData', varargin{:}, 'FaceColor', c);
    elseif strcmp(type, 'line')   

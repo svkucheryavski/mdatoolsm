@@ -392,7 +392,11 @@ classdef mdapca < handle
       function plot(obj, comp, varargin)
          
          if nargin < 2
-            comp = [1 2];
+            if obj.nComp > 1
+               comp = [1 2];
+            else
+               comp = 1;
+            end   
          end
          
          v = getarg(varargin, 'Labels');

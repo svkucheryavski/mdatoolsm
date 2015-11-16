@@ -3446,7 +3446,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
 
          y = values(1, :);     
          h = bar(double(x), double(y), 0.95, varargin{:}); 
-            
+         
          if showExcluded
             ind = obj.excludedCols(~obj.factorCols);
             [~, varargin] = getarg(varargin, 'FaceColor');
@@ -3470,8 +3470,13 @@ classdef mdadata < handle & matlab.mixin.Copyable
          if showTicks
              set(gca, 'XTick', x(xtick), 'XTickLabel', xticklabels(xtick));
          end   
-         dx = x(2) - x(1);
-         xlim = [min(x) - dx/2 max(x) + dx/2];
+         
+         if numel(x) > 1
+            dx = x(2) - x(1);
+            xlim = [min(x) - dx/2 max(x) + dx/2];
+         else
+            xlim = [0 2];
+         end
          
          if ~strcmp(showLabels, 'none')
             if isempty(labels)
@@ -3742,9 +3747,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
             labels = [];            
          end
                            
-         h = bar(values', 0.98, varargin{:}); 
+         isNaN = false;
+         if size(values, 2) == 1
+            values = [values, nan(size(values))];
+            isNaN = true;
+         end
+         h = bar(values', 0.98, 'grouped', varargin{:}); 
          
-         for i = 1:numel(h)
+         for i = 1:numel(h)            
             set(h(i), 'FaceColor', fc(i, :), 'EdgeColor', ec(i, :));
             xl = get(get(h(i), 'Children'), 'XData');
             if ~isempty(labels) && ~isempty(xl) 
@@ -3753,7 +3763,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
                   mdadata.showlabels((xl(3, :) + xl(1, :)) / 2, values(i, :), ...
                      labels(i, :), 'top');
             end            
-          end   
+         end   
          
          set(gca, 'XTick', xtick, 'XTickLabel', obj.colNamesWithoutFactors(xtick));
          xlabel(obj.dimNames{2})            
@@ -3775,10 +3785,13 @@ classdef mdadata < handle & matlab.mixin.Copyable
             end
          end
          
+         if isNaN
+            xlim([0 2]);
+         end
+         
          if nargout > 0
             varargout{1} = h;
          end   
-
       end   
       
       function varargout = gplot(obj, varargin)
