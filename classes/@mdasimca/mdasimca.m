@@ -55,7 +55,7 @@ classdef mdasimca < mdapca & classmodel
       function res = predict(obj, X, cref)
                                           
          st = dbstack(1);
-         if strcmp(st(1).name, 'mdapca.fit')
+         if numel(st) > 0 && strcmp(st(1).name, 'mdapca.fit')
             % in this case cref is doPrep for PCA
             res = predict@mdapca(obj, X, cref);
             return;                        
@@ -85,7 +85,11 @@ classdef mdasimca < mdapca & classmodel
       function plot(obj, comp, varargin)
          
          if nargin < 2
-            comp = [1 2];
+            if obj.nComp > 1
+               comp = [1 2];
+            else
+               comp = 1;
+            end   
          end
          
          v = getarg(varargin, 'Labels');

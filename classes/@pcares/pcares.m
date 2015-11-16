@@ -7,7 +7,11 @@ classdef pcares < ldecomp
             
       function plot(obj, varargin)
          if nargin < 2 || ~isnumeric(varargin{1})
-            comp = [1 2];
+            if obj.Q.nCols > 1
+               comp = [1 2];
+            else
+               comp = 1;
+            end   
          else
             comp = varargin{1};
             varargin(1) = [];

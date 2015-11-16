@@ -1,3 +1,10 @@
+v.0.1.2
+========
+* fixed bug in SIMCA which did not allow to use `redict()`
+* performance plots for classification do not require class number any more
+* overview plot for SIMCA and PCA now works correctly if only one component selected
+* bar and line plots for performance now works correctly if only one component is selected
+
 v.0.1.1
 ========
 * fixed bug in PLS-DA which did not allow to use `redict()`
