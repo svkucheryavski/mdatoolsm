@@ -1,3 +1,8 @@
+v.0.1.1
+========
+* fixed bug in PLS-DA which did not allow to use `redict()`
+* fixed bug with wrong calculation of false positives
+
 v.0.1.0
 ========
 * SIMCA one-class classification is implemented

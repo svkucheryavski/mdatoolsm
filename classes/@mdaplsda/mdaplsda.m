@@ -68,8 +68,13 @@ classdef mdaplsda < mdapls & classmodel
             makeres = false;
          end
                
+<<<<<<< HEAD
          st = dbstack(1);         
          if strcmp(st(1).name, 'regmodel.regmodel')
+=======
+         st = dbstack(1);
+         if numel(st) > 0 && strcmp(st(1).name, 'regmodel.regmodel')
+>>>>>>> develop
             res = predict@mdapls(obj, X, cref, makeres);
             return;                        
          end

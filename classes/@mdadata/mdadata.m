@@ -3287,7 +3287,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          h.plotHidden = hp;
          
          % correct axis limits
-         if strcmp(get(gca, 'NextPlot'), 'replace')
+         if strcmp(get(gca, 'NextPlot'), 'replace') && abs(min(x) - max(x)) > 0.001
             correctaxislim([5, 5, 0, 5], [min(x) max(x)]);
          end
          
