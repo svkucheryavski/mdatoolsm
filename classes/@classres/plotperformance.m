@@ -47,7 +47,9 @@ function varargout = plotperformance(obj, varargin)
    if ~ishold
       box on
       title([upper(restype(1)) restype(2:end) ' (' obj.classNames{nclass} ')'])
-      correctaxislim()
+      if plotData.nCols > 1
+          correctaxislim()
+      end    
    end
    
    if nargout > 0
