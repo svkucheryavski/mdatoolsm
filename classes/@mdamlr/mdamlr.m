@@ -66,11 +66,11 @@ classdef mdamlr < regmodel
          % set up 3-way dataset for coefficients (nPred x nResp x nComp)
          % we use empty name for components here         
             if isempty(yref)
-               colNames = {};
-               colFullNamesAll = {};
+               colNames = textgen('y', 1:size(ypred, 2));
+               colFullNamesAll = textgen('y', 1:size(ypred, 2));
             else
                colNames = yref.colNames;
-               colNamesFullAll = yref.colNamesFullAll;
+               colFullNamesAll = yref.colFullNamesAll;
             end
             
             wayNames = {X.rowNamesAll, colNames, {'x'}};
