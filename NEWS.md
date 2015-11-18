@@ -1,3 +1,9 @@
+v.0.1.3
+========
+* fixed bug in `redict()` method for regression, which did not work if y references have not been provided
+* small improvements to the `regcoeffs` class
+
+
 v.0.1.2
 ========
 * fixed bug in SIMCA which did not allow to use `redict()`

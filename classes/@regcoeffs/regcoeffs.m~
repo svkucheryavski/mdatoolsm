@@ -279,12 +279,7 @@ classdef regcoeffs < handle
    
          axis auto
          xl = xlim();
-         dx = abs(diff(xl))/25;
-         xlim([xl(1) - dx xl(2) + dx])
-         yl = ylim();
-         dy = abs(diff(yl))/25;
-         ylim([yl(1) - dy yl(2) + dy])
-         
+         dx = 
          if showLines && strcmp(type, 'line')
             lim = axis();
             line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.8 0.8 0.8]);
