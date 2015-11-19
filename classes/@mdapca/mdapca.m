@@ -486,6 +486,44 @@ classdef mdapca < handle
          eigenvals = (diag(s).^2)/(size(x, 1) - 1);
          eigenvals = eigenvals(1:nComp);
       end
+      
+      function [loadings, eigenvals] = pcanipals(x, nComp)
+         if nargin < 2 
+            nComp = min([size(x, 1) - 1, size(x, 2), pca.MAX_NCOMP]);
+         else   
+            nComp = min([size(x, 1) - 1, size(x, 2), nComp]);
+         end
+
+         if nComp < 1
+            error('Number of components should be above zero!')
+         end   
+   
+         nObj = size(x, 1);
+         loadings = zeros(size(x, 2), nComp);
+         eigenvals = zeros(nComp, 1);
+   
+         E = x;
+         for i = 1:nComp
+            [~, ind] = max(std(E));
+            t = E(:, ind);
+            tau = 99999;
+            th = 9999;
+
+            while (th > 0.00001)
+               p = (E' * t) / (t' * t);
+               p = p / (p' * p)^0.5;
+               t = (E * p)/(p' * p);
+               tau_new = t' * t;
+               th = abs(tau - tau_new);
+               tau = tau_new;
+            end
+            
+            E = E - t * p';
+            loadings(:, i) = p;
+            eigenvals(i) = tau / (nObj - 1);
+         end
+      end
+            
    end   
 end
 

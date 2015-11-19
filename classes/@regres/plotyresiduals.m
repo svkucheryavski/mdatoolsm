@@ -25,7 +25,7 @@ function varargout = plotyresiduals(obj, varargin)
 
    if ~ishold
       box on
-      title('Y residuals');
+      title('Prediction residuals');
       lim = axis();
       line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
    end

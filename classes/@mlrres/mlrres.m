@@ -63,8 +63,11 @@ classdef mlrres < regres
                   fprintf('\n%s', obj.info);
                end   
                show(out);
-            end   
+            end
+         else
+            disp('No summary statistics are available.')
          end
+         
       end   
         
         function show(obj, varargin)

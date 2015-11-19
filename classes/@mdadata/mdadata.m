@@ -5463,7 +5463,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       ind = reducerows(dens, factor)      
       [values, names] = cell2levels(v)            
       [values, names] = var2levels(v, varname)              
-      h = showlabels(x, y, labels, position)      
+      h = showlabels(x, y, labels, position, c)      
       ind = parseind(ind, n, names, colnames, values); 
       showexcluded(ind, names)
       legend(varargin)

@@ -1,10 +1,12 @@
-function h = showlabels(x, y, labels, position)
-   if nargin < 4
+function varargout = showlabels(x, y, labels, position, c)
+   if nargin < 4 || isempty(position)
       position = 'top';
    end
 
-   c = mdadata.LABELS_COLOR;
-
+   if nargin < 5
+      c = mdadata.LABELS_COLOR;
+   end
+   
    lim = axis();
    dx = (lim(2) - lim(1))/50;
    dy = (lim(4) - lim(3))/40;
@@ -17,5 +19,10 @@ function h = showlabels(x, y, labels, position)
       h = text(x, y - dy, labels, 'HorizontalAlignment', 'center', 'Color', c);  
    elseif strcmp(position, 'left')
       h = text(x - dx, y, labels, 'HorizontalAlignment', 'right', 'Color', c);  
-   end   
+   end
+   
+   varargout = {};
+   if nargout > 0
+      varargout{1} = h;
+   else   
 end  

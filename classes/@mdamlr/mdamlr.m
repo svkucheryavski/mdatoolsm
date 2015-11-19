@@ -65,8 +65,16 @@ classdef mdamlr < regmodel
          else   
          % set up 3-way dataset for coefficients (nPred x nResp x nComp)
          % we use empty name for components here         
-            wayNames = {X.rowNamesAll, yref.colNames, {'x'}};
-            wayFullNames = {X.rowFullNamesAll, yref.colFullNamesAll, {'x'}};
+            if isempty(yref) || isempty(yref.colNames)
+               colNames = obj.calres.yref.colNames;
+               colFullNamesAll = obj.calres.yref.colFullNamesAll;
+            else
+               colNames = yref.colNames;
+               colFullNamesAll = yref.colFullNamesAll;
+            end
+            
+            wayNames = {X.rowNamesAll, colNames, {'x'}};
+            wayFullNames = {X.rowFullNamesAll, colFullNamesAll, {'x'}};
             dimNames = {X.dimNames{1}, 'Responses', ''};
             name = 'Predicted values';
             

@@ -127,7 +127,7 @@ classdef ldecomp < handle
             Q = reshape(Q, scores.height, scores.width, scores.nCols);
             Q = mdaimage(Q, scores.colNames);
             res = reshape(res, scores.height, scores.width, size(res, 2));
-            res = mdaimage(res, scores.rowNames, loadings.rowNames);            
+            res = mdaimage(res, loadings.rowNames);            
          else   
             T2 = mdadata(T2, scores.rowNamesAll, scores.colNames);
             T2.rowFullNames = scores.rowFullNamesAll;

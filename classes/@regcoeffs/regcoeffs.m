@@ -105,6 +105,12 @@ classdef regcoeffs < handle
       end
       
       function out = ci(obj, varargin)
+         if isempty(obj.ci_)
+            disp('Confidence intervals are not available.');
+            out = [];
+            return
+         end   
+         
          if isempty(varargin)
             varargin = {':', obj.nComp};
          end
@@ -124,6 +130,12 @@ classdef regcoeffs < handle
       end
       
       function out = pvalues(obj, varargin)
+         if isempty(obj.pvalues_)
+            disp('p-values are not available.');
+            out = [];
+            return
+         end   
+         
          if isempty(varargin)
             varargin = {':', obj.nComp};
          end   
@@ -181,11 +193,12 @@ classdef regcoeffs < handle
          v = obj.values_(:, resp, comp).values; 
                   
          if ~isempty(obj.pvalues_)
-            p = obj.pvalues(:, resp, comp);
-            ci = obj.ci(:, resp, comp);
+            p = obj.pvalues(1:end, resp, comp);
+            ci = obj.ci(1:end, resp, comp);
          
-            out = [v ci p];
+            out = [ci(:, 1) v  ci(:, 2) p];
             out.name = 'Summary statistics for regression coefficients';
+            out.colNames = {'Lo', 'Value', 'Up', 'p-value'};
             out.dimNames = {'', ''};
             show(out);
          else
@@ -264,6 +277,14 @@ classdef regcoeffs < handle
             title('Regression coefficients');
          end   
    
+         axis auto
+         xl = xlim();
+         dx = abs(diff(xl))/25;
+         xlim([xl(1) - dx xl(2) + dx])
+         yl = ylim();
+         dy = abs(diff(yl))/25;
+         ylim([yl(1) - dy yl(2) + dy])
+         
          if showLines && strcmp(type, 'line')
             lim = axis();
             line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.8 0.8 0.8]);

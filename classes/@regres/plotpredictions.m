@@ -23,7 +23,7 @@ function varargout = plotpredictions(obj, varargin)
    else
       plotData = obj.ypred_(:, nresp, ncomp).values;
    end
-   
+
    if strcmp(type, 'scatter')
       h = scatter(plotData, varargin{:});
    else
