@@ -1,12 +1,15 @@
 v.0.1.3
 ========
-* fixed bug in `redict()` method for regression, which did not work if y references have not been provided
+* fixed bug in `predict()` method for regression, which did not work if y references have not been provided
 * small improvements to the `regcoeffs` class
-
+* small improvements to the `mdamlr` class
+* fixed a bug in `decomp`, which lead to an error when `mdaimage` is used as a data source
+* NIPALS algorithm is implemented for PCA (`'nipals'`)
+* The `mdapca` class got a new method ? `biplot()`
 
 v.0.1.2
 ========
-* fixed bug in SIMCA which did not allow to use `redict()`
+* fixed bug in SIMCA which did not allow to use `predict()`
 * performance plots for classification do not require class number any more
 * overview plot for SIMCA and PCA now works correctly if only one component selected
 * bar and line plots for performance now works correctly if only one component is selected

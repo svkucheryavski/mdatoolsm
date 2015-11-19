@@ -65,9 +65,9 @@ classdef mdamlr < regmodel
          else   
          % set up 3-way dataset for coefficients (nPred x nResp x nComp)
          % we use empty name for components here         
-            if isempty(yref)
-               colNames = textgen('y', 1:size(ypred, 2));
-               colFullNamesAll = textgen('y', 1:size(ypred, 2));
+            if isempty(yref) || isempty(yref.colNames)
+               colNames = obj.calres.yref.colNames;
+               colFullNamesAll = obj.calres.yref.colFullNamesAll;
             else
                colNames = yref.colNames;
                colFullNamesAll = yref.colFullNamesAll;
