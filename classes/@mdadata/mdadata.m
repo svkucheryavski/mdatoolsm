@@ -2701,7 +2701,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %  "Labels" - show or not labels for the data points. Possible
       %  values are "none" (default), "names" for name of objects and "numbers"
       %  for their numbers. 
-      %  
+      % 
       %
       % Examples:
       % ---------
