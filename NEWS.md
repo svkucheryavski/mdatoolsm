@@ -1,3 +1,8 @@
+v.0.1.4
+=======
+* new plots for PLS model: `plotxloadings()`, `plotxyloadings()` and `plotweights()`
+* small improvements for regression coefficients plot
+
 v.0.1.3
 ========
 * fixed bug in `predict()` method for regression, which did not work if y references have not been provided

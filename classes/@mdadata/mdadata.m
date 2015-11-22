@@ -857,6 +857,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          ind(getfullcolind(obj, rind)) = true;
 
          fullNames = obj.colFullNamesAll;
+         
          obj.valuesAll(:, ind) = [];
          obj.colNamesAll = obj.colNamesAll(~ind);
          obj.colFullNamesAll = fullNames(~ind);      
