@@ -8,19 +8,25 @@ classdef mdaplsda < mdapls & classmodel
    
    methods
       function obj = mdaplsda(X, c, className, ncomp, varargin)
-         
+                  
+         if isa(c, 'mdadata')
+            c = classmodel.getClassFromFactor(c, className);
+         elseif islogical(c)
+            c = classmodel.getClassFromFactor(c, className);
+            c.rowFullNames = X.rowFullNames;
+            c.rowNames = X.rowNames;            
+         else
+            error('Wrong type for c values (use either mdadata with factor column or logical vector)!')
+         end
+
          if X.nRows ~= c.nRows
             error('Number of rows in "X" ad "c" variables must be the same!')
          end
                   
-         if c.nCols ~= 1 || ~isfactor(c, 1)
-            error('Class variable should be a dataset with one factor column!')
-         end   
          
-         c = classmodel.getClassFromFactor(c, className);
          y = splitfactor(c, 1);         
          y = y(:, className);
-         
+            
          % check if test set is provided and apply model to the test set
          [test, varargin] = getarg(varargin, 'TestSet');
          if ~isempty(test) 
@@ -74,15 +80,15 @@ classdef mdaplsda < mdapls & classmodel
             return;                        
          end
          
-         if ~isempty(cref) && cref.nCols ~= 1
-            error('Class reference should be a dataset with one column!');
-         elseif ~isfactor(cref, 1)
-            error('Class reference should be a factor!');
-         end
-                  
          if isempty(cref)
             yref = [];
          else
+            if cref.nCols ~= 1
+               error('Class reference should be a dataset with one column!');
+            elseif ~isfactor(cref, 1)
+               error('Class reference should be a factor!');
+            end   
+            
             cref = classmodel.getClassFromFactor(cref, obj.className);
             yref = splitfactor(cref, 1);
             yref = yref(:, obj.className);

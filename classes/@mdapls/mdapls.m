@@ -93,7 +93,7 @@ classdef mdapls < regmodel
             makeres = true;
          end
                   
-         if nargin < 3
+         if nargin < 3 || isempty(oyref)
             yref = [];
          else   
             yref = copy(oyref);
@@ -133,8 +133,16 @@ classdef mdapls < regmodel
             
          % set up 3-way dataset for predictions (nPred x nResp x nComp)
          % we use empty name for components here         
-         wayNames = {X.rowNamesAll, yref.colNames, obj.weights.colNames};
-         wayFullNames = {X.rowFullNamesAll, yref.colFullNamesAll, obj.weights.colFullNames};
+         if isempty(yref) || isempty(yref.colNames)
+            colNames = obj.calres.yref.colNames;
+            colFullNamesAll = obj.calres.yref.colFullNamesAll;
+         else
+            colNames = yref.colNames;
+            colFullNamesAll = yref.colFullNamesAll;
+         end
+         
+         wayNames = {X.rowNamesAll, colNames, obj.weights.colNames};
+         wayFullNames = {X.rowFullNamesAll, colFullNamesAll, obj.weights.colFullNames};
          dimNames = {X.dimNames{1}, 'Responses', 'Components'};
          name = 'Predicted values';
          ypred = mdadata3(ypred, wayNames, wayFullNames, dimNames, name);

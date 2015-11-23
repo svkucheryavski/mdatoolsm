@@ -1,9 +1,15 @@
+v.0.1.5
+=======
+* `mdaplsda()` can now work with vector of logical values as a second argument
+* improvements to classification plot for models and results
+* fixed bug in `predict()` method for PLS-DA, which did not work if references have not been provided
+
 v.0.1.4
 =======
 * new plots for PLS model: `plotxloadings()`, `plotxyloadings()` and `plotweights()`
 * small improvements for regression coefficients plot
 * methods `scatter()` and `plot()` now have a new parameter `'Groupby'` for easy color grouping
-* method `catter()` has a new parameter `'ShowContour'` for drawing contour for a cluster of points
+* method `scatter()` has a new parameter `'ShowContour'` for drawing contour for a cluster of points
 
 v.0.1.3
 ========
