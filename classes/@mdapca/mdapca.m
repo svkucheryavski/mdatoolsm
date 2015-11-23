@@ -428,6 +428,54 @@ classdef mdapca < handle
    end
    
    methods (Static = true)
+      function varargout = plotloadingsstat(loadings, varargin)
+         if nargin > 1 && isnumeric(varargin{1})
+            comp = varargin{1};
+            varargin(1) = [];
+         else   
+            comp = [1, 2];
+         end
+
+         ncomp = numel(comp);
+
+         i = find(strcmp(varargin, 'Type'), 1);
+         if ~isempty(i)
+            type = varargin{i + 1};
+            varargin(i:i+1) = [];
+         else
+            if ncomp == 2
+               type = 'scatter';
+            else
+               type = 'line';
+            end   
+         end   
+
+         if strcmp(type, 'scatter')
+            h = scatter(loadings(:, comp), varargin{:});
+         elseif strcmp(type, 'bar')   
+            h = gbar(loadings(:, comp)', varargin{:});
+            xlim([0.5, loadings.nRows + 0.5])
+         elseif strcmp(type, 'line')   
+            h = gplot(loadings(:, comp)', varargin{:});
+            xlim([0.5, loadings.nRows + 0.5])
+         else
+            error('Wrong plot type!');
+         end
+         title('Loadings')
+
+         lim = axis();
+         if strcmp(type, 'scatter')
+            line([0 0], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);            
+            line([lim(1)  lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+         elseif strcmp(type, 'line')
+            line([lim(1)  lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+         end
+
+         if nargout > 0
+            varargout{1} = h;
+         end   
+      end
+      
       function [loadings, eigenvals] = pcaica(x, nComp)
          eps = 1e-4; 
          maxIters = 100; 

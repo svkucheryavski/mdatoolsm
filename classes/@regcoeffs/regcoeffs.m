@@ -249,8 +249,10 @@ classdef regcoeffs < handle
          values = obj.values(1:end, resp, comp)';
          if strcmp(type, 'line')
             h = plot(values, varargin{:}, 'Marker', mr);
+            xl = [1, obj.nPred];
          elseif strcmp(type, 'bar')   
             h = bar(values, varargin{:});
+            xl = [0.5, obj.nPred + 0.5];
          else
             error('Wrong plot type!');
          end
@@ -265,7 +267,7 @@ classdef regcoeffs < handle
                errorbar(1:size(v, 2), v, l, u, '.', 'Color', mdalight(mdadata.getmycolors(1)))
             elseif strcmp(type, 'line')
                plot(1:size(v, 2), v - l, '-', 'Color', mdalight(mdadata.getmycolors(1)))
-               plot(1:size(v, 2), v + u, '-', 'Color', mdalight(mdadata.getmycolors(1)))
+               plot(1:size(v, 2), v + u, '-', 'Color', mdalight(mdadata.getmycolors(1)))               
             end
             
             hold off
@@ -278,7 +280,7 @@ classdef regcoeffs < handle
          end   
    
          axis auto
-         xl = xlim();
+                  
          dx = abs(diff(xl))/25;
          xlim([xl(1) - dx xl(2) + dx])
          yl = ylim();
