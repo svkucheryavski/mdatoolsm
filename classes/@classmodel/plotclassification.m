@@ -16,7 +16,6 @@ function plotclassification(obj, varargin)
       titleStr = '';
    end    
    
-   figure
    subplot(nrows, 1, 1)
    obj.calres.plotclassification(classes, ncomp, varargin{:});
    box on

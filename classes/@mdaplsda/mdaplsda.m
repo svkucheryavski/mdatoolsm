@@ -9,21 +9,11 @@ classdef mdaplsda < mdapls & classmodel
    methods
       function obj = mdaplsda(X, c, className, ncomp, varargin)
                   
-         if isa(c, 'mdadata')
-            c = classmodel.getClassFromFactor(c, className);
-         elseif islogical(c)
-            c = classmodel.getClassFromFactor(c, className);
-            c.rowFullNames = X.rowFullNames;
-            c.rowNames = X.rowNames;            
-         else
-            error('Wrong type for c values (use either mdadata with factor column or logical vector)!')
-         end
-
-         if X.nRows ~= c.nRows
+         if X.nRows ~= size(c, 1)
             error('Number of rows in "X" ad "c" variables must be the same!')
          end
-                  
-         
+                           
+         c = classmodel.getClassFromFactor(c, className, X);
          y = splitfactor(c, 1);         
          y = y(:, className);
             
@@ -35,8 +25,10 @@ classdef mdaplsda < mdapls & classmodel
             end   
             Xtest = test{1};
             ctest = test{2};
-            ytest = splitfactor(ctest, 1);
+            ctest = classmodel.getClassFromFactor(ctest, className, Xtest);
+            ytest = splitfactor(ctest, 1);         
             ytest = ytest(:, className);
+            
             varargin = {varargin{:}, 'TestSet', {Xtest, ytest}};
          end
          
@@ -83,13 +75,7 @@ classdef mdaplsda < mdapls & classmodel
          if isempty(cref)
             yref = [];
          else
-            if cref.nCols ~= 1
-               error('Class reference should be a dataset with one column!');
-            elseif ~isfactor(cref, 1)
-               error('Class reference should be a factor!');
-            end   
-            
-            cref = classmodel.getClassFromFactor(cref, obj.className);
+            cref = classmodel.getClassFromFactor(cref, obj.className, X);
             yref = splitfactor(cref, 1);
             yref = yref(:, obj.className);
          end 

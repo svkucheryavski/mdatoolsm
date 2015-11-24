@@ -17,7 +17,11 @@ classdef classmodel < handle
          end   
       end   
       
-      function newc = getClassFromFactor(c, className)
+      function newc = getClassFromFactor(c, className, X)
+         if nargin < 3
+            X = [];
+         end
+         
          if isa(c, 'mdadata')
             if c.nCols ~= 1 || ~isfactor(c, 1)
                error('Class variable should be a dataset with one factor column!')
@@ -53,7 +57,8 @@ classdef classmodel < handle
             end
             newc.excluderows(c.excludedRows);
          else
-            newc = mdadata(c, {}, {className});
+            newc = mdadata(c, X.rowNames, {className});
+            newc.rowFullNames = X.rowFullNames;
             if sum(newc) == size(c, 1)
                newc.factor(1, {className});
             else
