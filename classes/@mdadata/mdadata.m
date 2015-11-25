@@ -2299,7 +2299,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       
       %%% overrides for standard methods
       function ind = parserowind(obj, ind, full)
-      % 'parseind' parses indices for rows and return parsed values
+      % 'parserowind' parses indices for rows and return parsed values
       %
       % It may work with a name, array of names or sequence of names, logical 
       % expressions as well as with numeric values.
@@ -2333,7 +2333,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       end
       
       function ind = parsecolind(obj, ind, full, withFactors)
-      % 'parserowind' parses indices for columns return parsed values
+      % 'parsecolind' parses indices for columns return parsed values
       %
       % It may work with a name, array of names or sequence of names, logical 
       % expressions as well as with numeric values.
