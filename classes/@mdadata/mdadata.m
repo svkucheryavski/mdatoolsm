@@ -4254,8 +4254,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
                colNames{i} = ['* ' colNames{i} ];
                
                % get factor values as indices
-               [~, ~, v] = unique(valuesAll(:, i));
-               v = v(~obj.excludedRows);
+               [~, ~, v] = unique(valuesAll(1:nRows, i));
+               v = v(~obj.excludedRows(1:nRows));
                
                % calculate maximal width for the field
                factors = obj.getfactorlevels(i);
@@ -4266,6 +4266,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
                % convert factor values into a char array
                s = sprintf('%%%ds', l);
                v = cellfun(@(x)(sprintf(s, x)), v, 'UniformOutput', false);
+               v
+               size(v, 1)
+               nRows
                if size(v, 1) ~= nRows
                   v = v';
                end   
