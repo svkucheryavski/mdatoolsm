@@ -76,10 +76,16 @@ function varargout = plotclassification(obj, varargin)
    plotExcludedRows = logical(plotExcludedRows);
    if any(plotExcludedRows)
       plotData.excluderows(plotExcludedRows);
-      refData.excluderows(plotExcludedRows);
+      if ~isempty(cref)
+         refData.excluderows(plotExcludedRows);
+      end   
    end
    
-   h = gscatter(plotData, refData, varargin{:});
+   if ~isempty(cref)
+      h = gscatter(plotData, refData, varargin{:});
+   else
+      h = scatter(plotData, varargin{:});
+   end   
    
    set(gca, 'YTick', [0 classes], 'YTickLabel', ['None', classNames]);
    ylabel('Classes')

@@ -57,8 +57,11 @@ classdef classmodel < handle
             end
             newc.excluderows(c.excludedRows);
          else
-            newc = mdadata(c, X.rowNames, {className});
-            newc.rowFullNames = X.rowFullNames;
+            newc = zeros(X.nRowsAll, 1);
+            newc(~X.excludedRows) = c;
+            newc = mdadata(newc, X.rowNamesAll, {className});
+            newc.rowFullNames = X.rowFullNamesAll;
+            newc.excluderows(X.excludedRows);
             if sum(newc) == size(c, 1)
                newc.factor(1, {className});
             else
