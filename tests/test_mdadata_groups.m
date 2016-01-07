@@ -83,30 +83,30 @@ d = people(8:20, :);
 show(d)
 
 % just a normal use of mean for a column
-m = mean(d(:, 'Height'));
+m = mean(d(:, 'Height:Weight'));
 show(m)
 
 % grouping factors are provided
-m = mean(d(:, 'Height'), d(:, {'Sex'}));
+m = mean(d(:, 'Height:Weight'), d(:, {'Sex'}));
 show(m)
 
 %%
 % If a method requires additional parameters, they should be specified after
 % dataset with factors.
 
-p = percentile(d(:, 'Height'), 25);
+p = percentile(d(:, 'Height:Weight'), 25);
 show(p)
 
-p = percentile(d(:, 'Height'), d(:, 'Sex'), 25);
+p = percentile(d(:, 'Height:Weight'), d(:, 'Sex'), 25);
 show(p)
 
 %%
 % Several factors can be used at the same time.
 
-s = ci(d(:, 'Height'), d(:, {'Sex', 'Region'}));
+s = ci(d(:, 'Height:Weight'), d(:, {'Sex', 'Region'}));
 show(s)
 
-s = ci(d(:, 'Height'), d(:, {'Sex', 'Region'}), 0.10);
+s = ci(d(:, 'Height:Weight'), d(:, {'Sex', 'Region'}), 0.10);
 show(s)
 
 %% Qualitative statistics

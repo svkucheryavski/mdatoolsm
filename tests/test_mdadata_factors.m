@@ -59,4 +59,73 @@ gplot(dda(:, 1:2), dda(:, 3:4));
 
 
 %%
-show(mean(dda(:, 1), dda(:, 3:4)))
+
+show(mean(dda, dda(:, 3:4)))
+show(median(dda, dda(:, 3:4)))
+show(min(dda, dda(:, 3:4)))
+show(max(dda, dda(:, 3:4)))
+show(sum(dda, dda(:, 3:4)))
+
+show(percentile(dda, dda(:, 3:4), 25))
+show(percentile(dda, dda(:, 3:4), 10:10:90))
+
+show(var(dda, dda(:, 3:4)))
+show(std(dda, dda(:, 3:4)))
+show(se(dda, dda(:, 3:4)))
+
+show(ci(dda, dda(:, 3:4)))
+show(ttest(dda, dda(:, 3:4)))
+
+
+%% the same for people data
+
+load 'people'
+people.factor('Sex', {'M', 'F'});
+people.factor('Region', {'A', 'B'});
+
+show(mean(people, people(:, {'Sex', 'Region'})))
+show(median(people, people(:, {'Sex', 'Region'})))
+show(min(people, people(:, {'Sex', 'Region'})))
+show(max(people, people(:, {'Sex', 'Region'})))
+show(sum(people, people(:, {'Sex', 'Region'})))
+
+show(percentile(people, people(:, {'Sex', 'Region'}), 25))
+show(percentile(people, people(:, {'Sex', 'Region'}), 25:25:99))
+
+show(var(people, people(:, {'Sex', 'Region'})))
+show(std(people, people(:, {'Sex', 'Region'})))
+show(se(people, people(:, {'Sex', 'Region'})))
+
+show(ci(people, people(:, {'Sex', 'Region'})))
+show(ci(people, people(:, {'Sex', 'Region'}), 0.01))
+
+show(ttest(people, people(:, {'Sex', 'Region'})))
+show(ttest(people(:, 'Height'), people(:, {'Sex', 'Region'}), 175))
+
+%% plots
+
+
+people.excludecols({'Income', 'Beer'});
+people.excluderows([1 5 10]);
+
+figure
+subplot 221
+gscatter(people, people(:, {'Sex', 'Region'}), 'Labels', 'names');
+subplot 222
+scatter(people, 'Groupby', people(:, {'Sex', 'Region'}), 'ShowContour', 'on');
+subplot 223
+gplot(people, people(:, {'Sex', 'Region'}));
+subplot 224
+plot(people, 'Groupby', people(:, {'Sex', 'Region'}));
+
+figure
+subplot 221
+gscatter(people, people(:, {'Sex', 'Region'}), 'Labels', 'names', 'ShowExcluded', 'on');
+subplot 222
+scatter(people, 'Groupby', people(:, {'Sex', 'Region'}), 'ShowContour', 'on', 'ShowExcluded', 'on');
+subplot 223
+gplot(people, people(:, {'Sex', 'Region'}), 'ShowExcluded', 'on');
+subplot 224
+plot(people, 'Groupby', people(:, {'Sex', 'Region'}), 'ShowExcluded', 'on');
+
+

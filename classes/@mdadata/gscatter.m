@@ -35,6 +35,9 @@ function varargout = gscatter(obj, varargin)
 %  "MarkerSize" - one value or a vector with values (one for each group) 
 %  for the marker size.
 %
+%  "ShowContour" - show or not a contour around the data points belonging to each group. 
+%  It uses convex hull to find the outer points. 
+%
 %
 % Examples:
 % ---------
@@ -129,7 +132,7 @@ function varargout = gscatter(obj, varargin)
          mdadata.legend(lh, legendStr);
       end
 
-      title(objs{1}.name)
+      title(obj.name)
       box on
       correctaxislim(10);                  
    end

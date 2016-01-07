@@ -1,8 +1,19 @@
+v.0.1.6
+=======
+* new behaviour for all statistical methods (`mean()`, `std()`, ...), now values are calculated for each column of a dataset
+* manual x-values now can be provided to `gplot()` (similar to `plot()`)
+* if a vector with numbers is provided for column names, the numbers will be used as x-values for line plots
+* fixed a bug in classification plot which worked incorrectly if reference data is not provided
+* other small improvememnts to the plotting methods for `mdadata` objects
+* help and GitBook documentation were adjusted according to the changes
+
 v.0.1.5
 =======
 * `mdaplsda()` can now work with vector of logical values as a second argument
 * improvements to classification plot for models and results
 * fixed bug in `predict()` method for PLS-DA, which did not work if references have not been provided
+* scatter plot for scores now show the explained variance for each component in axis label
+* fixed a bug in PCA when cross-validation always used SVD regardless value for Method parameter
 
 v.0.1.4
 =======

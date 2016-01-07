@@ -36,26 +36,6 @@ function [args, varargin] = getgscatteroptions(nGroups, varargin)
       end   
    end
 
-   [mec, varargin] = getarg(varargin, 'MarkerEdgeColor');
-   if ~isempty(mec)
-      if isnumeric(mec)
-         nmec = size(mec, 1);
-      else
-         nmec = numel(mec);
-         if size(mec, 2) > size(mec, 1)
-            mec = mec';
-         end   
-      end
-
-      if nmec == 1
-         mec = repmat(mec, nGroups, 1);
-      elseif nmec ~= nGroups
-         error('Number of colors in "MarkerEdgeColor" should be the same as number of groups!');
-      end   
-   else
-      mec = mc;
-   end   
-
    [mfc, varargin] = getarg(varargin, 'MarkerFaceColor');
    if isempty(mfc)
       mfc = mc;
@@ -76,12 +56,32 @@ function [args, varargin] = getgscatteroptions(nGroups, varargin)
       end   
    end   
 
+      [mec, varargin] = getarg(varargin, 'MarkerEdgeColor');
+   if ~isempty(mec)
+      if isnumeric(mec)
+         nmec = size(mec, 1);
+      else
+         nmec = numel(mec);
+         if size(mec, 2) > size(mec, 1)
+            mec = mec';
+         end   
+      end
+
+      if nmec == 1
+         mec = repmat(mec, nGroups, 1);
+      elseif nmec ~= nGroups
+         error('Number of colors in "MarkerEdgeColor" should be the same as number of groups!');
+      end   
+   else
+      mec = mfc;
+   end   
+
    [ms, varargin] = getarg(varargin, 'MarkerSize');
    if isempty(ms) 
       if strcmp(mr{1}, '.') 
          ms = repmat(12, nGroups, 1);
       else
-         ms = repmat(5, nGroups, 1);
+         ms = repmat(6, nGroups, 1);
       end   
    else
       if numel(ms) == 1

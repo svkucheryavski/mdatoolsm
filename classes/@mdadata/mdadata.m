@@ -153,6 +153,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       rowNamesAll       % cell array with names for all rows
       colFullNamesAll   % cell array with full names for all columns
       rowFullNamesAll   % cell array with full names for all rows
+      colValuesAll      % numeric vector with column values used to make line plot
    end
    
    properties (SetAccess = 'protected', Hidden = true, SetObservable = true)
@@ -175,6 +176,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       colNames          % column names (only letters and numbers, unique)      
       rowFullNames      % row names with extra symbols, using for printing and plotting
       colFullNames      % column names with extra symbols, using for printing and plotting
+      colValues         % numeric values for columns used for making line plots
    end
    
    properties (Dependent = true, Hidden = true)
@@ -197,6 +199,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
       colFullNamesWithoutFactors % column names only for qualitative data
       colNamesAllWithoutFactors % all column names (including hidden) only for quantitative data
       colFullNamesAllWithoutFactors % all column full names (including hidden) only for quantitative data
+      colValuesWithoutFactors % column values only for quantitative data
+      colValuesAllWithoutFactors % column values only for quantitative data including hidden columns
    end
       
    methods
@@ -329,6 +333,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end   
       end
       
+      function out = get.colValues(obj)
+         out = obj.colValuesAll;
+         
+         if ~isempty(out)
+            out(obj.excludedCols) = [];
+         end   
+      end
+      
       function out = get.colFullNames(obj)
          out = obj.colFullNamesAll;
          
@@ -361,8 +373,24 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end   
       end
       
+      function out = get.colValuesWithoutFactors(obj)
+         out = obj.colValuesAll;
+         
+         if ~isempty(out) 
+            out(obj.factorCols | obj.excludedCols) = [];
+         end   
+      end
+      
       function out = get.colNamesAllWithoutFactors(obj)
          out = obj.colNamesAll;
+         
+         if ~isempty(out) 
+            out(obj.factorCols) = [];
+         end   
+      end
+      
+      function out = get.colValuesAllWithoutFactors(obj)
+         out = obj.colValuesAll;
          
          if ~isempty(out) 
             out(obj.factorCols) = [];
@@ -385,6 +413,50 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end   
       end
       
+      function out = get.rowNames(obj)
+         out = obj.rowNamesAll;
+         
+         if ~isempty(out)
+            out(obj.excludedRows) = [];
+         end   
+      end
+      
+      function out = get.rowFullNames (obj)
+         out = obj.rowFullNamesAll;
+         
+         if ~isempty(out)
+            out(obj.excludedRows) = [];
+         end   
+      end
+      
+      function ind = get.selectedRows(obj)
+         ind = obj.selectedRows;
+      end   
+      
+      function ind = get.selectedCols(obj)
+         ind = obj.selectedCols;
+      end   
+            
+      function ind = get.currentRows(obj)
+         if isempty(obj.currentRows)
+            obj.currentRows = [1 1];
+         end   
+         
+         ind = obj.currentRows;
+      end   
+      
+      function ind = get.currentCols(obj)
+         if isempty(obj.currentCols)
+            if obj.nCols > 1
+               obj.currentCols = [1 2];
+            else
+               obj.currentCols = [1 1];
+            end   
+         end   
+         
+         ind = obj.currentCols;
+      end   
+      
       %%% setters
       function set.colNamesAll(obj, colNames)         
                   
@@ -396,10 +468,15 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          if isempty(colNames)
          % no colnames - generate them as '1', '2', ...   
-            obj.colNamesAll = textgen('', 1:nCols);
+            obj.colValuesAll = 1:nCols;
+            obj.colNamesAll = textgen('', obj.colValuesAll);
          else   
             if ischar(colNames) && nCols == 1
                colNames = {colNames};
+            end
+            
+            if size(colNames, 1) > size(colNames, 2)
+               colNames = colNames';
             end
             
             if iscell(colNames) && ischar(colNames{1})
@@ -411,10 +488,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
                % remove all symbols which are non letter nor numbers
                % merge words and capitalise them
                for i = 1:numel(colNames)
-                  a = regexp(colNames{i}, '[^A-Za-z0-9\.\-\s]', 'split');
-                  a = regexp(strtrim(a{1}), '\s', 'split');
+                  %a = regexp(colNames{i}, '[^A-Za-z0-9\.\-\s]', 'split');
+                  %a = regexp(strtrim(a{1}), '\s', 'split');
                   %a = cellfun(@(x)([upper(x(1)) x(2:end)]), a, 'UniformOutput', false);
-                  colNames{i} = sprintf('%s', a{:});
+                  %colNames{i} = sprintf('%s', a{:});
+                  colNames{i} = regexprep(colNames{i}, '[^A-Za-z0-9\.\-]', '');
                end
             end
             
@@ -425,6 +503,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             elseif (numel(colNames) ~= nCols)
                error('Number of names should be the same as number of columns!');
             elseif isnumeric(colNames)
+               obj.colValuesAll = colNames;
                obj.colNamesAll = textgen('', colNames);
             elseif iscell(colNames) && ischar([colNames{:}])
                obj.colNamesAll = colNames;
@@ -446,6 +525,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       end
       
       function set.colFullNames(obj, colNames)
+         if size(colNames, 1) > size(colNames, 2)
+            colNames = colNames';
+         end
+         
          obj.colFullNamesAll = colNames;
       end
             
@@ -467,10 +550,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
                % remove all symbols which are non letter nor numbers
                % merge words and capitalise them
                for i = 1:numel(rowNames)
-                  a = regexp(rowNames{i}, '[^A-Za-z0-9\-\.\s]', 'split');
-                  a = regexp(strtrim(strtrim(a{1})), '\s', 'split');
+                  %a = regexp(rowNames{i}, '[^A-Za-z0-9\-\.\s]', 'split');
                   %a = cellfun(@(x)([upper(x(1)) x(2:end)]), a, 'UniformOutput', false);
-                  rowNames{i} = sprintf('%s', a{:});
+                  %rowNames{i} = sprintf('%s', a{:});
+                  rowNames{i} = regexprep(rowNames{i}, '[^A-Za-z0-9\-\.\s]', '');  
                end
             end
             
@@ -511,22 +594,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
          obj.rowFullNamesAll = rowNames;
       end
       
-      function out = get.rowNames(obj)
-         out = obj.rowNamesAll;
-         
-         if ~isempty(out)
-            out(obj.excludedRows) = [];
-         end   
-      end
-      
-      function out = get.rowFullNames (obj)
-         out = obj.rowFullNamesAll;
-         
-         if ~isempty(out)
-            out(obj.excludedRows) = [];
-         end   
-      end
-
       function set.dimNames(obj, dimNames)
          if ~isempty(dimNames)
             if sum(cellfun(@ischar, dimNames)) ~=2 || numel(dimNames) ~= 2
@@ -536,37 +603,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             end   
          end   
       end
-      
-      function out = getfullrowind(obj, ind)
-      % 'getfullrowind' returns numeric indices for rows, taking into 
-      % account hidden rows   
-      
-      
-         ind = parserowind(obj, ind);
-         
-         fullRowInd = 1:obj.nRowsAll;
-         fullRowInd(obj.excludedRows) = [];
-         
-         out = fullRowInd(ind);
-      end
-      
-      function out = getfullcolind(obj, ind, full, withFactors)
-      % 'getfullcolind' returns numeric indices for columns, taking into 
-      % account hidden columns
 
-         if nargin < 3
-            full = false;
-         end
-         
-         if nargin < 4
-            withFactors = true;
-         end   
-         ind = parsecolind(obj, ind, full, withFactors);
-         fullColInd = 1:obj.nColsAll;
-         fullColInd((~full & obj.excludedCols) | (~withFactors & obj.factorCols)) = [];
-         out = fullColInd(ind);
-      end
-      
       function set.selectedRows(obj, ind)
          if isempty(ind)
             obj.selectedRows = false(obj.nRowsAll, 1);
@@ -601,36 +638,39 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end   
       end   
       
-      function ind = get.selectedRows(obj)
-         ind = obj.selectedRows;
-      end   
-      
-      function ind = get.selectedCols(obj)
-         ind = obj.selectedCols;
-      end   
-            
-      function ind = get.currentRows(obj)
-         if isempty(obj.currentRows)
-            obj.currentRows = [1 1];
-         end   
-         
-         ind = obj.currentRows;
-      end   
-      
-      function ind = get.currentCols(obj)
-         if isempty(obj.currentCols)
-            if obj.nCols > 1
-               obj.currentCols = [1 2];
-            else
-               obj.currentCols = [1 1];
-            end   
-         end   
-         
-         ind = obj.currentCols;
-      end   
             
       %%% methods for including/excluding/removing values and variables
       
+      function out = getfullrowind(obj, ind)
+      % 'getfullrowind' returns numeric indices for rows, taking into 
+      % account hidden rows   
+      
+      
+         ind = parserowind(obj, ind);
+         
+         fullRowInd = 1:obj.nRowsAll;
+         fullRowInd(obj.excludedRows) = [];
+         
+         out = fullRowInd(ind);
+      end
+      
+      function out = getfullcolind(obj, ind, full, withFactors)
+      % 'getfullcolind' returns numeric indices for columns, taking into 
+      % account hidden columns
+
+         if nargin < 3
+            full = false;
+         end
+         
+         if nargin < 4
+            withFactors = true;
+         end   
+         ind = parsecolind(obj, ind, full, withFactors);
+         fullColInd = 1:obj.nColsAll;
+         fullColInd((~full & obj.excludedCols) | (~withFactors & obj.factorCols)) = [];
+         out = fullColInd(ind);
+      end
+            
       function excluderows(obj, ind, type)
       % 'exlcluderows' exclude (hide) rows from the dataset
       %
@@ -1099,7 +1139,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          % get factor values as level indices (1, 2, 3)
          values = zeros(obj.nRowsAll, nFactors);
          for i = 1:numel(ind)             
-            [~, ~, values(:, i)] = unique(valuesAll(:, ind(i)));
+            [~, ~, values(:, i)] = unique(valuesAll(:, i));
          end   
          values = values(~obj.excludedRows, :);
          
@@ -1474,18 +1514,17 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %%% statistical methods
       
       function out = var(obj, varargin)
-      % 'var' calculates variance for each column of dataset, or for one 
-      % column, which values are split into groups.
+      % 'var' calculates variance for each column of dataset.
       %
       %   s2 = var(data);
       %   s2 = var(data, factors);
       %
       %
       % By default, method calculates variance for each column of the
-      % 'data' object. However if a dataset with factors is provided the
-      % method will calculate the variance only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the variance for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
       %
       % Examples:
       % ---------
@@ -1505,13 +1544,20 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   show(s2)
       %
       
-         if nargin == 1
-            groups = [];
-         else
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
+            varargin(1) = [];
          end
-         
-         out = stat(obj, groups, @var, 'Variance');
+      
+         if isempty(varargin)
+            varargin{1} = 0;
+            varargin{2} = 1;
+         elseif numel(varargin) > 0
+            varargin{2} = 1;
+         end   
+
+         out = stat(obj, groups, @var, 'Variance', varargin{:});
       end
       
       function out = cov(obj)
@@ -1526,7 +1572,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          out.name = 'Covariance';
       end
       
-      function out = corr(obj)
+      function out = corr(obj, varargin)
       % 'corr' calculates correlation matrix for all pairwise combinations of columns.
       %
       %   r = corr(data);
@@ -1540,18 +1586,17 @@ classdef mdadata < handle & matlab.mixin.Copyable
       end
                   
       function out = mean(obj, varargin)
-      % 'mean' calculates average value for each column of dataset or for one 
-      % column, which values are split into groups.
+      % 'mean' calculates average value for each column of dataset.
       %
       %    m = mean(data);
       %    m = mean(data, factors);
       %
       %
       % By default, method calculates mean value for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the mean value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the mean value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
       %
       % Examples:
       % ---------
@@ -1571,28 +1616,27 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   show(m)
       %
       
-         if nargin == 1
-            groups = [];
-         else
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
+            varargin(1) = [];
          end
       
          out = stat(obj, groups, @mean, 'Mean');
       end
       
       function out = std(obj, varargin)
-      % 'std' calculates standard deviation for each column of dataset or for one
-      % column, which values are split into groups.
+      % 'std' calculates standard deviation for each column of dataset.
       %
       %    s = std(data);
       %    s = std(data, factors);
       %
       %
-      % By default, method calculates standard deviation for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
+      % By default, method calculates std value for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the std value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
       %
       % Examples:
       % ---------
@@ -1612,29 +1656,34 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   show(s)
       %
       
-         if nargin == 1
-            groups = [];
-         else
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
+            varargin(1) = [];
          end
       
+         if isempty(varargin)
+            varargin{1} = 0;
+            varargin{2} = 1;
+         elseif numel(varargin) > 0
+            varargin{2} = 1;
+         end   
 
-         out = stat(obj, groups, @std, 'Stdev');
+         out = stat(obj, groups, @std, 'Std', varargin{:});
       end
       
       function out = se(obj, varargin)
-      % 'se' calculates standard error of mean for each column of dataset or for 
-      % the first column, which values are split into groups.
+      % 'se' calculates standard error of mean for each column of dataset.
       %
       %   s = se(data);
       %   s = se(data, factors);
       %
       %
-      % By default, method calculates standard error for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
+      % By default, method calculates the se value for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the se value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
       %
       % Examples:
       % ---------
@@ -1654,19 +1703,266 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   show(s)
       %
       
-         if nargin == 1
-            groups = [];
-         else
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
+            varargin(1) = [];
          end
          
          out = stat(obj, groups, @mdase, 'Std. error');
       end
       
+      function out = min(obj, varargin)
+      % 'min' calculates minimal value for each column of dataset.
+      %
+      %   mn = min(data);
+      %   mn = min(data, factors);
+      %
+      %
+      % By default, method calculates min value for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the min value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
+      %
+      % Examples:
+      % ---------
+      %
+      %   load people
+      %
+      %   % calculate minimum for each column
+      %   mn = min(people);
+      %   show(mn)
+      %   
+      %   % mark columns "Sex" and "Region" as a factors
+      %   people.factor('Sex', {'Male', 'Female'})
+      %   people.factor('Region', {'A', 'B'})
+      %
+      %   % calculate minimum for "Height" separately for each sex and region.
+      %   mn = min(people(:, 'Height'), people(:, {'Sex', 'Region'}));
+      %   show(mn)
+      %
+      
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
+            groups = varargin{1};
+            varargin(1) = [];
+         end
+      
+         varargin{1} = [];
+         varargin{2} = 1;
+      
+         out = stat(obj, groups, @min, 'Min', varargin{:});
+      end
+      
+      function out = max(obj, varargin)
+      % 'max' calculates maximal value for each column of dataset.
+      %
+      %   mx = max(data);
+      %   mx = max(data, factors);
+      %
+      %
+      % By default, method calculates max value for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the max value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
+      %
+      % Examples:
+      % ---------
+      %
+      %   load people
+      %
+      %   % calculate maximum for each column
+      %   mx = max(people);
+      %   show(mx)
+      %   
+      %   % mark columns "Sex" and "Region" as a factors
+      %   people.factor('Sex', {'Male', 'Female'})
+      %   people.factor('Region', {'A', 'B'})
+      %
+      %   % calculate minimum for "Height" separately for each sex and region.
+      %   mx = max(people(:, 'Height'), people(:, {'Sex', 'Region'}));
+      %   show(mx)
+      %
+      
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
+            groups = varargin{1};
+            varargin(1) = [];
+         end
+      
+         varargin{1} = [];
+         varargin{2} = 1;
+      
+         out = stat(obj, groups, @max, 'Max', varargin{:});
+      end
+                  
+      function out = median(obj, varargin)
+      % 'median' calculates median value for each column of dataset.
+      %
+      %   md = median(data);
+      %   md = median(data, factors);
+      %
+      %
+      % By default, method calculates median value for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the median value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
+      %
+      % Examples:
+      % ---------
+      %
+      %   load people
+      %
+      %   % calculate median for each column
+      %   md = median(people);
+      %   show(md)
+      %   
+      %   % mark columns "Sex" and "Region" as a factors
+      %   people.factor('Sex', {'Male', 'Female'})
+      %   people.factor('Region', {'A', 'B'})
+      %
+      %   % calculate median for "Height" separately for each sex and region.
+      %   md = median(people(:, 'Height'), people(:, {'Sex', 'Region'}));
+      %   show(md)
+      %
+      
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
+            groups = varargin{1};
+            varargin(1) = [];
+         end
+      
+         out = stat(obj, groups, @median, 'Median');
+      end
+      
+      function out = sum(obj, varargin)
+      % 'sum' calculates the sum of values in each column of dataset.
+      %
+      %   s = sum(data);
+      %   s = sum(data, factors);
+      %
+      %
+      % By default, method calculates sum value for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the sum value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
+      %
+      % Examples:
+      % ---------
+      %
+      %   load people
+      %
+      %   % calculate sum for each column
+      %   s = sum(people);
+      %   show(s)
+      %   
+      %   % mark columns "Sex" and "Region" as a factors
+      %   people.factor('Sex', {'Male', 'Female'})
+      %   people.factor('Region', {'A', 'B'})
+      %
+      %   % calculate sum for "Height" separately for each sex and region.
+      %   s = sum(people(:, 'Height'), people(:, {'Sex', 'Region'}));
+      %   show(s)
+      %
+      
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
+            groups = varargin{1};
+            varargin(1) = [];
+         end
+            
+         out = stat(obj, groups, @sum, 'Sum');
+      end
+      
+      function out = percentile(obj, varargin)
+      % 'percentile' calculates n-th percentile for each column of dataset.
+      % 
+      %   p = percentile(data, n); 
+      %   p = percentile(data, factors, n);
+      %
+      %
+      % By default, method calculates percentile for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the percentile for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
+      %
+      % Examples:
+      % ---------
+      %
+      %   load people
+      %
+      %   % calculate 25th percentile for each column
+      %   p = percentile(people, 25);
+      %   show(p)
+      %   
+      %   % mark columns "Sex" and "Region" as a factors
+      %   people.factor('Sex', {'Male', 'Female'})
+      %   people.factor('Region', {'A', 'B'})
+      %
+      %   % calculate 25th percentile for "Height" separately for each sex and region.
+      %   p = percentile(people(:, 'Height'), people(:, {'Sex', 'Region'}), 25);
+      %   show(p)
+      %
+      
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
+            groups = varargin{1};
+            varargin(1) = [];
+         end
+      
+         if numel(varargin) == 0
+            error('Specify which percentile should be calculated!')
+         else
+            if ~isnumeric(varargin{1}) 
+               error('Specify which percentile should be calculated!')
+            else   
+               n = varargin{1};
+            end   
+         end
+         
+         rowNames = textgen('', n, '%%');
+         out = stat(obj, groups, @mdapercentile, 'Percentiles', rowNames, n);
+      end
+      
+      function out = summary(obj, varargin)
+      % 'summary' calculates summary statistics for each column of dataset.
+      %
+      %   s = summary(data);
+      %
+      % The statistics include min, max, mean, median, first and third
+      % quartiles.
+      %
+      %
+      % Examples:
+      % ---------
+      %
+      %   load people
+      %
+      %   % calculate summary for each column
+      %   s = summary(people);
+      %   show(s)
+      %   
+      %
+                     
+         out = [min(obj); percentile(obj, 25); median(obj);...
+            mean(obj); percentile(obj, 75); max(obj)];
+         out.rowNames = {'Min', 'Q1', 'Median', 'Mean', 'Q3', 'Max'};
+         
+         if isempty(obj.name)
+            out.name = 'Summary statistics' ;
+         else   
+            out.name = ['Summary statistics for ' obj.name];
+         end   
+      end
+      
       function out = ci(obj, varargin)
       % 'ci' calculates confidence interval using Student's t-distribution either 
-      % for each column of dataset or for the first column, which values are split
-      % into groups.
+      % for each column of dataset.
       %
       %   s = ci(data);
       %   s = ci(data, alpha);
@@ -1674,11 +1970,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   s = ci(data, factors, alpha);
       %
       %
-      % By default, method calculates confidence interval for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the interval only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
+      % By default, method calculates intervals for each column of the
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the intervals for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
       %
       % Argument 'alpha' is a signigicance level (between 0 and 1, default is 0.05).
       %
@@ -1703,31 +1999,24 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   show(s)
       %
       
-         if nargin == 1
-            groups = [];
-            alpha = 0.05;
-         elseif nargin == 2 
-            if isa(varargin{1}, 'mdadata') 
-               groups = varargin{1};
-               alpha = 0.05;
-            elseif isnumeric(varargin{1})   
-               alpha = varargin{1};
-               groups = [];
-            else
-               alpha = 0.05;
-               groups = [];
-            end   
-         elseif nargin == 3
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
-            alpha = varargin{2};
+            varargin(1) = [];
          end
-         out = stat(obj, groups, @mdaci, {'Lower', 'Upper'}, ...
-            sprintf('Confidence intervals (%.0f%%)', 100 * (1 - alpha)), alpha);
+      
+         alpha = 0.05;
+         if numel(varargin) > 0
+            alpha = varargin{1};
+         end
+         
+         out = stat(obj, groups, @mdaci, ...
+                  sprintf('Confidence intervals (%.0f%%)', 100 * (1 - alpha)), {'Lower', 'Upper'}, ...
+                  alpha);
       end
       
       function out = ttest(obj, varargin)
-      % 'ttest' calculates one-sample t-test p-value for each column of dataset or 
-      % for the first column, which values are split into groups.
+      % 'ttest' calculates one-sample t-test p-value for each column of dataset.
       %
       %   p = ttest(data);
       %   p = ttest(data, mu);
@@ -1736,10 +2025,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %
       %
       % By default, method calculates p-value for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
+      % 'data' object. If a dataset with factors is also provided the
+      % method will calculate the p-value for columns by splitting 
+      % data rows into groups, corresponded to all possible combination 
+      % of the factors.
       %
       % Argument 'mu' is the tested average. By default it is 0. 
       % The p-values are calculated for each tail and both.
@@ -1765,326 +2054,82 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %   show(s)
       %
       
-      
-         if nargin == 1
-            groups = [];
-            mu = 0;
-         elseif nargin == 2 
-            if isa(varargin{1}, 'mdadata') 
-               groups = varargin{1};
-               mu = 0;
-            elseif isnumeric(varargin{1})   
-               mu = varargin{1};
-               groups = [];
-            else
-               mu = 0;
-               groups = [];
-            end   
-         elseif nargin == 3
+         groups = [];
+         if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
             groups = varargin{1};
-            mu = varargin{2};
+            varargin(1) = [];
+         end
+      
+         mu = 0;
+         if numel(varargin) > 0 && isnumeric(varargin{1})
+            mu = varargin{1};
          end
          
          if numel(mu) > 1
             error('Argument "mu" should have one value!')
          end
-         out = stat(obj, groups, @mdattest, {'Left tail', 'Both tails', 'Right tail'},...
-            sprintf('P-values for t-test (mu = %s)', num2str(mu, 3)), mu);
-      end
-      
-      function out = min(obj, varargin)
-      % 'min' calculates minimal value for each column of dataset or for the 
-      % first column, which values are split into groups.
-      %
-      %   mn = min(data);
-      %   mn = min(data, factors);
-      %
-      %
-      % By default, method calculates min value for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % calculate minimum for each column
-      %   mn = min(people);
-      %   show(mn)
-      %   
-      %   % mark columns "Sex" and "Region" as a factors
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   people.factor('Region', {'A', 'B'})
-      %
-      %   % calculate minimum for "Height" separately for each sex and region.
-      %   mn = min(people(:, 'Height'), people(:, {'Sex', 'Region'}));
-      %   show(mn)
-      %
-      
-         if nargin == 1
-            groups = [];
-         else
-            groups = varargin{1};
-         end
-      
-         out = stat(obj, groups, @min, 'Min');
-      end
-      
-      function out = max(obj, varargin)
-      % 'max' calculates maximal value for each column of dataset or for the 
-      % first colum, which values are split into groups.
-      %
-      %   mx = max(data);
-      %   mx = max(data, factors);
-      %
-      %
-      % By default, method calculates max value for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % calculate maximum for each column
-      %   mx = max(people);
-      %   show(mx)
-      %   
-      %   % mark columns "Sex" and "Region" as a factors
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   people.factor('Region', {'A', 'B'})
-      %
-      %   % calculate minimum for "Height" separately for each sex and region.
-      %   mx = max(people(:, 'Height'), people(:, {'Sex', 'Region'}));
-      %   show(mx)
-      %
-      
-         if nargin == 1
-            groups = [];
-         else
-            groups = varargin{1};
-         end
-      
-         out = stat(obj, groups, @max, 'Max');
-      end
-                  
-      function out = median(obj, varargin)
-      % 'median' calculates median value for each column of dataset, or for the 
-      % first column, which values are split into groups.
-      %
-      %   md = median(data);
-      %   md = median(data, factors);
-      %
-      %
-      % By default, method calculates median for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % calculate median for each column
-      %   md = median(people);
-      %   show(md)
-      %   
-      %   % mark columns "Sex" and "Region" as a factors
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   people.factor('Region', {'A', 'B'})
-      %
-      %   % calculate median for "Height" separately for each sex and region.
-      %   md = median(people(:, 'Height'), people(:, {'Sex', 'Region'}));
-      %   show(md)
-      %
-      
-         if nargin == 1
-            groups = [];
-         else
-            groups = varargin{1};
-         end
-      
-         out = stat(obj, groups, @median, 'Median', 'Statistics');
-      end
-      
-      function out = sum(obj, varargin)
-      % 'sum' calculates the sum of values in each column of dataset or for the
-      % first column, which values are split into groups.
-      %
-      %   s = sum(data);
-      %   s = sum(data, factors);
-      %
-      %
-      % By default, method calculates sum for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the value only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % calculate sum for each column
-      %   s = sum(people);
-      %   show(s)
-      %   
-      %   % mark columns "Sex" and "Region" as a factors
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   people.factor('Region', {'A', 'B'})
-      %
-      %   % calculate sum for "Height" separately for each sex and region.
-      %   s = sum(people(:, 'Height'), people(:, {'Sex', 'Region'}));
-      %   show(s)
-      %
-      
-         if nargin == 1
-            groups = [];
-         else
-            groups = varargin{1};
-         end
-      
-         out = stat(obj, groups, @sum, 'Sum', 'Statistics');
-      end
-      
-      function out = percentile(obj, varargin)
-      % 'percentile' calculates n-th percentile for each column of dataset
-      % or for the first column, which values are split into groups.
-      % 
-      %   p = percentile(data, n); 
-      %   p = percentile(data, factors, n);
-      %
-      %
-      % By default, method calculates percentile for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the interval only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % calculate 25th percentile for each column
-      %   p = percentile(people, 25);
-      %   show(p)
-      %   
-      %   % mark columns "Sex" and "Region" as a factors
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   people.factor('Region', {'A', 'B'})
-      %
-      %   % calculate 25th percentile for "Height" separately for each sex and region.
-      %   p = percentile(people(:, 'Height'), people(:, {'Sex', 'Region'}), 25);
-      %   show(p)
-      %
-      
-         if nargin == 1
-            error('Specify which percentile should be calculated!')
-         elseif nargin == 2 
-            if ~isnumeric(varargin{1}) 
-               error('Specify which percentile should be calculated!')
-            else   
-               n = varargin{1};
-               groups = [];
-            end   
-         elseif nargin == 3
-            groups = varargin{1};
-            n = varargin{2};
-         end
          
-         out = stat(obj, groups, @mdapercentile, sprintf('%d%%', n), 'Percentiles', n);
+         out = stat(obj, groups, @mdattest, sprintf('P-values (mu = %s)', num2str(mu, 3)), ...
+            {'Left tail', 'Both tails', 'Right tail'}, mu);
       end
       
-      function out = summary(obj, varargin)
-      % 'summary' calculates summary statistics for each column of dataset, or
-      % for the first column, which values a split into groups.
-      %
-      %   s = summary(data);
-      %   s = sum(data, factors);
-      %
-      %
-      % The statistics include min, max, mean, median, first and third
-      % quartiles.
-      %
-      % By default, method calculates statistics for each column of the
-      % 'data' object. However if a dataset with factors is also provided the
-      % method will calculate the values only for the first column of
-      % 'data' by splitting its values into groups, corresponded to all
-      % possible combination of the factors.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % calculate summary for each column
-      %   s = summary(people);
-      %   show(s)
-      %   
-      %   % mark columns "Sex" and "Region" as a factors
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   people.factor('Region', {'A', 'B'})
-      %
-      %   % calculate summary for "Height" separately for each sex and region.
-      %   s = summary(people(:, 'Height'), people(:, {'Sex', 'Region'}));
-      %   show(s)
-      %
-      
-         if nargin == 1
-            groups = [];
-         else
-            groups = varargin{1};
-         end
-               
-         out = [min(obj, groups); percentile(obj, groups, 25); median(obj, groups);...
-            mean(obj, groups); percentile(obj, groups, 75); max(obj, groups)];
-         out.rowNames = {'Min', 'Q1', 'Median', 'Mean', 'Q3', 'Max'};
-         
-         if isempty(groups)
-            out.name = 'Summary statistics' ;
-         else   
-            out.name = ['Summary statistics for ' obj.colNames{1}];
-         end   
-      end
             
-      function out = stat(obj, groups, fun, rowNames, name, varargin)         
-         if nargin < 5
+      function out = stat(obj, groups, fun, name, varargin)         
+         if nargin < 4
             name = '';
          end
-
-         if ~iscell(rowNames)
-            rowNames = {rowNames};
-         end   
-
+         
+         rowNames = [];
+         if isempty(varargin)
+            varargin{1} = 1;
+         elseif iscell(varargin{1})
+            rowNames = varargin{1};
+            varargin(1) = [];
+         end
+         
+         
          if isempty(groups)
+            if isempty(rowNames)
+               rowNames = {name};
+            end   
             out = mdadata(fun(obj.numValues, varargin{:}), rowNames, obj.colFullNamesWithoutFactors, ...
-               {'Statistics', obj.dimNames{2}}, name); 
+               {'Statistics', obj.dimNames{2}}, obj.name); 
          else
             groups = groups.getgroups();
             values = obj.numValues;
             out = [];
+            
             for i = 1:groups.nCols
-               out = [out fun(values(groups.values(:, i) == 1, 1), varargin{:})];
+               f = fun(values(groups.values(:, i) == 1, :), varargin{:});
+               out = [out; f];
             end
             
             if isempty(name)
-               name = [obj.colNamesWithoutFactors{1}];
-            else
-               name = [name ' for ' obj.colNamesWithoutFactors{1}];
+               name = [obj.name];
+            elseif ~isempty(obj.name)
+               name = [name ' for ' obj.name];
             end
             
-            out = mdadata(out, rowNames, groups.colNames, {'Statistics', groups.dimNames{2}}, name); 
-            out.colFullNames = groups.colFullNames;
+            if isempty(rowNames)
+               orowNames = groups.colNames;
+               orowFullNames = groups.colFullNames;
+            else
+               nNames = numel(rowNames);
+               rowNames = repmat(rowNames, 1, groups.nCols);
+               
+              
+               gcolNames = repmat(groups.colNames, nNames, 1);
+               gcolNames = gcolNames(:)';
+               gcolFullNames = repmat(groups.colFullNames, nNames, 1);
+               gcolFullNames = gcolFullNames(:)';
+
+               orowNames = cellfun(@(x, y) [x  '-' y], rowNames, gcolNames, 'un', 0);
+               orowFullNames = cellfun(@(x, y) [x  ' ' y], rowNames, gcolFullNames, 'un', 0);
+            end   
+            
+            out = mdadata(out, orowNames, obj.colNamesWithoutFactors, {groups.dimNames{2}, obj.dimNames{2}}, name); 
+            out.rowFullNames = orowFullNames;
+            out.colFullNames = obj.colFullNamesWithoutFactors;
          end   
       end   
       
@@ -2610,7 +2655,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
             
             svalues = values(row_ind, col_ind);
             scolNames = obj.colNamesAll(col_ind);
-            scolFullNames = obj.colFullNamesAll(col_ind);
+            if ~isempty(obj.colFullNamesAll)
+               scolFullNames = obj.colFullNamesAll(col_ind);
+            else
+               scolFullNames = [];
+            end   
             sexcludedRows = [];
             sexcludedCols = [];
             sselectedRows = [];
@@ -2731,192 +2780,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
             varargout{1} = h;
          end
       end
-
-      function varargout = bar(obj, varargin)
-      % 'bar' makes a bar plot for 'mdadata' object.
-      %
-      %   bar(data);
-      %   bar(data, 'ParamName', ParamValue, ...);
-      %   bar(data, x);
-      %   bar(data, x, 'ParamName', ParamValue, ...);
-      %
-      %
-      % The method makes a bar plot for a particular row of a dataset. If
-      % dataset provided as an argument has more than one row the plot will 
-      % be shown for the first row.
-      %
-      % The optional second argument ('x') is a vector of values for the x
-      % axis. If it is not provided, a sequence 1:N, where N is number of
-      % columns in the dataset, will be used. The ticks for x axis in this case
-      % will be generated based on column names. The method assumes that every
-      % column of the data is a variable and every row is an observation.
-      %
-      % Parameters:
-      % -----------
-      % All parameters for Matlab's 'bar()' function will work. Extra parameters are shown below.
-      %
-      %  "Labels" - show or not labels for the data points. Possible
-      %  values are "none" (default), "names" for name of objects, "numbers"
-      %  for their numbers and "values" for the data values (height of bars). 
-      %
-      %  "LabelsSigfig" - how many significant figures to use for the label values.
-      %
-      %
-      % Examples:
-      % ---------
-      % 
-      %   expvar = mdadata([40.1 20 5 4; 35.2 18 4 3], {'Cal', 'Test'}, 1:4);
-      %   expvar.dimNames = {'Results', 'Components'};
-      %   expvar.name = 'Explained variance';
-      %   
-      %   % show bar plot for second row and change bar colors
-      %   figure
-      %   bar(expvar('Test', :), 'FaceColor', 'r');
-      %
-      %   % show labels on top of the bars
-      %   figure
-      %   bar(expvar, 'Labels', 'on');
-      %
-      %
-      
-         [v, varargin] = getarg(varargin, 'ShowExcluded');
-         if isempty(v) || ~strcmp(v, 'on')
-            showExcluded = false;
-         else
-            showExcluded = true;
-         end
-               
-         % check if x values are provided and set up x and xtick values
-         if numel(varargin) > 0 && isnumeric(varargin{1})
-            if showExcluded
-               error('You can not use manual x values with "ShowExcluded" parameter!');
-            end   
-            x = varargin{1};
-            varargin(1) = [];
-         else
-            x = [];
-         end
-         
-         if isempty(find(strcmp(varargin, 'FaceColor'), 1))
-            c = mdadata.getmycolors(1);
-            varargin = [varargin, 'FaceColor', c(1, :)];
-         end   
-
-         if isempty(find(strcmp(varargin, 'EdgeColor'), 1))
-            varargin = [varargin 'EdgeColor', 'n'];
-         end
-         
-         bw = getarg(varargin, 'BarWidth');
-         if isempty(bw)
-            varargin = [varargin 'BarWidth', 0.75];
-         else
-            varargin = [varargin 'BarWidth', bw];            
-         end   
-
-         [showLabels, varargin] = getarg(varargin, 'Labels');
-         if isempty(showLabels)
-            showLabels = 'none';
-         end
-         
-         [sigfig, varargin] = getarg(varargin, 'LabelsSigfig');
-         if isempty(sigfig) || ~isnumeric(sigfig) || sigfig < 1 || sigfig > 10
-            sigfig = 3;
-         end
-                
-         
-         if showExcluded
-            values = obj.valuesAll(:, ~obj.factorCols);
-            nCols = size(values, 2);
-            xticklabels = obj.colNamesAll(~obj.factorCols);
-         else
-            values = obj.numValues;
-            xticklabels = obj.colNamesWithoutFactors;
-            nCols = size(values, 2);
-         end
-
-
-         if isempty(x)            
-            x = 1:nCols;
-            showTicks = true;
-         else
-            showTicks = false;
-         end   
-
-         if strcmp(showLabels, 'names')
-            labels = xticklabels;               
-         elseif strcmp(showLabels, 'numbers')
-            labels = num2str(x');               
-         else
-            labels = [];
-         end   
-         
-         if numel(x) < 12
-            xtick = 1:numel(x);
-         else
-            xtick = unique(round(linspace(1, numel(x), 12)));
-         end
-         
-         if ~ishold
-            cla;
-         end
-
-         y = values(1, :);     
-         h = bar(double(x), double(y), 0.95, varargin{:}); 
-         
-         if showExcluded
-            ind = obj.excludedCols(~obj.factorCols);
-            [~, varargin] = getarg(varargin, 'FaceColor');
-            hold on
-            h(2) = bar(x(ind), y(ind), 0.95, 'FaceColor', obj.EXCLUDED_COLOR, varargin{:});                
-            hold off
-         end
-            
-         xlabel(obj.dimNames{2})            
-         ylabel('')         
-            
-         if ~isempty(obj.rowNames)
-            if ~isempty(obj.name) 
-               title([obj.name ' (' obj.rowNames{1} ')'])
-            else
-               title(obj.rowNames{1})
-            end
-         end
-            
-         box on
-         if showTicks
-             set(gca, 'XTick', x(xtick), 'XTickLabel', xticklabels(xtick));
-         end   
-         
-         if numel(x) > 1
-            dx = x(2) - x(1);
-            xlim = [min(x) - dx/2 max(x) + dx/2];
-         else
-            xlim = [0 2];
-         end
-         
-         if ~strcmp(showLabels, 'none')
-            if isempty(labels)
-               labels = cellstr(num2str(y', sigfig));
-            end
-            
-            indtop = y >= 0;
-            mdadata.showlabels(x(indtop), y(indtop), labels(indtop), 'top');
-            mdadata.showlabels(x(~indtop), y(~indtop), labels(~indtop), 'bottom');
-            
-            if strcmp(get(gca, 'NextPlot'), 'replace')
-               correctaxislim([3 3 0 10], xlim);
-            end
-         else   
-            if strcmp(get(gca, 'NextPlot'), 'replace')
-               correctaxislim([3 3 0 5], xlim);
-            end
-         end            
-
-         if nargout > 0
-            varargout{1} = h;
-         end   
-
-      end   
       
       function varargout = levelplot(obj, varargin)
       % 'levelplot' makes a level plot for dataset values.
@@ -3962,221 +3825,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end            
       end
       
-      function varargout = qqplot(obj, varargin)
-      % 'qqplot' makes a quantile-quantile plot for selected columns of dataset.
-      %
-      %   qqplot(data)
-      %   qqplot(data, 'ParamName', ParamValue, ...)
-      %   
-      %   qqplot(data, factors)
-      %   qqplot(data, factors, 'ParamName', ParamValue, ...)
-      %
-      %
-      % Quantile-quantile plot for normal distribution calculates real and theoretical 
-      % quantiles of each data value as if the values are distributed normally.
-      % The calculated values are shown as a scatter plot and can be used to
-      % evaluate if data is distributed normally or deviates from normal
-      % distribution.      
-      %
-      % If dataset has more than one column, the method  will make the plot 
-      % for the first column only.
-      %
-      % Optional argument "factors" is a dataset with qualitative variables
-      % (factors) used to split values to groups and show points separately 
-      % for each group on the same axis.
-      %
-      %
-      % Parameters:
-      % -----------
-      % All parameters for Matlab's 'plot()' function will work. Extra parameters 
-      % are shown below. If factors are used the color parameters should have 
-      % a value for each group, made by combination of the factors.
-      %
-      %  "ShowNormal" - show or not a line for ideal normal distribution.
-      %  Possible values are "off" and "on" (default). 
-      % 
-      %  "Labels" - show or not labels for the data points. Possible
-      %  values are "none" (default), "names" for name of objects and "numbers"
-      %  for their numbers. 
-      %
-      %  "LineColor" - a color of fitted line (the color of points can be
-      %  changed using parameter "Color")
-      %
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   figure
-      %   qqplot(people(:, 'Height'), 'Labels', 'on')   
-      %   
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   figure
-      %   qqplot(people(:, 'IQ'), people(:, 'Sex'))
-      %
-      %
-
-         if ~ishold
-            cla;
-         end
-      
-         % check arguments for groups and nbins
-         if nargin > 1 && isa(varargin{1}, 'mdadata') 
-            groups = varargin{1};
-            varargin(1) = [];
-            groups = groups.getgroups();
-            nGroups = groups.nCols;            
-         else
-            groups = [];
-            nGroups = 1;            
-         end
-
-         % limit number of variables by 12
-         values = obj.numValues(:, 1);
-                  
-         % check color settings
-         [fa, varargin] = getarg(varargin, 'FaceAlpha');
-         if isempty(fa)
-            fa = 0.5;
-         end
-            
-         [mc, varargin] = getarg(varargin, 'Color');
-         if isempty(mc)
-            mc = mdadata.getmycolors(nGroups);
-         else
-            if isnumeric(mc)
-               nmc = size(mc, 1);
-            else
-               nmc = numel(mc);
-               if size(mc, 2) > size(mc, 1)
-                  mc = mc';
-               end   
-            end
-            
-            if nmc ~= nGroups
-               error('Number of colors in "Color" should be the same as number of groups!');
-            end   
-         end   
-         
-         [lc, varargin] = getarg(varargin, 'LineColor');
-         if isempty(lc)
-            lc = mc;
-         else
-            if isnumeric(lc)
-               nlc = size(lc, 1);
-            else
-               nlc = numel(lc);
-               if size(lc, 2) > size(lc, 1)
-                  lc = lc';
-               end                                 
-            end
-            
-            if nlc ~= nGroups
-               error('Number of colors in "LineColor" should be the same as number of groups!');
-            end               
-         end   
-
-         [v, varargin] = getarg(varargin, 'ShowNormal');
-         if ~isempty(v) && strcmp(v, 'off')
-            showLine = false;
-         else 
-            showLine = true;
-         end   
-         
-         % check line and marker parameters
-         [lw, varargin] = getarg(varargin, 'LineWidth');
-         if isempty(lw) 
-            lw = 1;
-         end
-         
-         [ls, varargin] = getarg(varargin, 'LineStyle');
-         if isempty(ls) 
-            ls = '--';
-         end
-
-         if isempty(find(strcmp(varargin, 'Marker'), 1))
-            varargin = [{'Marker', 'o'} varargin];
-         end   
-         
-         if isempty(find(strcmp(varargin, 'MarkerSize'), 1))
-            varargin = [{'MarkerSize', 8} varargin];
-         end   
-         
-         rowNames = obj.rowNames;
-
-         % check if labels to show
-         [showLabels, varargin] = getarg(varargin, 'Labels');
-         if strcmp(showLabels, 'names') && ~isempty(obj.rowNames)
-            labels = rowNames;
-         elseif strcmp(showLabels, 'numbers')
-            labels = textgen('', 1:obj.nRows);
-         else
-            labels = [];            
-         end         
-            
-         hold on
-         hp = zeros(nGroups, 1);
-         hl = zeros(nGroups, 1);
-         for nGroup = 1:nGroups
-            if nGroups > 1
-               ind = groups.values(:, nGroup) == 1;
-               v = values(ind, 1);
-            else
-               ind = 1:size(values, 1);
-               v = values(:, 1);
-            end
-               
-            [v, sortind] = sort(v);
-
-            n = numel(v);
-            k = 1:n;
-            x = (k - 0.5)/n;            
-            x = mdatinv(x, 100000);
-               
-            hp(nGroup) = plot(x, v, 'MarkerEdgeColor', 'none', 'MarkerFaceColor', mc(nGroup, :),...
-               'LineStyle', 'none', varargin{:});
-
-            if showLine && numel(x) > 1
-               qx = mdapercentile(x, [25 75]);
-               qy = mdapercentile(v, [25 75]);
-               
-               b1 = diff(qy)/diff(qx);
-               b0 = (qy(1) + qy(2))/2 - b1 * (qx(1) + qx(2))/2;               
-               
-               xp = [min(x), max(x)];
-               yp = b0 + b1 * xp;
-               
-               h.normalLine = line(xp, yp, 'Color', lc(nGroup, :), 'LineStyle', ls, 'LineWidth', lw);
-            end
-               
-            if ~isempty(labels)
-               l = labels(ind);
-               h.labels = mdadata.showlabels(x, v, l(sortind), 'top');      
-            end            
-         end     
-         hold off
-            
-         axis auto
-         title(obj.colFullNamesWithoutFactors{1})         
-         ylabel('Data quantiles');         
-         xlabel('Normal theoretical quantiles');
-         box on
-         correctaxislim([10 10])
-            
-         if nGroups > 1
-               % show legend and set transparancy for legend items
-            h.legend = legend(hp, groups.colFullNames, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
-%                c = get(hl, 'Children');
-%                hp = arrayfun(@(x) allchild(x), c(1:2:end));
-%                set(hp, 'FaceAlpha', fa);                              
-         end
-         h.plot = hp;         
-         if nargout > 0
-            varargout{1} = h;
-         end   
-      end
-
       %%% sort and display methods
             
       function show(obj, sigfig)
@@ -4254,8 +3902,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
                colNames{i} = ['* ' colNames{i} ];
                
                % get factor values as indices
-               [~, ~, v] = unique(valuesAll(1:nRows, i));
-               v = v(~obj.excludedRows(1:nRows));
+               [~, ~, v] = unique(valuesAll(:, i));
+               v = v(~obj.excludedRows);
+               v = v(1:nRows);
                
                % calculate maximal width for the field
                factors = obj.getfactorlevels(i);
@@ -4266,9 +3915,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
                % convert factor values into a char array
                s = sprintf('%%%ds', l);
                v = cellfun(@(x)(sprintf(s, x)), v, 'UniformOutput', false);
-               v
-               size(v, 1)
-               nRows
                if size(v, 1) ~= nRows
                   v = v';
                end   
@@ -4349,46 +3995,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
             varargout{1} = 1;
          end   
       end
-            
-      %%% GUI methods
-      function guiplot(obj, varargin)
-      % 'guiplot' is a GUI tool for exploring data with plots
-      %
-      %   guiplot(data)
-      %
-      %
-      % The method allows to explore data with plots interactively. User can change
-      % type of plot, main parameters of the current plot as well as manipulate with
-      % objects and variables.
-      %
-      % The manipulation includes first of all selection, excluding, and
-      % including of objects on scatter plot and variables on lineseries plot.
-      % The following shortcats can be used (click on axes before): 
-      % 
-      % 's' - start polygon (scatter) or rectangular (line) selection. Double click 
-      % inside the selection figure when it is ready.
-      %
-      % 'i' - invert selection.
-      %  
-      % 'e' - exclude selected objects or variables.
-      %  
-      % 'a' - add the selected excluded objects or variables back.
-      %  
-      % Combination 'Ctrl s' allows to save current plot as a file. Using arrows
-      % allows to change current columns for X and Y axis.
-      %
-
-
-         fig = figure('Position', [100 100 800 600], 'Name', 'GUI tools for mdadata');
-         p = DataPanel(fig, obj, {1, 1, 1, 'scatter'});
-         set(fig, 'KeyPressFcn', @onKeyPress);
-
-
-         function onKeyPress(src, event)
-            p.onKeyPress(src, event);
-         end   
-
-      end
+      
+      %%% other methods
       
       function ind = inpolygon(obj, position)
       % 'inpolygon' returns indices of data points inside a polygon
@@ -4438,8 +4046,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
    end
    
    methods (Static = true)
-      [cmap, cgroup, args, isColorbar, colorbarTitle] = getplotcolorsettings(varargin)
-      h = showcolorbar(cmap, cgroup, colorbarTitle, dx, dy)
+      [cmap, cgroup, args, isColorbar, colorbarTitle, cgroupLevels] = getplotcolorsettings(varargin)
+      h = showcolorbar(cmap, cgroup, colorbarTitle, dx, dy, cgroupLevels)
       d = getsampledensity(x, y, nbins, smoothness, varargin)
       c = getmycolors(n)
       [args, varargin] = getgscatteroptions(nGroups, varargin)

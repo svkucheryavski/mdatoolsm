@@ -36,7 +36,7 @@ classdef mdapls < regmodel
          respNames = y.colNamesAll(~y.factorCols);
          respFullNames = y.colFullNamesAll(~y.factorCols);
          
-         predNames = X.colNamesAll(~X.factorCols);
+         predNames = X.colNamesAll(~X.factorCols);         
          predFullNames = X.colFullNamesAll(~X.factorCols);
          
          compNames = textgen('Comp', 1:obj.nComp);

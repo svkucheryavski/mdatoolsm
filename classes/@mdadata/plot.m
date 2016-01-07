@@ -146,13 +146,23 @@ function varargout = plot(obj, varargin)
       end
       xticklabel = [];
    else   
-      x = 1:nCols;
-
-      if showExcluded
-         xticklabel = obj.colFullNamesAllWithoutFactors;
-      else   
-         xticklabel = obj.colFullNamesWithoutFactors;
-      end   
+      % colValues is a new property, for old object we need a workaround
+      if isprop(obj, 'colValuesAll') && ~isempty(obj.colValuesAll)
+         if showExcluded
+            x = obj.colValuesAllWithoutFactors;
+            xticklabel = obj.colFullNamesAllWithoutFactors;
+         else   
+            x = obj.colValuesWithoutFactors;
+            xticklabel = obj.colFullNamesWithoutFactors;
+         end   
+      else
+         x = 1:nCols;
+         if showExcluded
+            xticklabel = obj.colFullNamesAllWithoutFactors;
+         else   
+            xticklabel = obj.colFullNamesWithoutFactors;
+         end   
+      end
    end
 
    if numel(x) < 12
@@ -162,7 +172,7 @@ function varargout = plot(obj, varargin)
    end
 
    % check if values for color grouping are provided
-   [cmap, cgroup, varargin, isColorbar, colorbarTitle] = mdadata.getplotcolorsettings(varargin{:});
+   [cmap, cgroup, varargin, isColorbar, colorbarTitle, cgroupLevels] = mdadata.getplotcolorsettings(varargin{:});
    if ~isempty(cgroup) && numel(cgroup) ~= obj.nRows
       error('Number of elements in color grouping variable should be the same as number of objects!');
    end   
@@ -263,7 +273,7 @@ function varargout = plot(obj, varargin)
       l = axis();
       dx = (l(2) - l(1));
       dy = (l(4) - l(3))/2;
-      h.colorbar = mdadata.showcolorbar(cmap, cgroup, colorbarTitle, dx, dy);
+      h.colorbar = mdadata.showcolorbar(cmap, cgroup, colorbarTitle, dx, dy, cgroupLevels);
    end
 
    if ~isempty(xticklabel)

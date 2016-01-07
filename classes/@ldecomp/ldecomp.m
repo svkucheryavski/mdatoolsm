@@ -179,61 +179,66 @@ classdef ldecomp < handle
       function limits = getResLimits(data, model)
          colNames = model.loadings.colNames;
          colFullNames = model.loadings.colFullNames;
-         
+
          nObj = data.nRows;
          nVar = data.nNumCols;
          nComp = model.nComp;
          alpha = model.alpha;
-                  
-         % calculate T2 limits using Hotelling T2 statistics
-         T2lim = zeros(1, nComp);
-         for i = 1:nComp
-            if nObj == i
-               T2lim(i) = 0;
-            else
-               T2lim(i) = (i * (nObj - 1) / (nObj - i)) * mdafinv(1 - alpha, i, nObj - i);  
-            end
-         end
          
-         % calculate Q2 limits using F statistics
-         Qlim = zeros(1, nComp);
-         
-         conflim = 100 - alpha * 100;   
-         cl = 2 * conflim - 100;
-   
-         nValues = min(nObj, nVar);
-         eigenvalues = model.eigenvalues.values;
-         if numel(eigenvalues) < nValues
-            % calculate eigenvalues for other possible components
-            residuals = data.numValues - model.calres.scores.values * model.loadings.values';
-            [~, s, ~] = svd(residuals, 0);
-            e = (diag(s).^2)/(size(residuals, 1) - 1);
-            eigenvalues = [eigenvalues; e(1:nValues - numel(eigenvalues))];
-         end
-         
-         for i = 1:nComp
-            if i < nValues
-               evals = eigenvalues((i + 1):nValues);         
-         
-               t1 = sum(evals);
-               t2 = sum(evals.^2);
-               t3 = sum(evals.^3);
-               h0 = 1 - 2 * t1 * t3/3/(t2^2);
-         
-               if (h0 < 0.001)
-                  h0 = 0.001;
+         if nVar < 50000
+
+            % calculate T2 limits using Hotelling T2 statistics
+            T2lim = zeros(1, nComp);
+            for i = 1:nComp
+               if nObj == i
+                  T2lim(i) = 0;
+               else
+                  T2lim(i) = (i * (nObj - 1) / (nObj - i)) * mdafinv(1 - alpha, i, nObj - i);  
                end
-               
-               ca = sqrt(2) * erfinv(cl/100);
-               h1 = ca * sqrt(2 * t2 * h0^2)/t1;
-               h2 = t2 * h0 * (h0 - 1)/(t1^2);
-               
-               Qlim(i) = t1 * (1 + h1 + h2)^(1/h0);
-            else
-               Qlim(i) = 0;
-            end   
-         end
-         
+            end
+
+            % calculate Q2 limits using F statistics
+            Qlim = zeros(1, nComp);
+
+            conflim = 100 - alpha * 100;   
+            cl = 2 * conflim - 100;
+
+            nValues = min(nObj, nVar);
+            eigenvalues = model.eigenvalues.values;
+            if numel(eigenvalues) < nValues
+               % calculate eigenvalues for other possible components
+               residuals = data.numValues - model.calres.scores.values * model.loadings.values';
+               [~, s, ~] = svd(residuals, 0);
+               e = (diag(s).^2)/(size(residuals, 1) - 1);
+               eigenvalues = [eigenvalues; e(1:nValues - numel(eigenvalues))];
+            end
+
+            for i = 1:nComp
+               if i < nValues
+                  evals = eigenvalues((i + 1):nValues);         
+
+                  t1 = sum(evals);
+                  t2 = sum(evals.^2);
+                  t3 = sum(evals.^3);
+                  h0 = 1 - 2 * t1 * t3/3/(t2^2);
+
+                  if (h0 < 0.001)
+                     h0 = 0.001;
+                  end
+
+                  ca = sqrt(2) * erfinv(cl/100);
+                  h1 = ca * sqrt(2 * t2 * h0^2)/t1;
+                  h2 = t2 * h0 * (h0 - 1)/(t1^2);
+
+                  Qlim(i) = t1 * (1 + h1 + h2)^(1/h0);
+               else
+                  Qlim(i) = 0;
+               end   
+            end
+         else
+            T2lim = nan(1, nComp);
+            Qlim = nan(1, nComp);
+         end   
          limits = mdadata([T2lim; Qlim], {'T2', 'Q'}, colNames, {'Limits', 'Components'});
          limits.name = 'Statistical limits for residuals';
          limits.colFullNamesAll = colFullNames;         

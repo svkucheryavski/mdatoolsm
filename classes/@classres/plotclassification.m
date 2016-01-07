@@ -64,7 +64,7 @@ function varargout = plotclassification(obj, varargin)
       per = excludedRows & ind_none;
       plotExcludedRows = [plotExcludedRows; per(ind_none)];
       
-      if ~isempty(cref)
+      if ~isempty(cref) & ~isempty(refData)
          refData = [refData; cref(ind_none, :)];
       end
    end
