@@ -247,10 +247,16 @@ classdef mdapca < handle
          end
          
          compnames = textgen('Comp ', 1:obj.nComp);         
-         
-         obj.loadings = mdadata(loads, data.colNamesAll(~data.factorCols), compnames);
+
+         obj.loadings = mdadata(loads);
+         obj.loadings.colNames = compnames;
+         if ~isempty(data.colNames)
+            obj.loadings.rowNames = data.colNamesAll(~data.factorCols);
+         end   
+         if ~isempty(data.colFullNames)
+            obj.loadings.rowFullNames = data.colFullNamesAll(~data.factorCols);
+         end   
          obj.loadings.dimNames = {data.dimNames{2}, 'Components'};
-         obj.loadings.rowFullNames = data.colFullNamesAll(~data.factorCols);
          obj.loadings.colFullNames = compnames;
          obj.loadings.name = 'Loadings';
          obj.loadings.excluderows(excludedCols);
@@ -329,7 +335,7 @@ classdef mdapca < handle
             
                   cal = data(~vind, :);
                   val = data(vind, :);
-                  m = mdapca(cal, nComp, 'Prep', obj.prep, 'Scale', 'off', 'Center', 'off');
+                  m = mdapca(cal, nComp, 'Prep', obj.prep, 'Scale', 'off', 'Center', 'off', 'Method', obj.method);
                   res = m.predict(val);
                   
                   Q(vind, :) = Q(vind, :) + res.Q.values;

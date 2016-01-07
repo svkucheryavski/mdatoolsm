@@ -4,7 +4,7 @@ function test_plsda
    clc
 
    types = {'people'};
-   cases = 5;
+   cases = 1:6;
    
    if isdir(mfilename('fullpath'))
       rmdir(mfilename('fullpath'), 's')
@@ -145,6 +145,34 @@ function m = do_test(type, casen)
          showPlotsForResult(m.cvres, cname, 'case 5 - cvres');
          showPlotsForResult(m.testres, cname, 'case 5 - test');
          showPlotsForModel(m, cname, 'case 5');
+      case 6
+         fprintf('5. Prediction for a new data\n')   
+
+         for i = 1:numel(factorCols);
+            X.factor(factorCols{i}, factorLevels{i});
+         end
+         X.excludecols(excludedCols);      
+         Xc = X(cind, :);
+         cc = c(cind, :);
+         
+         Xt = X(~cind, :);
+         ct = c(~cind, :);
+
+         Xc.excluderows(excludedRows(cind));
+         cc.excluderows(excludedRows(cind));
+
+         Xt.excluderows(excludedRows(~cind));
+         ct.excluderows(excludedRows(~cind));
+
+         m = mdaplsda(Xc, cc, cname, ncomp, 'CV', {'rand', 8, 4}, 'Prep', {p, prep()}, 'Scale', scale);
+         
+         res1 = m.predict(Xt);
+         res2 = m.predict(Xt, ct);
+         res3 = m.predict(Xt, ct == cname);
+         showPlotsForResult(res1, cname, 'case 6 - res1');
+         showPlotsForResult(res2, cname, 'case 6 - res2');
+         showPlotsForResult(res2, cname, 'case 6 - res3');
+
    end
 end
 

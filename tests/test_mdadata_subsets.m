@@ -50,7 +50,7 @@ disp('Column names are:')
 disp(d.colNames);
 
 % correct name
-show(d(:, 'Bodymass'))
+show(d(:, 'Bodymasskg'))
 
 % wrong name
 try

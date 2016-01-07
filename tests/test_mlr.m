@@ -193,7 +193,7 @@ function showPlotsForResult(res)
    subplot(2, 2, 1)
    plotpredictions(res);
    subplot(2, 2, 2)
-   plotpredictions(res, 'Labels', 'names', 'Colorby', res.ypred(:, 1, 1), 'ShowExcluded', 'on');
+   plotpredictions(res, 'Labels', 'names', 'Colorby', res.ypred(1:end, 1, 1), 'ShowExcluded', 'on');
    subplot(2, 2, 3)
    plotyresiduals(res);
    subplot(2, 2, 4)

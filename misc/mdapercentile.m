@@ -3,10 +3,6 @@ function p = mdapercentile(v, i)
       i = i * 100;
    end
    
-   if size(v, 1) == 1 && size(v, 2) > 1
-      v = v';
-   end   
-   
    v = sort(v);   
    m = size(v, 1);
 
@@ -15,13 +11,8 @@ function p = mdapercentile(v, i)
    n1 = floor(n);
    n2 = ceil(n);
    
-   if (n1 == 0)
-      n1 = 1;
-   end
-   
-   if (n2 > size(v, 1))
-      n2 = size(v, 1);
-   end   
-   
+   n1(n1 == 0) = 1;   
+   n2(n2 > size(v, 1)) = size(v, 1);
+
    p = (v(n1, :) + v(n2, :))/2;
 end

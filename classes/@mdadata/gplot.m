@@ -4,12 +4,20 @@ function varargout = gplot(obj, varargin)
 %   gplot(data)
 %   gplot(data, factors)
 %   gplot(data, factors, 'ParamName', ParamValue, ...)
+%   gplot(data, x, factors)
+%   gplot(data, x, factors, 'ParamName', ParamValue, ...)
 %
 %
 % The method makes a line series plot for two or more group of data rows,
 % defined by a combination of provided factors. By default, each group 
 % has its own color. If dataset with factors is not provided every row 
 % of the dataset will be considered as a separate group.
+%
+% Another optional second argument ('x') is a vector of values for the x
+% axis. If it is not provided, a sequence 1:N, where N is number of
+% columns in the dataset, will be used. The ticks for x axis in this case
+% will be generated based on column names. The method assumes that every
+% column of the data is a variable and every row is an observation.
 %
 % Parameters:
 % -----------
@@ -66,19 +74,28 @@ function varargout = gplot(obj, varargin)
       cla;
    end
 
+   x = [];
+   
    % check if factors are provided
    if numel(varargin) > 0 
-      if isa(varargin{1}, 'mdadata')
+      if isnumeric(varargin{1})
+      % x values are provided
+         x = varargin{1};
+         varargin(1) = [];
+      end
+      
+      if numel(varargin) > 0 && isa(varargin{1}, 'mdadata')
       % dataset with factors is provided
          groups = varargin{1};
          varargin(1) = [];
          groups = groups.getgroups();
-         nGroups = groups.nCols;
-      else
+         nGroups = groups.nCols;         
+      else   
       % consider every row as a separate group
          groups = [];
          nGroups = obj.nRows;
-      end   
+      end       
+      
    else
       groups = [];
       nGroups = obj.nRows;            
@@ -116,11 +133,8 @@ function varargout = gplot(obj, varargin)
       colNames = obj.colFullNamesWithoutFactors;
    end
 
-   % check if x values are provided and set up x and xtick values
-   if numel(varargin) > 0 && isnumeric(varargin{1})
-      x = varargin{1};
-      varargin(1) = [];
-
+   % check x values are provided and set up x and xtick values
+   if ~isempty(x)
       if numel(x) ~= nCols
          error('Number of x values should be the same as number of columns in dataset!');
       end
@@ -227,9 +241,7 @@ function varargout = gplot(obj, varargin)
    if numel(x) < 12
       xtick = x;
    else
-      tickind = unique(round(linspace(1, numel(x), 12)));
-      xtick = x(tickind);
-      xticklabel = xticklabel(tickind);
+      xtick = unique(round(linspace(1, numel(x), 12)));
    end
 
    hold on
@@ -274,7 +286,9 @@ function varargout = gplot(obj, varargin)
 
    xlabel(obj.dimNames{2});
    title(obj.name);
-   set(gca, 'XTick', xtick, 'XTickLabel', xticklabel);
+   if ~isempty(xticklabel)
+      set(gca, 'XTick', xtick, 'XTickLabel', xticklabel);
+   end   
    box on
 
    if showLegend
@@ -282,7 +296,7 @@ function varargout = gplot(obj, varargin)
    end
 
    if strcmp(get(gca, 'NextPlot'), 'replace')
-      correctaxislim(5);
+      %correctaxislim(5);
    end
 
    if nargout > 0

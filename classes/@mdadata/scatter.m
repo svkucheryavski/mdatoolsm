@@ -10,7 +10,7 @@ function varargout = scatter(obj, varargin)
 % slow with large datasets) and give some extra functionality, such 
 % as automatic labels for data points, grouping data with color, etc. If output 
 % variable is specified it returns a structure with plot elements (plot handle, 
-% labels handle, etc).
+% label handles, etc).
 % 
 % The mandatory argument is a dataset (object of class 'mdadata') with at 
 % least one column. If more than two columns exist, the method will make a plot 
@@ -50,6 +50,12 @@ function varargout = scatter(obj, varargin)
 %  convex hull to find the outer points. Can be combined with "Groupby"
 %  parameter
 %
+%  "Reduce" - if data has many rows (more than 2000) this number will
+%  be reduced to speed up the plot by removing rows which are similar. 
+%  The reducing algorithm is based on PCA (Principal Component
+%  Analysis) and density of the rows on scores plot for first two 
+%  components. Set this parameter to "off" to avoid reducing. 
+
 % Examples:
 % ---------
 %   
@@ -63,7 +69,7 @@ function varargout = scatter(obj, varargin)
 %   subplot(1, 3, 2)
 %   scatter(people(:, 1:2), 'MarkerFaceColor', 'b', 'Marker', 's');
 %   subplot(1, 3, 3)
-%   scatter(people(:, 1:2), 'Labels', 'on');
+%   scatter(people(:, 1:2), 'Labels', 'names');
 %   
 %   % using color grouping
 %   
@@ -102,7 +108,7 @@ function varargout = scatter(obj, varargin)
    end   
 
    % check if values for color grouping are provided
-   [cmap, cgroup, varargin, isColorbar, colorbarTitle] = mdadata.getplotcolorsettings(varargin{:});
+   [cmap, cgroup, varargin, isColorbar, colorbarTitle, cgroupLevels] = mdadata.getplotcolorsettings(varargin{:});
    if ~isempty(cgroup) && numel(cgroup) ~= obj.nRows
       error('Number of elements in color grouping variable should be the same as number of objects!');
    end   
@@ -261,7 +267,7 @@ function varargout = scatter(obj, varargin)
                'Marker', mr, ...
                'MarkerSize', ms,...
                'Color', cmap(k,:), ...
-               'MarkerEdgeColor', mec,...
+               'MarkerEdgeColor', 'none',...
                'MarkerFaceColor', cmap(k,:), ...
                'LineStyle', 'none',...
                varargin{:});
@@ -304,7 +310,7 @@ function varargout = scatter(obj, varargin)
          mc = obj.EXCLUDED_COLOR;
          hh = plot(xh, yh, 'Color', mc, 'Marker', mr, ...
             'MarkerFaceColor', mc, ...
-            'MarkerEdgeColor', mec, 'MarkerSize', ms,...
+            'MarkerEdgeColor', mc, 'MarkerSize', ms,...
             'LineStyle', 'none');         
 
          set(hh, 'Color', [1 1 0])
@@ -321,20 +327,18 @@ function varargout = scatter(obj, varargin)
    % show axis labels, title and box
    xlabel(colNames{1})         
    ylabel(colNames{2})         
-   title(obj.name)
-   box on
-
-   % correct axis limits
    if ~ishold
       axis tight
       correctaxislim(10)
+      title(obj.name)
+      box on
    end
 
    % show colorbar
    if isColorbar
       xc = xlim(); dx = (xc(2) - xc(1));
       yc = ylim(); dy = (yc(2) - yc(1))/2;
-      h.colorbar = mdadata.showcolorbar(cmap, cgroup, colorbarTitle, dx, dy);
+      h.colorbar = mdadata.showcolorbar(cmap, cgroup, colorbarTitle, dx, dy, cgroupLevels);
    end   
 
    % show labels
@@ -345,7 +349,6 @@ function varargout = scatter(obj, varargin)
          h.labelsHidden = mdadata.showlabels(xh, yh, rowNamesHidden);
       end
    end
-
 
    if nargout > 0
       varargout{1} = h;

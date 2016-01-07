@@ -1,4 +1,4 @@
-function [cmap, cgroup, args, isColorbar, colorbarTitle] = getplotcolorsettings(varargin)
+function [cmap, cgroup, args, isColorbar, colorbarTitle, cgroupLevels] = getplotcolorsettings(varargin)
 % 'getplotcolorsettings()' checks and returns various color settings for plot,
 % e.g. color grouping, color map etc.
 %
@@ -6,9 +6,13 @@ function [cmap, cgroup, args, isColorbar, colorbarTitle] = getplotcolorsettings(
    
    cmap = [];
    [cgroup, args] = getarg(args, 'Colorby');
+   cgroupLevels = [];
    if ~isempty(cgroup)
 
-      if isa(cgroup, 'mdadata')
+      if isa(cgroup, 'mdadata')         
+         if isfactor(cgroup, 1)
+            cgroupLevels = cgroup.factorLevelNames{1};
+         end   
          cgroup = cgroup.values(:, 1);
       end
       

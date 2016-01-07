@@ -8,6 +8,9 @@ function varargout = plotperformance(obj, varargin)
    
    if isempty(obj.stat)
       warning('Classification statistics are not available for this object.')
+      if nargout > 0
+         varargout{1} = [];
+      end      
       return
    end
    

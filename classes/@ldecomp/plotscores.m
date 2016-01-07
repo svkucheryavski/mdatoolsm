@@ -23,14 +23,27 @@ function varargout = plotscores(obj, varargin)
    end   
    
    [type, varargin] = getarg(varargin, 'Type');
-   if isempty(type)
-      type = 'scatter';
+   if isempty(type) 
+      if numel(comp) < 3
+         type = 'scatter';
+      else
+         type = 'line';
+      end   
    end
          
    if strcmp(type, 'scatter')
       h = scatter(obj.scores(:, comp), varargin{:});
+      if numel(comp) == 2
+         xlabel(sprintf('Comp %d (%.1f%%)', comp(1), obj.variance(comp(1), 1).values));
+         ylabel(sprintf('Comp %d (%.1f%%)', comp(2), obj.variance(comp(2), 1).values));
+      else
+         xlabel(obj.scores.dimNames{1});
+         ylabel(sprintf('Comp %d (%.1f%%)', comp, obj.variance(comp, 1).values));
+      end
    elseif strcmp(type, 'density') ||   strcmp(type, 'densscatter')
       h = densscatter(obj.scores(:, comp), varargin{:});
+      xlabel(sprintf('Comp %d (%.1f%%)', comp(1), obj.variance(comp(1), 1).values));
+      ylabel(sprintf('Comp %d (%.1f%%)', comp(2), obj.variance(comp(2), 1).values));
    elseif strcmp(type, 'line')   
       h = gplot(obj.scores(:, comp)', varargin{:});
    elseif strcmp(type, 'bar')   
@@ -38,8 +51,8 @@ function varargout = plotscores(obj, varargin)
    else
       error('Wrong plot type!');
    end
-   title('Scores');
    
+   title('Scores');
    if showLines && ~strcmp(type, 'density')
       lim = axis();
       line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);

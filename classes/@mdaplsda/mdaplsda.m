@@ -8,19 +8,15 @@ classdef mdaplsda < mdapls & classmodel
    
    methods
       function obj = mdaplsda(X, c, className, ncomp, varargin)
-         
-         if X.nRows ~= c.nRows
+                  
+         if X.nRows ~= size(c, 1)
             error('Number of rows in "X" ad "c" variables must be the same!')
          end
-                  
-         if c.nCols ~= 1 || ~isfactor(c, 1)
-            error('Class variable should be a dataset with one factor column!')
-         end   
-         
-         c = classmodel.getClassFromFactor(c, className);
+                           
+         c = classmodel.getClassFromFactor(c, className, X);
          y = splitfactor(c, 1);         
          y = y(:, className);
-         
+            
          % check if test set is provided and apply model to the test set
          [test, varargin] = getarg(varargin, 'TestSet');
          if ~isempty(test) 
@@ -29,8 +25,10 @@ classdef mdaplsda < mdapls & classmodel
             end   
             Xtest = test{1};
             ctest = test{2};
-            ytest = splitfactor(ctest, 1);
+            ctest = classmodel.getClassFromFactor(ctest, className, Xtest);
+            ytest = splitfactor(ctest, 1);         
             ytest = ytest(:, className);
+            
             varargin = {varargin{:}, 'TestSet', {Xtest, ytest}};
          end
          
@@ -74,16 +72,10 @@ classdef mdaplsda < mdapls & classmodel
             return;                        
          end
          
-         if ~isempty(cref) && cref.nCols ~= 1
-            error('Class reference should be a dataset with one column!');
-         elseif ~isfactor(cref, 1)
-            error('Class reference should be a factor!');
-         end
-                  
          if isempty(cref)
             yref = [];
          else
-            cref = classmodel.getClassFromFactor(cref, obj.className);
+            cref = classmodel.getClassFromFactor(cref, obj.className, X);
             yref = splitfactor(cref, 1);
             yref = yref(:, obj.className);
          end 

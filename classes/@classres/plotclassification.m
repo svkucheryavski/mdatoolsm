@@ -1,14 +1,19 @@
 function varargout = plotclassification(obj, varargin)
    [classes, ncomp, varargin] = classres.getClassPlotParams(obj.nClasses, obj.nComp, obj.classNames, varargin{:});
 
-   cref = copy(obj.cref);
    cpred = copy(obj.cpred_);
 
    excludedRows = cpred.excludedRows;   
    classNames = obj.classNames(classes);
-   
-   cref.includerows(excludedRows);
    cpred.includerows(excludedRows);
+   
+   if ~isempty(obj.cref)
+      cref = copy(obj.cref);
+      cref.includerows(excludedRows);
+   else
+      cref = [];
+   end
+   
    
    if isempty(cpred.wayFullNames{1})
       objNames = textgen('', 1:size(cpred, 1))';
@@ -38,10 +43,12 @@ function varargout = plotclassification(obj, varargin)
             plotObjNames = [plotObjNames; objNames(ind)];
          end
          
-         if isempty(refData)
-            refData = cref(ind, :);
-         else   
-            refData = [refData; cref(ind, :)];
+         if ~isempty(cref)
+            if isempty(refData) 
+               refData = cref(ind, :);
+            else   
+               refData = [refData; cref(ind, :)];
+            end
          end
          
          per = excludedRows & ind;
@@ -54,9 +61,12 @@ function varargout = plotclassification(obj, varargin)
    if any(ind_none)
       plotData = [plotData; [x(ind_none), zeros(sum(ind_none), 1)]];
       plotObjNames = [plotObjNames; objNames(ind_none)];
-      refData = [refData; cref(ind_none, :)];
       per = excludedRows & ind_none;
       plotExcludedRows = [plotExcludedRows; per(ind_none)];
+      
+      if ~isempty(cref) & ~isempty(refData)
+         refData = [refData; cref(ind_none, :)];
+      end
    end
    
    plotData = mdadata(plotData);
@@ -66,19 +76,34 @@ function varargout = plotclassification(obj, varargin)
    plotExcludedRows = logical(plotExcludedRows);
    if any(plotExcludedRows)
       plotData.excluderows(plotExcludedRows);
-      refData.excluderows(plotExcludedRows);
+      if ~isempty(cref)
+         refData.excluderows(plotExcludedRows);
+      end   
    end
    
-   h = gscatter(plotData, refData, varargin{:});
+   if ~isempty(cref)
+      h = gscatter(plotData, refData, varargin{:});
+   else
+      h = scatter(plotData, varargin{:});
+   end   
    
    set(gca, 'YTick', [0 classes], 'YTickLabel', ['None', classNames]);
    ylabel('Classes')
    xlabel('Objects')
    
+   if ncomp < size(cpred, 3)
+      title_str = sprintf('Classification (ncomp = %d)', ncomp);
+   else
+      title_str = 'Classification';
+   end
+   
    if ~ishold
+      if plotData.nRows < 12
+         set(gca, 'XTick', 1:plotData.nRows)
+      end   
       box on
-      title('Classification');
-      correctaxislim(15, [], [0 max(classes)]);
+      title(title_str);
+      correctaxislim([0 5 10 10], xlim, [0 max(classes)]);
    end
    
    if nargout > 0
