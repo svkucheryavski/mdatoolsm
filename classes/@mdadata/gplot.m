@@ -76,6 +76,7 @@ function varargout = gplot(obj, varargin)
 
    x = [];
    groups = [];
+   
    % check if factors are provided
    if numel(varargin) > 0 
       if isnumeric(varargin{1})

@@ -58,20 +58,6 @@ function varargout = gbar(obj, varargin)
    if numel(varargin) > 0 && isnumeric(varargin{1})
       x = varargin{1};
       varargin(1) = [];
-   else
-      % colValues is a new property, for old object we need a workaround
-      if isprop(obj, 'colValuesAll') && ~isempty(obj.colValuesAll)
-         x = obj.colValuesWithoutFactors;
-      else
-         x = 1:nCols;
-         if ~isempty(obj.colNamesAll)
-            if showExcluded
-               xticklabel = obj.colFullNamesAllWithoutFactors;
-            else   
-               xticklabel = obj.colFullNamesWithoutFactors;
-            end   
-         end
-      end
    end
    
    % get groups
@@ -124,6 +110,19 @@ function varargout = gbar(obj, varargin)
 
    % get values
    plotValues = obj.numValues;
+   
+   if isempty(x)
+      % colValues is a new property, for old object we need a workaround
+      if isprop(obj, 'colValuesAll') && ~isempty(obj.colValuesAll)
+         x = obj.colValuesWithoutFactors;
+      else
+         x = 1:size(plotValues, 2);
+         if ~isempty(obj.colNamesAll)
+            xticklabel = obj.colFullNamesWithoutFactors;
+         end
+      end
+   end
+   
    if numel(x) < 12
       xtick = x;
    else
