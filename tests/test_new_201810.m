@@ -11,12 +11,19 @@ indc = 1:2:150;
 indv = 2:2:150;
 
 sp = cell(6, 1);
+cn = cell(6, 1);
 sp{1} = mdadata(spectra.values, round(log(2:151), 3), 210:360, {'Time', 'Wavelength, nm'});
+cn{1} = conc(:, 1);
 sp{2} = sp{1}';
+cn{2} = mdadata((210:360)');
 sp{3} = sp{2}';
+cn{3} = conc(:, 3);
 sp{4} = mdadata(spectra.values, {}, {}, {'Object #', 'Variable #'});
+cn{4} = conc(:, 1);
 sp{5} = sp{4}';
+cn{5} = mdadata((210:360)');
 sp{6} = sp{5}';
+cn{6} = conc(:, 3);
 
 % original spectra
 figure
@@ -205,19 +212,28 @@ end
 close all
 clc
 for i = 1:numel(sp)
-   s = sp{i};
-   m = mdapca(s(indc, :), 5, 'TestSet', s(indv, :), 'CV', {'full'});
+   s = sp{i}; c = cn{i};
+   m = mdapls(s, c, 5);
+   
    figure
-   subplot 431, plotloadings(m, 'Labels', 'names')
-   subplot 432, plotloadings(m, 'Type', 'line')
-   subplot 433, plotloadings(m, 'Type', 'bar')
-   subplot 434, plotscores(m, [1,2], 'Labels', 'names')
-   subplot 435, plotscores(m, [1,2], 'Type', 'line')
-   subplot 436, plotscores(m, [1,2], 'Type', 'bar')
-   subplot 437, plotresiduals(m, 'Labels', 'names')
-   subplot 438, plotcumexpvar(m)
-   subplot 439, plotcumexpvar(m, 'Type', 'bar', 'Labels', 'values')
-   subplot(4,3,10), plotexpvar(m)
-   subplot(4,3,11), plotexpvar(m, 'Type', 'bar', 'Labels', 'values')
+   subplot 431, plotregcoeffs(m)
+   subplot 432, plotregcoeffs(m, 1, 2, 'Type', 'line')
+   subplot 433, plotregcoeffs(m, 1, 2, 'Type', 'bar')
+   
+%    subplot 434, plotxloadings(m, 'Labels', 'names')
+%    subplot 435, plotxloadings(m, 'Type', 'line')
+%    subplot 436, plotxloadings(m, 'Type', 'bar')
+%    
+%    subplot 437, plotxscores(m, [1,2], 'Labels', 'names')
+%    subplot 438, plotxscores(m, [1,2], 'Type', 'line')
+%    subplot 439, plotxscores(m, [1,2], 'Type', 'bar')
+%    
+%    subplot(4, 3, 10), plotxyscores(m, [1,2], 'Labels', 'names')
+%    subplot(4, 3, 11), plotxyscores(m, [1,2], 'Type', 'line')
+%    subplot(4, 3, 12), plotxyscores(m, [1,2], 'Type', 'bar')
+%    
+%    subplot(4, 3, 13), plotcumexpvar(m)
+%    subplot(4, 3, 14), plotexpvar(m)
+%    subplot(4, 3, 15), plotrmse(m)
 end
 
