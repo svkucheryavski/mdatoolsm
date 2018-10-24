@@ -208,6 +208,7 @@ classdef regcoeffs < handle
       end
       
       function varargout = plot(obj, varargin)
+         
          [resp, comp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.respNames, varargin{:});
          
          [type, varargin] = getarg(varargin, 'Type');
@@ -249,10 +250,8 @@ classdef regcoeffs < handle
          values = obj.values(1:end, resp, comp)';
          if strcmp(type, 'line')
             h = plot(values, varargin{:}, 'Marker', mr);
-            xl = [1, obj.nPred];
          elseif strcmp(type, 'bar')   
             h = bar(values, varargin{:});
-            xl = [0.5, obj.nPred + 0.5];
          else
             error('Wrong plot type!');
          end
@@ -280,13 +279,7 @@ classdef regcoeffs < handle
          end   
    
          axis auto
-                  
-         dx = abs(diff(xl))/25;
-         xlim([xl(1) - dx xl(2) + dx])
-         yl = ylim();
-         dy = abs(diff(yl))/25;
-         ylim([yl(1) - dy yl(2) + dy])
-         
+                           
          if showLines && strcmp(type, 'line')
             lim = axis();
             line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.8 0.8 0.8]);
