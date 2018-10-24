@@ -1106,7 +1106,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          if ~isempty(obj.colNames)
             gColNames = obj.colNames(ind);
          else
-            gColNames = textget('X', 1:nFactorCols);
+            gColNames = textgen('X', 1:nFactorCols);
          end
          
          
@@ -1321,7 +1321,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             
             % add "O" to row names if they are not unique
             if ~isempty(out.rowNames) && ~isempty(b.rowNames)
-               if sum(ismember(a.rowNames, b.rowNames)) > 0
+               if sum(ismember(out.rowNames, b.rowNames)) > 0
                   newRowNames = [out.rowNames, strcat('O', b.rowNames)];
                   newRowFullNames = [out.rowFullNames, strcat('O', b.rowFullNames )];
                else
@@ -1332,6 +1332,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
                newRowNames = {};
                newRowFullNames = {};
             end
+            disp(newRowNames)
             
             % make correct row values
             if ~isempty(out.rowValues) && ~isempty(b.rowValues)
