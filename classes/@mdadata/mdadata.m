@@ -1332,7 +1332,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
                newRowNames = {};
                newRowFullNames = {};
             end
-            disp(newRowNames)
             
             % make correct row values
             if ~isempty(out.rowValues) && ~isempty(b.rowValues)
