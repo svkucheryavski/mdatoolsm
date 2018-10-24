@@ -214,6 +214,7 @@
 % visualising data of the same origin (unites) or pairwise data, for example 
 % correlation matrix.
 %
+   load people
    
    figure('Position', [0 0 400 300]);
    levelplot(people(1:5, 1:5))
@@ -288,6 +289,16 @@
    errorbar(d, 'Type', 'std', 'Alpha', 0.10)
 
 %%
+% Errorbar plot for groups
+
+g = people(:, {'Sex', 'Region'});
+g.factor(1, {'M', 'F'});
+g.factor(2, {'A', 'B'});
+
+figure
+errorbar(d(:, 1:3), g, 'Color', 'r')
+
+%%
 % The box and whiskers plot shows quartiles of the dataset columns as well
 % as minimal and maximal values for outliers free data. The outliers are
 % detected as values exceeding _q3 + w(q3 - q1)_ or beneath _q1 - w(q3 - q1)_.
@@ -313,6 +324,16 @@
    boxplot(d, 'Whisker', 1, 'Labels', 'names')
 
 %%
+% Boxplot for groups
+
+g = people(:, {'Sex', 'Region'});
+g.factor(1, {'M', 'F'});
+g.factor(2, {'A', 'B'});
+
+figure
+boxplot(d(:, 1:3), g, 'Color', 'r', 'Labels', 'names')
+
+%%
 % Quantile-quantile plot for normal distribution calculates real and theoretical 
 % quantiles of each data point as if the values are distributed normally.
 % The calculated values are shown as a scatter plot and can be used to
@@ -331,4 +352,5 @@
    subplot(1, 2, 2)
    qqplot(people(:, 'Height'), 'Labels', 'on', 'ShowNormal', 'off')
    
+
    
