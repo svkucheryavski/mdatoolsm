@@ -138,7 +138,7 @@ classdef ldecomp < handle
             res.rowValuesAll = loadings.rowValuesAll;
          end
          
-         T2.name = 'T2 residuals';
+         T2.name = 'T^2 residuals';
          T2.dimNames = scores.dimNames;
          T2.excluderows(excludedRows);
       
