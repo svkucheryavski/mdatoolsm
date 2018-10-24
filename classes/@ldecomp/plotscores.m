@@ -55,13 +55,15 @@ function varargout = plotscores(obj, varargin)
    title('Scores');
    if showLines && ~strcmp(type, 'density')
       lim = axis();
-      line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+      line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5], ...
+         'HandleVisibility','off');
       if strcmp(type, 'scatter') && numel(comp) > 1
-         line([0 0], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+         line([0 0], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5],...
+            'HandleVisibility','off');
       end   
    end
    
    if nargout > 0
-      varargout{1} = h.plot;
+      varargout{1} = h;
    end   
 end
