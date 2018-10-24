@@ -53,6 +53,7 @@ function varargout = bar(obj, varargin)
    end
 
    % check if x values are provided and set up x and xtick values
+   x = [];
    if numel(varargin) > 0 && isnumeric(varargin{1})
       if showExcluded
          error('You can not use manual x values with "ShowExcluded" parameter!');
@@ -60,7 +61,7 @@ function varargout = bar(obj, varargin)
       x = varargin{1};
       varargin(1) = [];
    else
-      x = [];
+      x = obj.colValuesAll;      
    end
 
    if isempty(find(strcmp(varargin, 'FaceColor'), 1))
@@ -89,17 +90,21 @@ function varargout = bar(obj, varargin)
       sigfig = 3;
    end
 
-
+   
+   xticklabels = {};
    if showExcluded
       values = obj.valuesAll(:, ~obj.factorCols);
       nCols = size(values, 2);
-      xticklabels = obj.colNamesAll(~obj.factorCols);
+      if ~isempty(obj.colNamesAll)
+         xticklabels = obj.colNamesAll(~obj.factorCols);
+      end
    else
       values = obj.numValues;
-      xticklabels = obj.colNamesWithoutFactors;
       nCols = size(values, 2);
+      if ~isempty(obj.colNamesAll)
+         xticklabels = obj.colNamesWithoutFactors;
+      end
    end
-
 
    if isempty(x)            
       x = 1:nCols;
@@ -108,8 +113,12 @@ function varargout = bar(obj, varargin)
       showTicks = false;
    end   
 
-   if strcmp(showLabels, 'names')
-      labels = xticklabels;               
+   if strcmp(showLabels, 'names') 
+      if ~isempty(xticklabels)
+         labels = xticklabels;               
+      else
+         labels = 1:nCols;
+      end
    elseif strcmp(showLabels, 'numbers')
       labels = num2str(x');               
    else
@@ -140,16 +149,18 @@ function varargout = bar(obj, varargin)
    xlabel(obj.dimNames{2})            
    ylabel('')         
 
-   if ~isempty(obj.rowNames)
+   if ~isempty(obj.rowNamesAll)
       if ~isempty(obj.name) 
          title([obj.name ' (' obj.rowNames{1} ')'])
       else
          title(obj.rowNames{1})
       end
+   else
+      title('Object #1');
    end
 
    box on
-   if showTicks
+   if showTicks && ~isempty(xticklabels)
        set(gca, 'XTick', x(xtick), 'XTickLabel', xticklabels(xtick));
    end   
 

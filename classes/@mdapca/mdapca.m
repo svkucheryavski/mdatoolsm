@@ -249,15 +249,15 @@ classdef mdapca < handle
          compnames = textgen('Comp ', 1:obj.nComp);         
 
          obj.loadings = mdadata(loads);
-         obj.loadings.colNames = compnames;
-         if ~isempty(data.colNames)
-            obj.loadings.rowNames = data.colNamesAll(~data.factorCols);
-         end   
-         if ~isempty(data.colFullNames)
-            obj.loadings.rowFullNames = data.colFullNamesAll(~data.factorCols);
+         
+         obj.loadings.colNamesAll = compnames;
+         if ~isempty(data.colNamesAll)
+            obj.loadings.rowNamesAll = data.colFullNamesAllWithoutFactors;            
          end   
          obj.loadings.dimNames = {data.dimNames{2}, 'Components'};
-         obj.loadings.colFullNames = compnames;
+         obj.loadings.colNamesAll = compnames;
+         obj.loadings.colFullNamesAll = compnames;
+         obj.loadings.rowValuesAll = data.colValuesAllWithoutFactors;
          obj.loadings.name = 'Loadings';
          obj.loadings.excluderows(excludedCols);
          
@@ -296,12 +296,11 @@ classdef mdapca < handle
             scores = reshape(scores, height, width, obj.loadings.nCols);
             scores = mdaimage(scores, obj.loadings.colNames);
          else   
-            scores = mdadata(scores, data.rowNamesAll, obj.loadings.colNames);
-            scores.rowFullNames = data.rowFullNamesAll;
+            scores = mdadata(scores, data.rowFullNamesAll, obj.loadings.colFullNames);
+            scores.rowValuesAll = data.rowValuesAll;
          end
          
          scores.dimNames = {data.dimNames{1}, obj.loadings.dimNames{2}};
-         scores.colFullNames = obj.loadings.colFullNames;
          scores.name = 'Scores';
          scores.excluderows(data.excludedRows);
          
@@ -349,21 +348,17 @@ classdef mdapca < handle
          T2 = T2 ./ nRep;
          residuals = residuals ./ nRep;
          
-         T2 = mdadata(T2, data.rowNames, obj.loadings.colNames, obj.calres.scores.dimNames);
+         T2 = mdadata(T2, data.rowFullNames, obj.loadings.colFullNames, obj.calres.scores.dimNames);
          T2.name = 'T2 residuals';
-         T2.rowFullNames = obj.calres.scores.rowFullNames;
-         T2.colFullNames = obj.calres.scores.colFullNames;
-
-         Q = mdadata(Q, T2.rowNames, T2.colNames, T2.dimNames, 'Q residuals');
-         Q.rowFullNames = T2.rowFullNamesAll;
-         Q.colFullNames = T2.colFullNamesAll;
-
+         T2.rowValuesAll = data.rowValues;
          
-         residuals = mdadata(residuals, Q.rowNamesAll, ...
-             data.colNamesAll(~(data.factorCols | data.excludedCols)),...
+         Q = mdadata(Q, T2.rowFullNamesAll, T2.colFullNamesAll, T2.dimNames, 'Q residuals');
+         Q.rowValuesAll = data.rowValues;
+         
+         residuals = mdadata(residuals, Q.rowNamesAll, obj.loadings.rowFullNamesAll, ...
              data.dimNames, 'Residuals');
-         residuals.rowFullNames = Q.rowFullNamesAll;
-         residuals.colFullNames = data.colFullNamesAll(~(data.factorCols | data.excludedCols));
+         residuals.rowValuesAll = data.rowValues;
+         residuals.colValuesAll = data.colValues;
          
          % in CV results there are no scores only residuals and variances
          cvres = pcares([], [], [], obj.calres.tnorm, obj.calres.totvar, Q, T2, [], residuals);
@@ -460,10 +455,8 @@ classdef mdapca < handle
             h = scatter(loadings(:, comp), varargin{:});
          elseif strcmp(type, 'bar')   
             h = gbar(loadings(:, comp)', varargin{:});
-            xlim([0.5, loadings.nRows + 0.5])
          elseif strcmp(type, 'line')   
             h = gplot(loadings(:, comp)', varargin{:});
-            xlim([0.5, loadings.nRows + 0.5])
          else
             error('Wrong plot type!');
          end
@@ -471,10 +464,13 @@ classdef mdapca < handle
 
          lim = axis();
          if strcmp(type, 'scatter')
-            line([0 0], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);            
-            line([lim(1)  lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+            line([0 0], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5],...
+               'HandleVisibility','off');            
+            line([lim(1)  lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5],...
+               'HandleVisibility','off');
          elseif strcmp(type, 'line')
-            line([lim(1)  lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+            line([lim(1)  lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5], ...
+               'HandleVisibility','off');
          end
 
          if nargout > 0

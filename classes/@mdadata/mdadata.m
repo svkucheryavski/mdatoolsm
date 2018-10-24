@@ -154,15 +154,12 @@ classdef mdadata < handle & matlab.mixin.Copyable
       colFullNamesAll   % cell array with full names for all columns
       rowFullNamesAll   % cell array with full names for all rows
       colValuesAll      % numeric vector with column values used to make line plot
+      rowValuesAll      % numeric vector with row values used to make line plot
    end
    
    properties (SetAccess = 'protected', Hidden = true, SetObservable = true)
       excludedRows      % vector with hidden (excluded) rows
       excludedCols      % vector with hidden (excluded) columns
-      selectedRows      % indices of selected rows for GUI
-      selectedCols      % indices of selected columns for GUI
-      currentRows       % indices of current rows for GUI
-      currentCols       % indices of selected columns for GUI
       showExcludedRows = false
       showExcludedCols = false     
    end
@@ -177,6 +174,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       rowFullNames      % row names with extra symbols, using for printing and plotting
       colFullNames      % column names with extra symbols, using for printing and plotting
       colValues         % numeric values for columns used for making line plots
+      rowValues         % numeric values for columns used for making line plots
    end
    
    properties (Dependent = true, Hidden = true)
@@ -186,8 +184,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
    
    properties (Dependent = true, Hidden = true)
       valuesHidden      % values for excluded rows
-      valuesRSelected   % values for selected rows
-      valuesCSelected   % values for selected columns
       numValuesAll      % get all data values without factors
       nColsAll          % number of all columns (including hidden)
       nRowsAll          % number of all rows (including hidden)
@@ -205,6 +201,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
       
    methods
       
+      %%% constructor 
+      
       function obj = mdadata(values, rowNames, colNames, dimNames, name)
          % 'mdadata' creates an object of class 'mdadata'
          %
@@ -217,381 +215,362 @@ classdef mdadata < handle & matlab.mixin.Copyable
             name = '';
          end
          
-         if nargin < 4 || isempty(dimNames)
+         if nargin < 4 || numel(dimNames) ~= 2
             dimNames = {'Objects', 'Variables'};
          end
          
-         if nargin < 3 
+         if nargin < 3 || numel(colNames) ~= size(values, 2)
             colNames = {};
+         elseif ~(iscell(colNames) || isnumeric(colNames))   
+             error('Column names should be either vector with numbers or cells!');   
          end
          
-         if nargin < 2 
+         if nargin < 2 || numel(rowNames) ~= size(values, 1)
             rowNames = {};
+         elseif ~(iscell(rowNames) || isnumeric(rowNames))   
+             error('Row names should be either vector with numbers or cells!');   
          end   
          
+         % set data values 
          obj.valuesAll = double(values);
+         
+         % set names and axis values for columns
          obj.colNamesAll = colNames;
+         obj.colFullNamesAll = colNames;
+         obj.colValuesAll = colNames;
+         
+         % set names and axis values for rows
          obj.rowNamesAll = rowNames;
+         obj.rowFullNamesAll = rowNames;
+         obj.rowValuesAll = rowNames;
+         
+         % set other attribites
          obj.dimNames = dimNames; 
          obj.excludedRows = false(obj.nRowsAll, 1);
-         obj.selectedRows = false(obj.nRowsAll, 1);
          obj.excludedCols = false(obj.nColsAll, 1);
-         obj.selectedCols = false(obj.nColsAll, 1);
          obj.factorCols = false(obj.nColsAll, 1);
-         obj.factorLevelNames = cell(obj.nColsAll, 1);
+         obj.factorLevelNames = cell(obj.nColsAll, 1);                  
          obj.name = name;
       end
       
       %%% getters and setters
       
-      function out = get.values(obj)  
+      function out = get.values(obj) 
+      % get matrix with non-hidden values 
          row_ind = ~obj.excludedRows;
          col_ind = ~obj.excludedCols;
          out = obj.valuesAll(row_ind, col_ind);
       end
       
       function out = get.factors(obj)         
+      % get matrix with factor values   
          row_ind = ~obj.excludedRows;
          col_ind = ~(obj.excludedCols) & obj.factorCols;
          out = obj.valuesAll(row_ind, col_ind);
       end
       
       function out = get.numValues(obj)         
+      % return matrix with numeric values (only non-hidden rows)   
          row_ind = ~obj.excludedRows;
          col_ind = ~(obj.excludedCols | obj.factorCols);
          out = obj.valuesAll(row_ind, col_ind);
       end
       
       function out = get.numValuesAll(obj)
+      % return matrix with numeric values (including hidden rows)   
          col_ind = ~(obj.excludedCols | obj.factorCols);
          out = obj.valuesAll(:, col_ind);
       end
                         
       function out = get.nRows(obj)
+      % return number of non-hidden rows
          out = obj.nRowsAll - sum(obj.excludedRows);
       end   
       
       function out = get.nCols(obj)
+      % return number of non-hidden columns
          out = obj.nColsAll - sum(obj.excludedCols);
       end
       
       function out = get.nNumCols(obj)
+      % return number of all numeric and non-hidden columns
          out = obj.nColsAll - sum(obj.excludedCols) - sum(obj.factorCols);
       end   
       
       function out = get.nColsAll(obj)
+      % return number of all columns
          out = size(obj.valuesAll, 2);
       end
       
       function out = get.nNumColsAll(obj)
+      % return number of all non-factor columns   
          out = size(obj.valuesAll, 2) - sum(obj.factorCols);
       end   
       
       function out = get.nRowsAll(obj)
+      % return number of all rows
          out = size(obj.valuesAll, 1);
       end   
             
       function out = get.nFactors(obj)
+      % return number of factor columns   
          out = sum(obj.factorCols(~obj.excludedCols));
       end      
       
       function out = get.valuesHidden(obj)
+      % return matrix for hidden rows and non-hidden columns
          row_ind = obj.excludedRows;
          col_ind = ~obj.excludedCols;
          out = obj.valuesAll(row_ind, col_ind);      
       end
-      
-      function out = get.valuesRSelected(obj)
-         if obj.showExcludedRows
-            out = obj.valuesAll(obj.selectedRows, ~obj.excludedCols & ~obj.factorCols);
-         else
-            out = obj.valuesAll(obj.selectedRows & ~obj.excludedRows, ~obj.excludedCols & ~obj.factorCols);
-         end
-      end
-      
-      function out = get.valuesCSelected(obj)
-      % returns matrix with values for selected columns and either all rows
-      % or selected rows
-         if any(obj.selectedRows)
-            rowInd = obj.selectedRows & ~obj.excludedRows;
-         else
-            rowInd = ~obj.excludedRows;
-         end
-         
-         if obj.showExcludedCols
-            out = obj.valuesAll(rowInd, obj.selectedCols & ~obj.factorCols);
-         else
-            out = obj.valuesAll(rowInd, obj.selectedCols & ~(obj.excludedCols | obj.factorCols));
-         end
-      end
-                     
+                           
       function out = get.colNames(obj)         
-         out = obj.colNamesAll;
-         
+      % return names for all non-hidden columns
+         out = obj.colNamesAll;         
          if ~isempty(out)
             out(obj.excludedCols) = [];
          end   
       end
       
       function out = get.colValues(obj)
-         out = obj.colValuesAll;
-         
+      % return column values (x-axis values)   
+         out = obj.colValuesAll;         
          if ~isempty(out)
             out(obj.excludedCols) = [];
          end   
       end
       
+      function out = get.rowValues(obj)
+      % return row values (y-axis values)   
+         out = obj.rowValuesAll;         
+         if ~isempty(out)
+            out(obj.excludedRows) = [];
+         end   
+      end
+      
+      function out = get.colFullNamesAll(obj)
+      % return full names for all non-hidden columns   
+         if isempty(obj.colFullNamesAll)
+            out = obj.colNamesAll;
+         else
+            out = obj.colFullNamesAll;
+         end         
+      end
+      
       function out = get.colFullNames(obj)
-         out = obj.colFullNamesAll;
-         
+      % return full names for all non-hidden columns   
+         if isempty(obj.colFullNamesAll)
+            out = obj.colNamesAll;
+         else
+            out = obj.colFullNamesAll;
+         end         
          if ~isempty(out)
             out(obj.excludedCols) = [];
          end   
       end
       
       function out = get.factorNames(obj)
-         out = obj.colNamesAll;
-         
+      % return names for factor columns 
+         out = obj.colNamesAll;   
          if ~isempty(out)
             out(~obj.factorCols | obj.excludedCols) = [];
          end         
       end
       
       function out = get.factorFullNames(obj)
-         out = obj.colFullNamesAll;
-         
+      % return full names for columns
+         out = obj.colFullNamesAll;         
          if ~isempty(out)
             out(~obj.factorCols | obj.excludedCols) = [];
          end         
       end
       
       function out = get.colNamesWithoutFactors(obj)
-         out = obj.colNamesAll;
-         
+      % return column names for all non-factor columns
+         out = obj.colNamesAll;         
          if ~isempty(out) 
             out(obj.factorCols | obj.excludedCols) = [];
          end   
       end
       
       function out = get.colValuesWithoutFactors(obj)
-         out = obj.colValuesAll;
-         
+      % return column values (xaxis values) for non-hidden non-factor columns   
+         out = obj.colValuesAll;         
          if ~isempty(out) 
             out(obj.factorCols | obj.excludedCols) = [];
          end   
       end
       
       function out = get.colNamesAllWithoutFactors(obj)
-         out = obj.colNamesAll;
-         
+      % return column names for all non-factor columns            
+         out = obj.colNamesAll;         
          if ~isempty(out) 
             out(obj.factorCols) = [];
          end   
       end
       
       function out = get.colValuesAllWithoutFactors(obj)
-         out = obj.colValuesAll;
-         
+      % return column values (xaxis values) for all non-factor columns   
+         out = obj.colValuesAll;         
          if ~isempty(out) 
             out(obj.factorCols) = [];
          end   
       end
       
       function out = get.colFullNamesWithoutFactors(obj)
-         out = obj.colFullNamesAll;
-         
+      % return column fll names for non-hidden non-factor columns   
+         out = obj.colFullNamesAll;         
          if ~isempty(out) 
             out(obj.factorCols | obj.excludedCols) = [];
          end   
       end
       
       function out = get.colFullNamesAllWithoutFactors(obj)
-         out = obj.colFullNamesAll;
-         
+      % return column fll names for all non-factor columns   
+         out = obj.colFullNamesAll;         
          if ~isempty(out) 
             out(obj.factorCols) = [];
          end   
       end
       
       function out = get.rowNames(obj)
-         out = obj.rowNamesAll;
-         
+      % return names for non-hidden rows 
+         out = obj.rowNamesAll;         
          if ~isempty(out)
             out(obj.excludedRows) = [];
          end   
       end
       
       function out = get.rowFullNames (obj)
-         out = obj.rowFullNamesAll;
-         
+      % return full names for non-hidden rows
+         out = obj.rowFullNamesAll;         
          if ~isempty(out)
             out(obj.excludedRows) = [];
          end   
       end
       
-      function ind = get.selectedRows(obj)
-         ind = obj.selectedRows;
-      end   
-      
-      function ind = get.selectedCols(obj)
-         ind = obj.selectedCols;
-      end   
-            
-      function ind = get.currentRows(obj)
-         if isempty(obj.currentRows)
-            obj.currentRows = [1 1];
-         end   
-         
-         ind = obj.currentRows;
-      end   
-      
-      function ind = get.currentCols(obj)
-         if isempty(obj.currentCols)
-            if obj.nCols > 1
-               obj.currentCols = [1 2];
-            else
-               obj.currentCols = [1 1];
-            end   
-         end   
-         
-         ind = obj.currentCols;
-      end   
+      function out = get.rowFullNamesAll(obj)
+      % return full names for all non-hidden rows   
+         if isempty(obj.rowFullNamesAll)
+            out = obj.rowNamesAll;
+         else
+            out = obj.rowFullNamesAll;
+         end         
+      end
       
       %%% setters
+      
+      function set.colValuesAll(obj, colValues)         
+      % set values for columns (x-axis values)
+         if isempty(colValues) || ~isnumeric(colValues)
+            obj.colValuesAll = [];
+         else
+            obj.colValuesAll = colValues;
+         end
+      end
+      
       function set.colNamesAll(obj, colNames)         
-                  
-         nCols = size(obj.valuesAll, 2);
-
-         colFullNames = {};
+      % set names for all column names            
          
-         %%%% check if colNames are provided and generate the names if needed
+         if isempty(colNames) 
+            obj.colNamesAll = {};
+            return
+         end
          
+         if iscell(colNames) && ischar(colNames{1})
+         % remove all symbols which are non letter nor numbers
+         % merge words and capitalise them
+            for i = 1:numel(colNames)
+               %a = regexp(colNames{i}, '[^A-Za-z0-9\.\-\s]', 'split');
+               %a = regexp(strtrim(a{1}), '\s', 'split');
+               %a = cellfun(@(x)([upper(x(1)) x(2:end)]), a, 'UniformOutput', false);
+               %colNames{i} = sprintf('%s', a{:});
+               colNames{i} = regexprep(colNames{i}, '[^A-Za-z0-9\.\-]', '');
+            end
+         end
+            
+         if numel(unique(colNames)) ~= numel(colNames)
+            error('Column names must be unique!')
+         elseif isnumeric(colNames)
+            obj.colNamesAll = textgen('', colNames);
+         elseif iscell(colNames) && ischar([colNames{:}])
+            obj.colNamesAll = colNames;
+         else
+            error('Values for "colNames" argument must be either numeric or cell array with text!');
+         end   
+      end
+      
+      function set.colFullNamesAll(obj, colNames)
+      % set full names for columns
          if isempty(colNames)
-         % no colnames - generate them as '1', '2', ...   
-            obj.colValuesAll = 1:nCols;
-            obj.colNamesAll = textgen('', obj.colValuesAll);
-         else   
-            if ischar(colNames) && nCols == 1
-               colNames = {colNames};
-            end
-            
-            if size(colNames, 1) > size(colNames, 2)
-               colNames = colNames';
-            end
-            
-            if iscell(colNames) && ischar(colNames{1})
-            % names are provided as a text cell array    
-            
-               % keep full names
-               colFullNames = colNames;
-               
-               % remove all symbols which are non letter nor numbers
-               % merge words and capitalise them
-               for i = 1:numel(colNames)
-                  %a = regexp(colNames{i}, '[^A-Za-z0-9\.\-\s]', 'split');
-                  %a = regexp(strtrim(a{1}), '\s', 'split');
-                  %a = cellfun(@(x)([upper(x(1)) x(2:end)]), a, 'UniformOutput', false);
-                  %colNames{i} = sprintf('%s', a{:});
-                  colNames{i} = regexprep(colNames{i}, '[^A-Za-z0-9\.\-]', '');
-               end
-            end
-            
+            obj.colFullNamesAll = {};
+         else
             if numel(unique(colNames)) ~= numel(colNames)
                error('Column names must be unique!')
-            elseif numel(unique(colFullNames)) ~= numel(colFullNames)
-               error('Column names must be unique!')
-            elseif (numel(colNames) ~= nCols)
-               error('Number of names should be the same as number of columns!');
             elseif isnumeric(colNames)
-               obj.colValuesAll = colNames;
-               obj.colNamesAll = textgen('', colNames);
+               obj.colFullNamesAll = textgen('', colNames);
             elseif iscell(colNames) && ischar([colNames{:}])
-               obj.colNamesAll = colNames;
+               obj.colFullNamesAll = colNames;
             else
                error('Values for "colNames" argument must be either numeric or cell array with text!');
-            end   
+            end
+         end
+      end
             
+      function set.rowValuesAll(obj, rowValues)         
+      % set axis values for rows (y-axis values)
+         if isempty(rowValues) || ~isnumeric(rowValues)
+            obj.rowValuesAll = [];
+         else
+            obj.rowValuesAll = rowValues;
+         end
+      end
+      
+      function set.rowNamesAll(obj, rowNames)         
+      % set names for all column names            
+         
+         if isempty(rowNames) 
+            obj.rowNamesAll = {};
+            return
          end
          
-         if isempty(colFullNames)
-            obj.colFullNamesAll = obj.colNamesAll;
+         if iscell(rowNames) && ischar(rowNames{1})
+         % remove all symbols which are non letter nor numbers
+         % merge words and capitalise them
+            for i = 1:numel(rowNames)
+               %a = regexp(colNames{i}, '[^A-Za-z0-9\.\-\s]', 'split');
+               %a = regexp(strtrim(a{1}), '\s', 'split');
+               %a = cellfun(@(x)([upper(x(1)) x(2:end)]), a, 'UniformOutput', false);
+               %colNames{i} = sprintf('%s', a{:});
+               rowNames{i} = regexprep(rowNames{i}, '[^A-Za-z0-9\.\-]', '');
+            end
+         end
+            
+         if numel(unique(rowNames)) ~= numel(rowNames)
+            error('Row names must be unique!')
+         elseif isnumeric(rowNames)
+            obj.rowNamesAll = textgen('', rowNames);
+         elseif iscell(rowNames) && ischar([rowNames{:}])
+            obj.rowNamesAll = rowNames;
          else
-            obj.colFullNamesAll = colFullNames;
+            error('Values for "rowNames" argument must be either numeric or cell array with text!');
          end   
       end
       
-      function set.colNames(obj, colNames)
-         obj.colNamesAll = colNames;
-      end
-      
-      function set.colFullNames(obj, colNames)
-         if size(colNames, 1) > size(colNames, 2)
-            colNames = colNames';
-         end
-         
-         obj.colFullNamesAll = colNames;
-      end
-            
-      function set.rowNamesAll(obj, rowNames)         
-         
-         nRows = size(obj.valuesAll, 1);
-         
-         rowFullNames = {};
-         
-         %%% check if rowNames are provided and generate the names if needed
-         if ~isempty(rowNames)
-            
-            if iscell(rowNames) && ischar(rowNames{1})
-            % row names are provided as text cell array
-            
-               % keep full names
-               rowFullNames = rowNames;
-               
-               % remove all symbols which are non letter nor numbers
-               % merge words and capitalise them
-               for i = 1:numel(rowNames)
-                  %a = regexp(rowNames{i}, '[^A-Za-z0-9\-\.\s]', 'split');
-                  %a = cellfun(@(x)([upper(x(1)) x(2:end)]), a, 'UniformOutput', false);
-                  %rowNames{i} = sprintf('%s', a{:});
-                  rowNames{i} = regexprep(rowNames{i}, '[^A-Za-z0-9\-\.\s]', '');  
-               end
-            end
-            
+      function set.rowFullNamesAll(obj, rowNames)
+         if isempty(rowNames)
+            obj.rowFullNamesAll = {};
+         else
             if numel(unique(rowNames)) ~= numel(rowNames)
                error('Row names must be unique!')
-            elseif (numel(rowNames) ~= nRows)
-               error('Number of names should be the same as number of objects!');
             elseif isnumeric(rowNames)
-               rowNames = textgen('', rowNames);
-               if size(rowNames, 1) < size(rowNames, 2)
-                  rowNames = rowNames';
-               end   
-               obj.rowNamesAll = rowNames;
+               obj.rowFullNamesAll = textgen('', rowNames);
             elseif iscell(rowNames) && ischar([rowNames{:}])
-               obj.rowNamesAll = rowNames;
+               obj.rowFullNamesAll = rowNames;
             else
-               error('Row names must be either numeric or cell array with text values!');
-            end    
-%          elseif nRows < 2000
-%          % if number of rows is large no names will be used, otherwise generate then from numbers   
-%             obj.rowNamesAll = textgen('', 1:nRows)';
-         else   
-            obj.rowNamesAll = {};
-         end   
-         
-         if isempty(rowFullNames)
-            obj.rowFullNamesAll = obj.rowNamesAll;
-         else
-            obj.rowFullNamesAll = rowFullNames ;
-         end            
-      end
-
-      function set.rowNames(obj, rowNames)
-         obj.rowNamesAll = rowNames;
-      end
-      
-      function set.rowFullNames(obj, rowNames)
-         obj.rowFullNamesAll = rowNames;
+               error('Values for "rowNames" argument must be either numeric or cell array with text!');
+            end   
+         end
       end
       
       function set.dimNames(obj, dimNames)
@@ -603,42 +582,42 @@ classdef mdadata < handle & matlab.mixin.Copyable
             end   
          end   
       end
-
-      function set.selectedRows(obj, ind)
-         if isempty(ind)
-            obj.selectedRows = false(obj.nRowsAll, 1);
-         elseif isnumeric(ind)
-            obj.selectedRows(ind) = true;
-         elseif islogical(ind)   
-            obj.selectedRows = ind;
-         else
-            error('Wrong indices for selected rows!')
-         end
-      end   
       
-      function set.selectedCols(obj, ind)
-         if isempty(ind)
-            obj.selectedCols = false(obj.nColsAll, 1);
-         elseif isnumeric(ind)
-            obj.selectedCols(ind) = true;
-         elseif islogical(ind)   
-            obj.selectedCols = ind;
+      %%% extra getters for column and row labels
+      
+      function labels = getRowLabels(obj, ind)
+      % return row labels for selected (or all) rows
+      
+         if ~isempty(obj.rowNamesAll)
+            labels = obj.rowFullNames;
+         elseif ~isempty(obj.rowValuesAll)
+            labels = textgen('', obj.rowValues);
          else
-            error('Wrong indices for selected rows!')
+            labels = textgen('', 1:obj.nRows);
+         end
+         
+         if nargin == 2
+            labels = labels(ind);
          end
       end
       
-      function set.currentRows(obj, ind)
-         obj.currentRows = ind;
-      end   
+      function labels = getColLabels(obj, ind)
+      % return column labels for selected (or all) columns
       
-      function set.currentCols(obj, ind)
-         if all(ind > 0) && all(ind <= obj.nCols) 
-            obj.currentCols = ind;
-         end   
-      end   
-      
-            
+         if ~isempty(obj.colNamesAll)
+            labels = obj.colFullNames;
+         elseif ~isempty(obj.colValuesAll)
+            labels = textgen('', obj.colValues);
+         else
+            labels = textgen('', 1:obj.nCols);
+         end
+         
+         if nargin == 2
+            labels = labels(ind);
+         end
+      end
+         
+         
       %%% methods for including/excluding/removing values and variables
       
       function out = getfullrowind(obj, ind)
@@ -705,7 +684,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
             ind = getfullrowind(obj, ind);         
          end
          
-         obj.selectedRows = [];
          obj.excludedRows(ind) = true;        
       end
       
@@ -738,7 +716,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
             ind = parserowind(obj, ind, true);
          end
          
-         obj.selectedRows = [];
          obj.excludedRows(ind) = false;
       end
       
@@ -800,27 +777,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             withFactors = true;
          end
                   
-
          ind = getfullcolind(obj, ind, full, withFactors);                  
-         
-         indCurrent = getfullcolind(obj, obj.currentCols, full, withFactors);
-         
-         cols = obj.currentCols;
-         
-         if any(ismember(ind, indCurrent(1)))
-            cols(1) = 1;
-         else            
-            cols(1) = cols(1) - sum(ind < indCurrent(1));
-         end
-         
-         if any(ismember(ind, indCurrent(2)))
-            cols(2) = 2;         
-         else   
-            cols(2) = cols(2) - sum(ind < indCurrent(2));
-         end   
-         
-         obj.selectedCols = [];
-         obj.currentCols = cols;
          obj.excludedCols(ind) = true;         
       end
       
@@ -899,8 +856,16 @@ classdef mdadata < handle & matlab.mixin.Copyable
          fullNames = obj.colFullNamesAll;
          
          obj.valuesAll(:, ind) = [];
-         obj.colNamesAll = obj.colNamesAll(~ind);
-         obj.colFullNamesAll = fullNames(~ind);      
+         
+         if ~isepmty(obj.colValuesAll)
+            obj.colValuesAll(ind) = [];
+         end
+         
+         if ~isempty(obj.colNamesAll)
+            obj.colNamesAll = obj.colNamesAll(~ind);
+            obj.colFullNamesAll = fullNames(~ind);      
+         end
+         
          obj.factorCols(ind) = [];        
          obj.factorLevelNames(ind) = [];        
          obj.excludedCols(ind) = [];
@@ -922,13 +887,17 @@ classdef mdadata < handle & matlab.mixin.Copyable
          ind = getfullrowind(obj, ind);
          
          obj.valuesAll(ind, :) = [];
-         obj.excludedRows(ind) = [];
-         if ~isempty(obj.rowFullNamesAll)
-            obj.rowFullNamesAll(ind) = [];      
-         end   
+         
+         if ~isempty(obj.rowValuesAll)
+            obj.rowValuesAll(ind) = [];
+         end
+         
          if ~isempty(obj.rowNamesAll)
             obj.rowNamesAll(ind) = [];
+            obj.rowFullNamesAll(ind) = [];            
          end
+         
+         obj.excludedRows(ind) = [];
       end   
       
       %%% methods for factors
@@ -1065,15 +1034,15 @@ classdef mdadata < handle & matlab.mixin.Copyable
             error('You can split only one factor at time!');
          end 
          
-         values = obj.valuesAll(:, ind);
-         levels = unique(values);
+         subValues = obj.valuesAll(:, ind);
+         levels = unique(subValues);
          levelNames = obj.factorLevelNames{ind};
          nlevels = numel(levels);
          
-         newvalues = zeros(size(values, 1), nlevels);
+         newvalues = zeros(size(subValues, 1), nlevels);
          
          for i = 1:nlevels
-            newvalues(:, i) = (values == levels(i)) * 2 - 1;
+            newvalues(:, i) = (subValues == levels(i)) * 2 - 1;
          end
          
          out = mdadata(newvalues, obj.rowNamesAll, levelNames, {obj.dimNames{1} obj.colNamesAll{ind}});
@@ -1130,26 +1099,31 @@ classdef mdadata < handle & matlab.mixin.Copyable
             error('Only factors can be used to make groups!')
          end   
          
-         valuesAll = obj.valuesAll(:, ~obj.excludedCols);
-         valuesAll = valuesAll(:, ind);
+         subValuesAll = obj.valuesAll(:, ~obj.excludedCols);
+         subValuesAll = subValuesAll(:, ind);
+         nFactorCols = numel(ind);
          
-         colNames = obj.colNames(ind);
-         nFactors = numel(ind);
+         if ~isempty(obj.colNames)
+            gColNames = obj.colNames(ind);
+         else
+            gColNames = textget('X', 1:nFactorCols);
+         end
+         
          
          % get factor values as level indices (1, 2, 3)
-         values = zeros(obj.nRowsAll, nFactors);
+         subValues = zeros(obj.nRowsAll, nFactorCols);
          for i = 1:numel(ind)             
-            [~, ~, values(:, i)] = unique(valuesAll(:, i));
+            [~, ~, subValues(:, i)] = unique(subValuesAll(:, i));
          end   
-         values = values(~obj.excludedRows, :);
+         subValues = subValues(~obj.excludedRows, :);
          
          % get factor values as names
          levelNames = obj.factorLevelNames(ind);
-         nlevels = cellfun(@(x)(numel(unique(x))), num2cell(values, 1));
+         nlevels = cellfun(@(x)(numel(unique(x))), num2cell(subValues, 1));
          
          % set up a vector with level sequences for each factor
-         arg = cell(nFactors, 1);
-         for i = 1:nFactors
+         arg = cell(nFactorCols, 1);
+         for i = 1:nFactorCols
             arg{i} = 1:nlevels(i);
          end   
          
@@ -1162,15 +1136,15 @@ classdef mdadata < handle & matlab.mixin.Copyable
          fullNames = cell(nComb, 1);
          shortNames = cell(nComb, 1);
          for i = 1:nComb
-            levels = unique(values(:, 1));
+            levels = unique(subValues(:, 1));
             ind = levels(comb(i, 1));
-            v = values(:, 1) == ind;
+            v = subValues(:, 1) == ind;
             fullName = [levelNames{1}{ind}];
             shortName = [levelNames{1}{ind}];
-            for j = 2:nFactors
-               levelsj = unique(values(:, j));               
+            for j = 2:nFactorCols
+               levelsj = unique(subValues(:, j));               
                indj = levelsj(comb(i, j));
-               v = v & values(:, j) == indj;               
+               v = v & subValues(:, j) == indj;               
                fullName = [fullName ', ' levelNames{j}{indj}];
                shortName = [shortName levelNames{j}{indj}];
             end   
@@ -1178,10 +1152,10 @@ classdef mdadata < handle & matlab.mixin.Copyable
             shortNames{i} = shortName;
             groups(:, i) = v;
          end   
-         dimName = sprintf('%s, ', colNames{:});
+         dimName = sprintf('%s, ', gColNames{:});
          dimName = ['Groups (' dimName(1:end-2) ')'];
          groups = mdadata(groups, obj.rowNames, {}, {obj.dimNames{1}, dimName});
-         groups.colFullNames = fullNames;
+         groups.colNamesAll = fullNames;
          
          % remove columns with all false values
          nulind = find(~any(logical(groups.values)));    
@@ -1210,16 +1184,16 @@ classdef mdadata < handle & matlab.mixin.Copyable
       
       function out = mtimes(a, b)
          if isscalar(b)
-            colNames = a.colNamesWithoutFactors;
-            colFullNames = a.colFullNamesWithoutFactors;
+            newColNames = a.colNamesWithoutFactors;
+            newColFullNames = a.colFullNamesWithoutFactors;
          else
             if ~isa(b, 'mdadata')
                b = mdadata(b);
             end
-            colNames = b.colNamesWithoutFactors;
-            colFullNames = b.colFullNamesWithoutFactors;
+            newColNames = b.colNamesWithoutFactors;
+            newColFullNames = b.colFullNamesWithoutFactors;
          end   
-         out = op(a, b, @mtimes, a.rowNames, a.rowFullNames , colNames, colFullNames);         
+         out = op(a, b, @mtimes, a.rowNames, a.rowFullNames , newColNames, newColFullNames);         
       end
       
       function out = rdivide(a, b)
@@ -1228,22 +1202,22 @@ classdef mdadata < handle & matlab.mixin.Copyable
       
       function out = mrdivide(a, b)
          if isscalar(a)
-            colNames = b.colNamesWithoutFactors;
-            rowNames = b.rowNames;
-            colFullNames = b.colFullNamesWithoutFactors;
-            rowFullNames = b.rowFullNames ;
+            newColNames = b.colNamesWithoutFactors;
+            newRowNames = b.rowNames;
+            newColFullNames = b.colFullNamesWithoutFactors;
+            newRowFullNames = b.rowFullNames;
          elseif isscalar(b)
-            colNames = a.colNamesWithoutFactors;
-            rowNames = a.rowNames;
-            colFullNames = a.colFullNamesWithoutFactors;
-            rowFullNames = a.rowFullNames ;
+            newColNames = a.colNamesWithoutFactors;
+            newRowNames = a.rowNames;
+            newColFullNames = a.colFullNamesWithoutFactors;
+            newRowFullNames = a.rowFullNames;
          else
-            rowNames = a.colNamesWithoutFactors;
-            colNames = {};
-            rowFullNames = a.colFullNamesWithoutFactors;
-            colFullNames = {};
+            newRowNames = a.colNamesWithoutFactors;
+            newColNames = {};
+            newRowFullNames = a.colFullNamesWithoutFactors;
+            newColFullNames = {};
          end   
-         out = op(a, b, @mrdivide, rowNames, rowFullNames , colNames, colFullNames);
+         out = op(a, b, @mrdivide, newRowNames, newRowFullNames , newColNames, newColFullNames);
       end
       
       function out = ldivide(a, b)
@@ -1253,8 +1227,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
       function out = bsxfun(a, b, fun)
          out = mdadata(bsxfun(fun, a.numValues, b.numValues), a.rowNames, a.colNamesWithoutFactors,...
             a.dimNames, a.name);
-         out.colFullNames = a.colFullNamesAll(~a.factorCols & ~a.excludedCols);
-         out.rowFullNames = a.rowFullNames;
+         
+         if ~isempty(a.colFullNamesAll)
+            out.colFullNames = a.colFullNamesAll(~a.factorCols & ~a.excludedCols);
+         end
+         
+         if ~isempty(a.rowFullNames)
+            out.rowFullNames = a.rowFullNames;
+         end
       end
        
       function out = mldivide(a, b)
@@ -1267,47 +1247,57 @@ classdef mdadata < handle & matlab.mixin.Copyable
          out = mdadata(ctranspose(a.numValues), a.colNamesWithoutFactors, a.rowNames, a.dimNames(end:-1:1));
          out.name = a.name;
          out.info = a.info;
-         out.colFullNames = a.rowFullNames ;
-         out.rowFullNames = a.colFullNamesWithoutFactors;
+         out.colNamesAll = a.rowNames;
+         out.colFullNamesAll = a.rowFullNames;
+         out.colValuesAll = a.rowValues;
+         out.rowNamesAll = a.colFullNamesWithoutFactors;
+         out.rowFullNamesAll = a.colFullNamesWithoutFactors;
+         out.rowValuesAll = a.colValuesAllWithoutFactors;
       end
       
-      function out = horzcat(a, b, varargin)
-         if any(ismember(a.colNames, b.colNames)) 
-            colNames = strcat('V', b.colNames);
-            colFullNames = strcat('V', b.colFullNames);
-         else
-            colNames = b.colNames;
-            colFullNames = b.colFullNames;
-         end   
-         out = op(a, b, @horzcat, a.rowNames, a.rowFullNames , ...
-            [a.colNames, colNames], [a.colFullNames, colFullNames], a.dimNames, true);
-         
-         factorCols = [a.factorCols; b.factorCols];
-         factorLevelNames = [a.factorLevelNames; b.factorLevelNames];
+      function out = horzcat(a, varargin)
+      % horizontal concatenation is made only for non-hidden rows and columns   
+         out = copy(a);       
          
          for i = 1:numel(varargin)
             b = varargin{i};
-            if any(ismember(out.colFullNames, b.colFullNames))
-               colNames = strcat('V', b.colNames);
-               colFullNames = strcat('V', b.colFullNames);
-            else
-               colNames = b.colNames;
-               colFullNames = b.colFullNames;
-            end   
             
-            out = op(out, b, @horzcat, out.rowNames, out.rowFullNames , [out.colNames, colNames],...
-               [out.colFullNames, colFullNames], out.dimNames, true);
-            factorCols = [factorCols; b.factorCols];
-            factorLevelNames = [factorLevelNames; b.factorLevelNames];    
+            if ~isempty(out.colNames) && ~isempty(b.colNames)
+               if any(ismember(out.colFullNames, b.colFullNames))
+                  newColNames = [out.colNames, strcat('V', b.colNames)];
+                  newColFullNames = [out.colFullNames, strcat('V', b.colFullNames)];
+               else
+                  newColNames = [out.colNames, b.colNames];
+                  newColFullNames = [out.colFullNames, b.colFullNames];
+               end   
+            else
+               newColNames = {};
+               newColFullNames = {};
+            end
+
+            if ~isempty(out.colValues) && ~isempty(b.colValues)
+               newColValues = [out.colValues, b.colValues];
+            else   
+               newColValues = [];
+            end
+            
+            newFactorCols = [out.factorCols; b.factorCols];
+            newFactorLevelNames = [out.factorLevelNames; b.factorLevelNames];    
+            out = op(out, b, @horzcat, out.rowNames, out.rowFullNames , newColNames,...
+               newColFullNames, out.dimNames, true);
+            out.factorCols = newFactorCols;
+            out.factorLevelNames = newFactorLevelNames;
+            out.colValuesAll = newColValues;            
          end   
-         out.factorCols = factorCols;
-         out.factorLevelNames = factorLevelNames;
+         
+         out.rowValuesAll = a.rowValues;                  
       end
       
       function out = vertcat(a, varargin)
+      % vertical concatenation is made only for non-hidden rows and columns   
 
         out = copy(a);       
-        outExcludedRows = out.excludedRows;         
+        outExcludedRows = out.excludedRows;
         out.includerows(outExcludedRows);
         
         fCols = out.factorCols;
@@ -1316,12 +1306,9 @@ classdef mdadata < handle & matlab.mixin.Copyable
         flv = cellfun(@unique, num2cell(out.values, 1), 'UniformOutput', false);
         
         for i = 1:numel(varargin)            
-            % include exclided rows for previous object
-            
-            % include exclided rows for concatenated object
-            b = copy(varargin{i});
-            bExcludedRows = b.excludedRows;
-            b.includerows(bExcludedRows);
+           b = copy(varargin{i});
+           outExcludedRows = [outExcludedRows; b.excludedRows];
+           b.includerows(b.excludedRows);
             
             % check factor columns
             bf = find(b.factorCols);            
@@ -1333,20 +1320,33 @@ classdef mdadata < handle & matlab.mixin.Copyable
             end
             
             % add "O" to row names if they are not unique
-            if sum(ismember(a.rowNames, b.rowNames)) > 0
-               rowNames = strcat('O', b.rowNames);
-               rowFullNames = strcat('O', b.rowFullNames );
+            if ~isempty(out.rowNames) && ~isempty(b.rowNames)
+               if sum(ismember(a.rowNames, b.rowNames)) > 0
+                  newRowNames = [out.rowNames, strcat('O', b.rowNames)];
+                  newRowFullNames = [out.rowFullNames, strcat('O', b.rowFullNames )];
+               else
+                  newRowNames = [out.rowNames, b.rowNames];
+                  newRowFullNames = [out.rowFullNames, b.rowFullNames];
+               end
             else
-               rowNames = b.rowNames;
-               rowFullNames = b.rowFullNames ;
+               newRowNames = {};
+               newRowFullNames = {};
+            end
+            
+            % make correct row values
+            if ~isempty(out.rowValues) && ~isempty(b.rowValues)
+               newRowValues = [out.rowValues, b.rowValues];
+            else   
+               newRowValues = [];
             end
                         
             % merge datasets
-            out = op(out, b, @vertcat, [out.rowNames; rowNames], [out.rowFullNames ; rowFullNames ],...
-               out.colNames, out.colFullNames, out.dimNames, true);
-            outExcludedRows = [outExcludedRows; bExcludedRows];
+            out = op(out, b, @vertcat, newRowNames, newRowFullNames, out.colNames, ...
+               out.colFullNames, out.dimNames, true);
+            out.rowValuesAll = newRowValues;
         end
         
+        out.colValuesAll = a.colValues;                  
         out.excluderows(outExcludedRows);        
         out.factorCols = fCols;
         
@@ -1373,25 +1373,29 @@ classdef mdadata < handle & matlab.mixin.Copyable
       end
       
       function out = power(a, b)
+      % power of dataset and scalar   
          out = op(a, b, @power);         
          out.valuesAll = double(out.valuesAll);
       end
       
       function out = log(a)
+      % natural logarithm for every element of dataset   
          out = op(a, [], @log);         
          out.valuesAll = double(out.valuesAll);
       end
       
       function out = sqrt(a)
+      % square root for every element of dataset   
          out = op(a, [], @sqrt);         
          out.valuesAll = double(out.valuesAll);
       end
       
       function out = abs(a)
+      % absolute value for every element of dataset   
          out = op(a, [], @abs);         
       end
       
-      function out = exp(a)
+      function out = exp(a)         
          out = op(a, [], @exp);         
       end
       
@@ -1399,9 +1403,13 @@ classdef mdadata < handle & matlab.mixin.Copyable
          out = op(a, [], @round);         
       end
 
-      function out = op(a, b, fun, rowNames, rowFullNames , colNames, colFullNames, dimNames, useAllValues)
+      function out = op(a, b, fun, rowNames, rowFullNames , colNames, colFullNames, dimNames, ...
+            useAllValues)
       % 'op' a general function for arithmetic operations with mdadata
       %
+         outRowValues = [];
+         outColValues = [];
+         
          if ~isa(a, 'mdadata')
             error('Frst argument should be an object of "mdadata" class!');
          end
@@ -1420,18 +1428,22 @@ classdef mdadata < handle & matlab.mixin.Copyable
 
          if nargin < 7
             colFullNames = a.colFullNamesWithoutFactors; 
+            outColValues = a.colValues;
          end
          
          if nargin < 6
             colNames = a.colNamesWithoutFactors; 
+            outColValues = a.colValues;
          end
 
          if nargin < 5
-            rowFullNames = a.rowFullNames ;
+            rowFullNames = a.rowFullNames;
+            outRowValues = a.rowValues;
          end
          
          if nargin < 4
             rowNames = a.rowNames;
+            outRowValues = a.colValues;
          end
          
          if ~isempty(b)
@@ -1449,12 +1461,20 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
          
          if ~isempty(colFullNames)
-            out.colFullNames = colFullNames;
+            out.colFullNamesAll = colFullNames;
          end   
          
          if ~isempty(rowFullNames)
-            out.rowFullNames = rowFullNames;
+            out.rowFullNamesAll = rowFullNames;
          end   
+         
+         if ~isempty(outRowValues)
+            out.rowValuesAll = outRowValues;
+         end
+         
+         if ~isempty(outColValues)
+            out.colValuesAll = outColValues;
+         end
          
          if ~isreal(out.valuesAll)
             out.valuesAll = real(out.valuesAll);
@@ -1510,6 +1530,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       %
          out = parserowind(obj, exp);
       end
+      
       
       %%% statistical methods
       
@@ -1568,6 +1589,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          out = op(obj, [], @cov, obj.colNamesWithoutFactors, obj.colFullNamesWithoutFactors,...
             obj.colNamesWithoutFactors, obj.colFullNamesWithoutFactors);         
+         out.colValuesAll = obj.colValuesWithoutFactors;
+         out.rowValuesAll = [];
          out.dimNames = {'Variables', 'Variables'};
          out.name = 'Covariance';
       end
@@ -1581,6 +1604,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
          %TODO: add calculation of confidence intervals and p-values
          out = op(obj, [], @mdacorr, obj.colNamesWithoutFactors, obj.colFullNamesWithoutFactors,...
             obj.colNamesWithoutFactors, obj.colFullNamesWithoutFactors);         
+         out.colValuesAll = obj.colValuesWithoutFactors;
+         out.rowValuesAll = [];
          out.dimNames = {'Variables', 'Variables'};
          out.name = 'Correlation';
       end
@@ -2072,35 +2097,36 @@ classdef mdadata < handle & matlab.mixin.Copyable
          out = stat(obj, groups, @mdattest, sprintf('P-values (mu = %s)', num2str(mu, 3)), ...
             {'Left tail', 'Both tails', 'Right tail'}, mu);
       end
-      
-            
+                  
       function out = stat(obj, groups, fun, name, varargin)         
          if nargin < 4
             name = '';
          end
          
-         rowNames = [];
+         outRowNames = [];
          if isempty(varargin)
             varargin{1} = 1;
          elseif iscell(varargin{1})
-            rowNames = varargin{1};
+            outRowNames = varargin{1};
             varargin(1) = [];
          end
-         
-         
+                  
          if isempty(groups)
-            if isempty(rowNames)
-               rowNames = {name};
+            if isempty(outRowNames)
+               outRowNames = {name};
             end   
-            out = mdadata(fun(obj.numValues, varargin{:}), rowNames, obj.colFullNamesWithoutFactors, ...
+            out = mdadata(fun(obj.numValues, varargin{:}), outRowNames, ...
+               obj.colFullNamesWithoutFactors, ...
                {'Statistics', obj.dimNames{2}}, obj.name); 
+            out.rowValuesAll = [];
+            out.colValuesAll = obj.colValuesWithoutFactors;
          else
             groups = groups.getgroups();
-            values = obj.numValues;
+            locValues = obj.numValues;
             out = [];
             
             for i = 1:groups.nCols
-               f = fun(values(groups.values(:, i) == 1, :), varargin{:});
+               f = fun(locValues(groups.values(:, i) == 1, :), varargin{:});
                out = [out; f];
             end
             
@@ -2110,12 +2136,12 @@ classdef mdadata < handle & matlab.mixin.Copyable
                name = [name ' for ' obj.name];
             end
             
-            if isempty(rowNames)
+            if isempty(outRowNames)
                orowNames = groups.colNames;
                orowFullNames = groups.colFullNames;
             else
-               nNames = numel(rowNames);
-               rowNames = repmat(rowNames, 1, groups.nCols);
+               nNames = numel(outRowNames);
+               outRowNames = repmat(outRowNames, 1, groups.nCols);
                
               
                gcolNames = repmat(groups.colNames, nNames, 1);
@@ -2123,13 +2149,16 @@ classdef mdadata < handle & matlab.mixin.Copyable
                gcolFullNames = repmat(groups.colFullNames, nNames, 1);
                gcolFullNames = gcolFullNames(:)';
 
-               orowNames = cellfun(@(x, y) [x  '-' y], rowNames, gcolNames, 'un', 0);
-               orowFullNames = cellfun(@(x, y) [x  ' ' y], rowNames, gcolFullNames, 'un', 0);
+               orowNames = cellfun(@(x, y) [x  '-' y], outRowNames, gcolNames, 'un', 0);
+               orowFullNames = cellfun(@(x, y) [x  ' ' y], outRowNames, gcolFullNames, 'un', 0);
             end   
             
-            out = mdadata(out, orowNames, obj.colNamesWithoutFactors, {groups.dimNames{2}, obj.dimNames{2}}, name); 
+            out = mdadata(out, orowNames, obj.colNamesWithoutFactors, ...
+               {groups.dimNames{2}, obj.dimNames{2}}, name); 
             out.rowFullNames = orowFullNames;
             out.colFullNames = obj.colFullNamesWithoutFactors;
+            out.rowValuesAll = [];
+            out.colValuesAll = obj.colValuesWithoutFactors;
          end   
       end   
       
@@ -2343,6 +2372,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
       end
       
       %%% overrides for standard methods
+      
       function ind = parserowind(obj, ind, full)
       % 'parseind' parses indices for rows and return parsed values
       %
@@ -2470,1475 +2500,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             varargout{:} = subsref;
          end   
       end
-
-      function obj = subsasgn(obj, s, b)
-         if strcmp(s(1).type, '()')            
-            row_ind = getfullrowind(obj, s(1).subs{1});
-            col_ind = getfullcolind(obj, s(1).subs{2});            
-         end
-         
-         if numel(s) > 1 && strcmp(s(2).type, '.')
-            if strcmp(s(2).subs, 'values')
-               % change data values   
-               if size(b) ~= size(obj.valuesAll(row_ind, col_ind))
-                  error('Subscripted assignment dimension mismatch!')
-               elseif ~isnumeric(b)
-                  error('Assigned values must be numeric!')
-               else
-                  obj.valuesAll(row_ind, col_ind) = b;
-               end   
-            elseif strcmp(s(2).subs, 'colNames')
-               if ~iscell(b) && ischar(b)
-                  b = {b};
-               end   
-               
-               if numel(b) ~= numel(col_ind)
-                  error('Subscripted assignment dimension mismatch!');
-               elseif ~iscell(b) || ~ischar(b{1})    
-                  error('Cell array with text values must be used as names!')
-               end
-               
-               colNames = obj.colNamesAll;
-               colFullNames = obj.colFullNamesAll;
-               colNames(col_ind) = b;
-               colFullNames(col_ind) = b;
-               obj.colNamesAll = colNames;
-               obj.colFullNamesAll = colFullNames;
-            elseif strcmp(s(2).subs, 'colFullNames')
-               if ~iscell(b) && ischar(b)
-                  b = {b};
-               end   
-               
-               if numel(b) ~= numel(col_ind)
-                  error('Subscripted assignment dimension mismatch!');
-               elseif ~iscell(b) || ~ischar(b{1})    
-                  error('Cell array with text values must be used as names!')
-               end
-               
-               colFullNames = obj.colFullNamesAll;
-               colFullNames(col_ind) = b;
-               obj.colFullNamesAll = colFullNames;
-            elseif strcmp(s(2).subs, 'rowNames')
-               if ~iscell(b) && ischar(b)
-                  b = {b};
-               end   
-               
-               if numel(b) ~= numel(row_ind)
-                  error('Subscripted assignment dimension mismatch!');
-               elseif ~iscell(b) || ~ischar(b{1})    
-                  error('Cell array with text values must be used as names!')
-               end
-               
-               rowNames = obj.rowNamesAll;
-               rowFullNames = obj.rowFullNamesAll ;
-               rowNames(row_ind) = b;
-               rowFullNames(row_ind) = b;
-               obj.rowNamesAll = rowNames;
-               obj.rowFullNamesAll = rowFullNames;
-            elseif strcmp(s(2).subs, 'rowFullNames')
-               if ~iscell(b) && ischar(b)
-                  b = {b};
-               end   
-               
-               if numel(b) ~= numel(row_ind)
-                  error('Subscripted assignment dimension mismatch!');
-               elseif ~iscell(b) || ~ischar(b{1})    
-                  error('Cell array with text values must be used as names!')
-               end
-               
-               rowFullNames = obj.rowFullNamesAll;
-               rowFullNames(row_ind) = b;
-               obj.rowFullNamesAll = rowFullNames;               
-            else
-               error('You can not change this property directly!')
-            end
-         else
-            if strcmp(s(1).subs, 'valuesAll') 
-               if numel(s) > 1
-                  % change part of the matrix
-                  if numel(s(2).subs) ~= 2
-                     error('Specify indices for rows and columns of the data object!')            
-                  end
-                  rowInd = s(2).subs{1};
-                  colInd = s(2).subs{2};
-                  if ~all(size(obj.valuesAll(rowInd, colInd)) == size(b))
-                     error('Subscripted assignment dimension mismatch!')
-                  else
-                     obj.valuesAll(rowInd, colInd) = b;
-                  end   
-               else   
-                  % change the whole matrix
-                  if ~all(size(obj.valuesAll) == size(b))
-                     error('Subscripted assignment dimension mismatch!')
-                  else
-                     obj.valuesAll = b;
-                  end   
-               end   
-            else   
-               obj = builtin('subsasgn', obj, s, b);
-            end   
-         end
-      end
-
-      function varargout = subset(obj, varargin)
-      % 'subset' returns a subset of the data set
-      %
-
-         % set default settings
-         if nargin == 1
-         % no indices   
-            col_ind = ':';
-            row_ind = ':';
-         elseif nargin == 2
-         % only one index   
-            if obj.nRows == 1
-               row_ind = 1;
-               col_ind = varargin{1};
-            elseif obj.nCols == 1
-               col_ind = 1;
-               row_ind = varargin{1};
-            else
-               error('Wrong indices for rows and columns!')
-            end   
-         else
-            row_ind = varargin{1};
-            col_ind = varargin{2};
-         end
-         
-         if ischar(row_ind) && strcmp(row_ind, ':')
-            % subset with all rows - with excluded rows   
-            col_ind = getfullcolind(obj, col_ind);            
-            row_ind = 1:obj.nRowsAll;            
-            values = obj.valuesAll;
-            
-            svalues = values(:, col_ind);
-            scolNames = obj.colNamesAll(col_ind);
-            scolFullNames = obj.colFullNamesAll(col_ind);
-            srowNames = obj.rowNamesAll;
-            srowFullNames = obj.rowFullNamesAll;
-            sexcludedRows = find(obj.excludedRows);
-            sexcludedCols = [];
-            sselectedRows = obj.selectedRows;
-            sselectedCols = [];
-            
-         elseif ischar(col_ind) && strcmp(col_ind, ':')
-            % subset with all cols - with excluded cols  
-            col_ind = 1:obj.nColsAll;            
-            row_ind = getfullrowind(obj, row_ind);            
-            values = obj.valuesAll;
-            
-            svalues = values(row_ind, :);
-            scolNames = obj.colNamesAll;
-            scolFullNames = obj.colFullNamesAll;
-            sexcludedCols = find(obj.excludedCols);
-            sexcludedRows = [];
-            
-            sselectedRows = [];
-            sselectedCols = obj.selectedCols;
-            
-            if ~isempty(obj.rowNamesAll)
-               srowNames = obj.rowNamesAll(row_ind);
-            else
-               srowNames = {};
-            end
-            
-            if ~isempty(obj.rowFullNamesAll)
-               srowFullNames = obj.rowFullNamesAll(row_ind);
-            else
-               srowFullNames = {};
-            end               
-         else
-            % partial subset for both rows and cols - no excluded data    
-            values = obj.valuesAll;
-            col_ind = getfullcolind(obj, col_ind);   
-            row_ind = getfullrowind(obj, row_ind);            
-            
-            svalues = values(row_ind, col_ind);
-            scolNames = obj.colNamesAll(col_ind);
-            if ~isempty(obj.colFullNamesAll)
-               scolFullNames = obj.colFullNamesAll(col_ind);
-            else
-               scolFullNames = [];
-            end   
-            sexcludedRows = [];
-            sexcludedCols = [];
-            sselectedRows = [];
-            sselectedCols = [];
-            
-            if ~isempty(obj.rowNamesAll)
-               srowNames = obj.rowNamesAll(row_ind);
-            else
-               srowNames = {};
-            end
-            
-            if ~isempty(obj.rowFullNamesAll)
-               srowFullNames = obj.rowFullNamesAll(row_ind);
-            else
-               srowFullNames = {};
-            end                           
-         end
-         
-         data = mdadata(svalues, srowNames, scolNames, obj.dimNames, obj.name);
-         data.info = obj.info;
-         data.colFullNames = scolFullNames;
-         data.rowFullNames = srowFullNames;
-         objFactorCols = col_ind(ismember(col_ind, find(obj.factorCols)));
-         dataFactorCols = find(obj.factorCols(col_ind));
-                  
-         for i = 1:numel(dataFactorCols)
-            objLevels = unique(values(:, objFactorCols(i)));
-            dataLevels = unique(svalues(:, dataFactorCols(i)));
-            
-            levels = obj.factorLevelNames{objFactorCols(i)}(ismember(objLevels, dataLevels));
-            
-            data.factorCols(dataFactorCols(i)) = true;            
-            data.factorLevelNames{dataFactorCols(i)} = levels;
-         end
-         
-         data.excludecols(sexcludedCols);
-         data.excluderows(sexcludedRows);
-
-         data.showExcludedRows = obj.showExcludedRows;
-         data.showExcludedCols = obj.showExcludedCols;
-         data.selectedRows = sselectedRows;
-         data.selectedCols = sselectedCols;
-         
-         varargout{1} = data;
-      end   
-      
-      %%% conventional plots
-            
-      function varargout = densscatter(obj, varargin)
-      % 'densscatter' makes a density scatter plot for 'mdadata' object.
-      %
-      % Density scatter plot looks like a normal scatter plot where data points
-      % are colored by their density - how many other data points are around.
-      %
-      % Parameters:
-      % -----------
-      % The syntax and parameters are similar to 'mdadata.scatter' The
-      % additional parameters are:
-      %  
-      %  "NBins" - number of sections to split every axis of the plotting 
-      %  area into. E.g. if it is 100, the XY plane will be split to 100x100
-      %  sections and density of each section will be calculated.
-      %  
-      %  "Colormap" - which colormap to use for color separation. By default
-      %  a built in palette based on colorbrewer 2 colors is used. Any
-      %  Matlab colormap can be used ('@jet', '@spring', etc).
-      %
-      %
-      % Examples:
-      % ---------
-      % 
-      %   d = mdadata(randn(10000, 2));
-      %
-      %   figure
-      %   subplot(1, 2, 1)
-      %   densscatter(d)
-      %   subplot(1, 2, 2)
-      %   densscatter(d, 'NBins', 20, 'Colormap', @parula)
-      %
-      %
-      
-         % check if values for colorbar are provided
-         [isColorbar, varargin] = getarg(varargin, 'Colorbar');
-         if ~(isempty(isColorbar) && strcmp(isColorbar, 'on'))
-            varargin = [varargin, {'Colorbar', 'off'}];
-         end
-         
-         [nbins, varargin] = getarg(varargin, 'NBins');
-         if isempty(nbins)
-            nbins = 80;
-         end   
-         
-         [mec, varargin] = getarg(varargin, 'MarkerEdgeColor');
-         if isempty(mec)
-            mec = 'none';
-         end
-         
-         if size(obj.numValues, 2) ~= 2
-            error('Specify for which two columns you want to make the plot for!')
-         end
-
-         values = obj.numValues;
-         x = values(:, 1);
-         y = values(:, 2);
-         nanind = isnan(x) | isnan(y);
-         x(nanind) = [];
-         y(nanind) = [];
-         
-         d = mdadata.getsampledensity(x, y, nbins);
-        
-         % remove Color argument if provided
-         [~, varargin] = getarg(varargin, 'Color');
-
-         varargin = [varargin {'Colorby', d, 'MarkerEdgeColor', mec, 'Density', 'on'}];
-         h = obj.scatter(varargin{:});
-
-         if nargout
-            varargout{1} = h;
-         end
-      end
-      
-      function varargout = levelplot(obj, varargin)
-      % 'levelplot' makes a level plot for dataset values.
-      %
-      %   levelplot(data);
-      %
-      %
-      % The method visualises a matrix of values from the dataset as a set of
-      % rectangles (levels), oriented the same way as values in the matrix. 
-      % Color of each rectangle corresponds to the value. This can be particularly
-      % useful for comparison of the same factors obtained at different
-      % conditions or for different groups (e.g. average values for males and
-      % females) or pairwise comparison (e.g. covariance or correlation
-      % matrices).
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %   
-      %   figure
-      %   levelplot(corr(people(:, 1:6)))
-      %
-      %   figure
-      %   levelplot(corr(people(:, 1:6)))
-      %   colormap('winter')
-      %   colorbar
-      %
-      
-         if ~ishold
-            cla;
-         end
-      
-         h = imagesc(obj.numValues);
-         set(gca, 'XTick', 1:obj.nNumCols, 'XTickLabel', obj.colNamesWithoutFactors);
-         
-         if ~isempty(obj.rowNames)
-            set(gca, 'YTick', 1:obj.nRows, 'YTickLabel', obj.rowNames);
-         end
-         
-         [cmap, ~] = getarg(varargin, 'Colormap');
-         if ~isempty(cmap)
-            colormap(cmap(64))
-         else   
-            colormap(mdadata.getmycolors())
-         end
-         
-         title(obj.name);
-         
-         if ~isempty(obj.dimNames) && numel(obj.dimNames) == 2
-            xlabel(obj.dimNames{2})
-            ylabel(obj.dimNames{1})
-         end
-         
-         if nargout > 0
-            varargout{1} = h;
-         end   
-         
-      end
-
-      function varargout = matrixplot(obj, varargin)
-      % 'matrixplot' makes a 3D plot for dataset values.
-      %
-      %   matrixplot(data);
-      %
-      %
-      % The method shows a matrix of values from the dataset as a 3D surface 
-      % with color identication of the surfacce levels.
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %   
-      %   figure
-      %   matrixplot(people(1:8, {'Height', 'Weight', 'Beer', 'Wine'}))
-      %
-      %
-
-         if ~ishold
-            cla;
-         end
-            
-         h = mesh(obj.numValues);
-         set(gca, 'XTick', 1:obj.nNumCols, 'XTickLabel', obj.colNamesWithoutFactors);
-         if ~isempty(obj.rowNames)
-            set(gca, 'YTick', 1:obj.nRows, 'YTickLabel', obj.rowNames);
-         end
-         [cmap, ~] = getarg(varargin, 'Colormap');
-         if ~isempty(cmap)
-            colormap(cmap(64))
-         else   
-            colormap(mdadata.getmycolors())
-         end
-         
-         view(45, 45)
-         title(obj.name);
-         
-         if ~isempty(obj.dimNames) && numel(obj.dimNames) == 2
-            xlabel(obj.dimNames{2})
-            ylabel(obj.dimNames{1})
-         end
-         
-         if nargout > 0
-            varargout{1} = h;
-         end   
-         
-      end
-      
-      %%% group plots
-      
-      function varargout = gbar(obj, varargin)
-      % 'gbar' makes a group bar plot 
-      %
-      %   gbar(data)
-      %   gbar(data, 'ParamName', ParamValue, ...)
-      %
-      %
-      % The method makes a bar plot for two or more data rows considered as 
-      % groups. By default, each group has its own color. 
-      %
-      % Parameters:
-      % -----------
-      %  "Labels" - show or not labels for the bars. Possible
-      %  values are "none" (default), "names" for name of objects, "numbers"
-      %  for their numbers and "values" for the bar values (height). This 
-      %  option does not work with HG2 graphics engine (Matlab 2014b), the 
-      %  solution is coming in next release.
-      %  
-      %  "LabelsSigfig" - how many significant figures to use for the label values.
-      %
-      %  "Legend" - shor or nor legend for the groups. Possible values are
-      %  "on" (default) and "off".
-      %
-      %  "LegendLocation" - if legend is on, defines location for the legend. 
-      %  The values are similar to what are used in 'legend()' function.
-      %
-      %  "EdgeColor" - one value or a vector with values (one for each group) 
-      %  for the bar edge color. If color is specified using RGB values, the
-      %  parameter should be a matrix with as many rows as many groups
-      %  exist.
-      %
-      %  "FaceColor" - one value or a vector with values (one for each group) 
-      %  for the bar face color. If color is specified using RGB values, the
-      %  parameter should be a matrix with as many rows as many groups
-      %  exist.
-      %
-      %
-      % Examples:
-      % ---------
-      %     
-      %   % prepare a dataset
-      %   v = [75 40 32; 68 35 31];
-      %   data = mdadata(v, {'Cal', 'Val'}, {'PC1', 'PC2', 'PC3'},...
-      %     {'Explained variance', 'Components'}, 'Explained variance');
-      %   
-      %   % group plot without factors
-      %   figure
-      %   subplot(1, 2, 1)
-      %   gbar(data)
-      %   
-      %   subplot(1, 2, 2)
-      %   gbar(data, 'FaceColor', 'rb', 'Labels', 'on', 'LegendLocation', 'best')
-      %
-      
-         if ~ishold
-            cla;
-         end
-         
-         nGroups = obj.nRows;
-         
-         bw = getarg(varargin, 'BarWidth');
-         if isempty(bw)
-            varargin = [varargin 'BarWidth', 0.75];
-         else
-            varargin = [varargin 'BarWidth', bw];            
-         end   
-
-         % check color settings            
-         [fc, varargin] = getarg(varargin, 'FaceColor');
-         if isempty(fc)
-            fc = mdadata.getmycolors(nGroups);
-         else
-            if isnumeric(fc)
-               nfc = size(fc, 1);
-            else
-               nfc = numel(fc);
-               if size(fc, 2) > size(fc, 1)
-                  fc = fc';
-               end   
-            end
-            
-            if nfc ~= nGroups
-               error('Number of colors in "FaceColor" should be the same as number of groups!');
-            end   
-         end   
-
-         [ec, varargin] = getarg(varargin, 'EdgeColor');
-         if isempty(ec)
-            ec = repmat('none', nGroups, 1);
-         else
-            if isnumeric(ec)
-            % color is an array with numbers
-               nec = size(ec, 1);
-            else
-            % color is a vector with symbols   
-               nec = numel(ec);
-               if size(ec, 2) > size(ec, 1)
-                  ec = ec';
-               end                  
-            end
-            
-            if nec ~= nGroups || nec == 1
-               error('Number of colors in "EdgeColor" should be one or the same as number of groups!');
-            end               
-         end   
-         
-         % get values
-         values = obj.numValues;
-         x = 1:obj.nNumCols;
-         if numel(x) < 12
-            xtick = x;
-         else
-            xtick = unique(round(linspace(1, numel(x), 12)));
-         end
-         
-         % check other parameters
-         [sigfig, varargin] = getarg(varargin, 'LabelsSigfig');
-         if isempty(sigfig) || ~isnumeric(sigfig) || sigfig < 1 || sigfig > 10
-            sigfig = 3;
-         end
-         
-         [showLabels, varargin] = getarg(varargin, 'Labels');
-         if strcmp(showLabels, 'names')
-            labels = repmat(obj.colNamesWithoutFactors, obj.nRows, 1);
-         elseif strcmp(showLabels, 'numbers')
-            labels = repmat(textgen('', 1:numel(obj.colNamesWithoutFactors)), obj.nRows, 1);
-         elseif strcmp(showLabels, 'values')
-            labels = cell(obj.nRows, obj.nNumCols);
-            for i = 1:obj.nRows               
-               labels(i, :) = cellstr(num2str(values(i, :)', sigfig))';
-            end   
-         else   
-            labels = [];            
-         end
-                           
-         isNaN = false;
-         if size(values, 2) == 1
-            values = [values, nan(size(values))];
-            isNaN = true;
-         end
-         h = bar(values', 0.98, 'grouped', varargin{:}); 
-         
-         for i = 1:numel(h)            
-            set(h(i), 'FaceColor', fc(i, :), 'EdgeColor', ec(i, :));
-            xl = get(get(h(i), 'Children'), 'XData');
-            if ~isempty(labels) && ~isempty(xl) 
-               % 2014a or older
-               % TODO: find solution for HG2 (2014b) 
-                  mdadata.showlabels((xl(3, :) + xl(1, :)) / 2, values(i, :), ...
-                     labels(i, :), 'top');
-            end            
-         end   
-         
-         set(gca, 'XTick', xtick, 'XTickLabel', obj.colNamesWithoutFactors(xtick));
-         xlabel(obj.dimNames{2})            
-         ylabel('')                     
-         title(obj.name);            
-         box on
-         axis auto
-         
-         
-         if obj.nRows > 1
-            legend(obj.rowNames, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
-         end
-         
-         if strcmp(get(gca, 'NextPlot'), 'replace')
-            if showLabels
-               correctaxislim([3 3 0 10]);
-            else
-               correctaxislim([3 3 0 5]);
-            end
-         end
-         
-         if isNaN
-            xlim([0 2]);
-         end
-         
-         if nargout > 0
-            varargout{1} = h;
-         end   
-      end   
-            
-      
-      %%% statistic plots
-      
-      function varargout = hist(obj, varargin)
-      % 'hist' makes a histogram plot for selected columns of dataset.
-      %
-      %   hist(data);
-      %   hist(data, nbins);
-      %   hist(data, 'ParamName', ParamValue, ...);
-      %   
-      %   hist(data, factors);
-      %   hist(data, factors, nbins);
-      %   hist(data, factors, 'ParamName', ParamValue, ...);
-      %
-      %
-      % The function returns a structure with plot elements (plot handle,
-      % labels handle, etc). If dataset has more than one column, the method 
-      % will make a plot for the first column only.
-      % 
-      % Optional argument "factors" is a dataset with qualitative variables
-      % (factors) used to split values to groups and show distribution
-      % histogram separately for each group on the same axis.
-      %
-      % Parameters:
-      % -----------
-      % All parameters for Matlab's 'bar()' function will work. Optinally the second 
-      % parameter (after dataset) is either number of bins or a vector with bin
-      % intervals like in original 'hist()' function. Extra parameters are shown below.
-      %
-      %  "Density" - calculate density instead of frequency. Possible
-      %  values are "on" and "off" (default).
-      %
-      %  "ShowNormal" - shows a curve with normal theoretical normal distribution.
-      %  Possible values are "on" and "off" (default). 
-      % 
-      %  "Labels" - show or not labels for the histogram bars. Possible
-      %  values are "on" and "off" (default). If "on", the values will be shown on 
-      %  top of each bar.
-      %
-      %  "FaceColor" - the parameter is similar to the one for bar plot, however if 
-      %  factors are used it should have a value for each group, made by combination 
-      %  of the factors.
-      %
-      %  "EdgeColor" - the parameter is similar to the one for bar plot, however if 
-      %  factors are used it should have a value for each group, made by combination 
-      %  of the factors.
-      %
-      %  "Color" - color of normal probability curve (if used), if factors are used it 
-      %  should have a value for each group, made by combination of the factors.
-      %
-      %  "FaceAlpha" - transparency of the bars, a value between 0 (fully transparent) 
-      %  and 1 (not transparent). Default value is 0.5.
-      %
-      %  "LineWidth" - line thickness of normal probability curve (if used), default is 2.
-      %
-      %  "LineStyle" - line style of normal probability curve (if used), default is "-".
-      %
-      %
-      % Examples:
-      % ---------
-      %
-      %   load people
-      %
-      %   % show historgram for particular column
-      %   figure
-      %   hist(people(:, 'IQ'), 'EdgeColor', 'c')
-      %   
-      %   % show histogram for first column
-      %   hist(people, 'Density', 'on', 'ShowNormal', 'on')
-      %
-      %   % make a factor and show histogram for groups
-      %   people.factor('Sex', {'M', 'F'});
-      %   figure
-      %   hist(people(:, 'Height'), people(:, 'Sex'), 'ShowNormal', 'on');
-      %
-      %
-
-         if ~ishold
-            cla;
-         end
-      
-         % check arguments for groups and nbins
-         if nargin == 1
-            groups = [];
-            nbins = 0;
-         elseif nargin >= 2 
-            if isa(varargin{1}, 'mdadata') 
-               groups = varargin{1};
-               if nargin > 2 && isnumeric(varargin{2}) 
-                  nbins = varargin{2};
-                  varargin(2) = []; 
-               else   
-                  nbins = 0;
-               end
-               varargin(1) = []; 
-            else
-               groups = [];
-               if isnumeric(varargin{1}) 
-                  nbins = varargin{1};
-                  varargin(1) = []; 
-               else
-                  nbins = 0;
-               end
-            end               
-         end
-
-         if ~isempty(groups)
-            groups = groups.getgroups();
-            nGroups = groups.nCols;
-         else
-            nGroups = 1;            
-         end
-         
-         values = obj.numValues(:, 1);
-                  
-         % check color settings
-         [fa, varargin] = getarg(varargin, 'FaceAlpha');
-         if isempty(fa)
-            fa = 0.4;
-         end
-            
-         [fc, varargin] = getarg(varargin, 'FaceColor');
-         if isempty(fc)
-            fc = mdadata.getmycolors(nGroups);
-         else
-            if isnumeric(fc)
-               nfc = size(fc, 1);
-            else
-               nfc = numel(fc);
-               if size(fc, 2) > size(fc, 1)
-                  fc = fc';
-               end   
-            end
-            
-            if nfc ~= nGroups
-               error('Number of colors in "FaceColor" should be the same as number of groups!');
-            end   
-         end   
-         
-         [ec, varargin] = getarg(varargin, 'EdgeColor');
-         if isempty(ec)
-            ec = repmat('none', nGroups, 1);
-         else
-            if isnumeric(ec)
-            % color is an array with numbers
-               nec = size(ec, 1);
-            else
-            % color is a vector with symbols   
-               nec = numel(ec);
-               if size(ec, 2) > size(ec, 1)
-                  ec = ec';
-               end                  
-            end
-            
-            if nec ~= nGroups || nec ~= 1
-               error('Number of colors in "EdgeColor" should be one or the same as number of groups!');
-            end               
-         end   
-         
-         [lc, varargin] = getarg(varargin, 'Color');
-         if isempty(lc)
-            lc = fc;
-         else
-            if isnumeric(lc)
-               nlc = size(lc, 1);
-            else
-               nlc = numel(lc);
-               if size(lc, 2) > size(lc, 1)
-                  lc = lc';
-               end                                 
-            end
-            
-            if nlc ~= nGroups
-               error('Number of colors in "Color" should be the same as number of groups!');
-            end               
-         end   
-
-         % check line parameters
-         [lw, varargin] = getarg(varargin, 'LineWidth');
-         if isempty(lw) 
-            lw = 2;
-         end
-         
-         [ls, varargin] = getarg(varargin, 'LineStyle');
-         if isempty(ls) 
-            ls = '-';
-         end
-         
-         % check if showing normal distribution is needed
-         [v, varargin] = getarg(varargin, 'ShowNormal');
-         if ~isempty(v) && strcmp(v, 'on')
-            showNormal = true;
-         else
-            showNormal = false;
-         end
-         
-         % check what to show - frequency or density
-         [v, varargin] = getarg(varargin, 'Density');
-         if ~isempty(v) && strcmp(v, 'on')
-            showDensity = true;
-            ylabelStr = 'Density';
-         else
-            showDensity = false;
-            ylabelStr = 'Frequencies';
-         end
-         
-         % check if labels to show
-         [v, varargin] = getarg(varargin, 'Labels');
-         if ~isempty(v) && strcmp(v, 'on')
-            showLabels = true;
-         else
-            showLabels = false;
-         end
-         
-         % in 2014b bar has no children, transparency will not work
-         showTransparent = true;
-         hg2 = false;
-         if ~verLessThan('matlab', '8.4')
-            hg2 = true;
-         end   
-            
-         isShowNormal = false;
-         
-            
-         hb = cell(nGroups, 1);
-         xlim = [];
-         hold on
-         for nGroup = 1:nGroups
-            if nGroups > 1
-               v = values(groups.values(:, nGroup) == 1, 1);
-            else
-               v = values(:, 1);
-            end
-
-            if nbins > 0
-               [y, x] = hist(v, nbins);
-            else   
-               [y, x] = hist(v);
-            end
-
-            if isempty(xlim)
-               xlim = [min(x) max(x)];
-            else   
-               if xlim(1) > min(x)
-                  xlim(1) = min(x);
-               end
-
-               if xlim(2) < max(x);
-                  xlim(2) = max(x);
-               end   
-            end
-
-            % calculate x and y values for normal curve
-            if showNormal == true;               
-               m = mean(v);
-               s2 = var(v);
-               mnx = min(v);
-               mxx = max(v);
-               dx = (mxx - mnx)/20;
-               if mnx < mxx
-                  nx = linspace(mnx - dx, mxx + dx, 100);
-                  ny = 1/sqrt(2 * pi * s2) * exp( - (nx - m).^2 / (2 * s2) );      
-                  isShowNormal = true;
-               else
-                  isShowNormal = false;
-               end                  
-            end
-
-            % amend y values for density/frequency case
-            if showDensity
-               y = y/sum(y)/(x(2) - x(1));
-            else
-               if isShowNormal
-                  ny = ny * sum(y) * (x(2) - x(1));
-               end     
-            end
-
-            % set up values for labels
-
-            % show plot and set transparency
-            hb{nGroup} = bar(double(x), double(y), 0.98, 'FaceColor', fc(nGroup, :), ...
-               'EdgeColor', ec(nGroup, :), varargin{:});   
-            if showTransparent
-               if hg2
-                  % TODO: fix HG2 transparancy
-                  % hb{nGroup}.Face.ColorType = 'truecoloralpha';
-                  % hb{nGroup}.Face.ColorData = uint8(255 * [fc(nGroup, :) fa]');
-               else   
-                  hp = arrayfun(@(x) allchild(x), double(hb{nGroup}));
-                  set(hp, 'FaceAlpha', fa);               
-               end   
-            end
-
-            if isShowNormal
-              plot(nx, ny, 'Color', lc(nGroup, :), 'LineWidth', lw, 'LineStyle', ls); 
-            end   
-
-            if showLabels
-               labels = strsplit(num2str(y, 3), ' ');
-               mdadata.showlabels(x, y, labels, 'top');
-            end
-         end
-         
-         hold off   
-         xlabel(obj.colFullNamesWithoutFactors{1})
-         ylabel(ylabelStr)         
-         title(obj.name)
-         box on               
-
-         % correct limits
-         if strcmp(get(gca, 'NextPlot'), 'replace')
-            correctaxislim([5 5 0.01 5], xlim);
-         end
-         
-         if nGroups > 1
-            % show legend and set transparancy for legend items
-            hl = legend([hb{:}], groups.colFullNamesWithoutFactors, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
-            c = get(hl, 'Children');
-            hp = arrayfun(@(x) allchild(x), c(1:2:end));
-            set(hp, 'FaceAlpha', fa);                              
-         end
-         
-         if nargout > 0
-            varargout{1} = [];
-         end   
-
-      end
-      
-      function varargout = errorbar(obj, varargin)
-      % 'errorbar' makes an error bar plot for dataset columns
-      %
-      %   errobar(data);
-      %   errorbar(data, 'ParamName', ParamValue, ...);
-      %   
-      %   errobar(data, factors);
-      %   errorbar(data, factors, 'ParamName', ParamValue, ...);
-      %
-      %
-      % The method is similar to standard 'errorbar()' function, however 
-      % all statistic are caclulated automatically, only dataset with original
-      % values should be provided.
-      %
-      % Optional argument "factors" is a dataset with qualitative variables
-      % (factors) used to split data values into groups and show error bars
-      % separately for each group on the same axis. In this case one plot
-      % will be made only for the first column of data.
-      %
-      % Parameters:
-      % ------------
-      % All parameters for Matlab's 'plot()' function (e.g. "Color", etc.)
-      % can be used. Additional parameters are:
-      %
-      %  "Type" - how to calculate size of the error bars. By default ("ci") 
-      %  error bars shows confidence interval for mean values. This can be
-      %  changed to: "se" to show standard error, or to "sd" to show standard
-      %  deviation. Both can be combined with 'Alpha' parameter, see
-      %  examples below.
-      %
-      %  "Alpha" - significance level, a value between 0 and 1.
-      %
-      %
-      % Examples:
-      % ---------
-      %   
-      %   load people
-      %   people.removecols('Income');
-      %
-      %   % show average and 95% confidence intervals
-      %   figure
-      %   errorbar(people)
-      %
-      %   % show average and 90% confidence intervals
-      %   figure
-      %   errorbar(people, 'Alpha', 0.1)
-      %
-      %   % show average +/- standard error
-      %   figure
-      %   errorbar(people, 'Type', 'se')
-      %
-      %   % show average +/- standard deviation
-      %   figure
-      %   errorbar(people, 'Type', 'sd')
-      %
-      %   % show average and 95% of most common values (+/- 1.96 sd)
-      %   figure
-      %   errorbar(people, 'Type', 'sd', 'Alpha', 0.05)
-      %
-      %   % confidence intervals for groups
-      %   people.factor('Sex', {'Male', 'Female'});
-      %   figure
-      %   errorbar(people(:, {'Height', 'Weight'}), people(:, 'Sex'))
-      %
-         
-         if ~ishold
-            cla;
-         end
-
-         % check if factors are provided and generate groups
-         if nargin > 1 && isa(varargin{1}, 'mdadata')
-            groups = varargin{1};
-            varargin(1) = [];
-            groups = groups.getgroups();
-            nGroups = groups.nCols;
-         else
-            groups = [];
-            nGroups = 1;
-            m = mean(obj);
-         end
-         
-         [type, varargin] = getarg(varargin, 'Type');
-         if isempty(type)
-            type = 'ci';            
-         end
-         
-         [alpha, varargin] = getarg(varargin, 'Alpha');
-         if isempty(alpha)
-            if strcmp(type, 'ci') 
-               type = 'se';
-               alpha = 0.05;
-               t = [];
-            else
-               t = 1;
-            end   
-         else
-            if strcmp(type, 'ci') 
-               type = 'se';
-            end   
-            t = [];
-         end
-
-         if isempty(find(strcmp(varargin, 'LineStyle'), 1))
-            varargin = [{'LineStyle', 'none'} varargin];
-         end   
-         
-         if isempty(find(strcmp(varargin, 'Marker'), 1))
-            varargin = [{'Marker', '.'} varargin];
-            if isempty(find(strcmp(varargin, 'MarkerSize'), 1))
-               varargin = [{'MarkerSize', 18} varargin];
-            end   
-         end   
-         
-         if isempty(find(strcmp(varargin, 'Color'), 1))
-            varargin = [{'Color', mdadata.getmycolors(1)} varargin];
-         end   
-         
-         values = obj.numValues(:, 1);
-         
-         % calculate error margin and mean values         
-         if strcmp(type, 'se')
-            if t == 1
-               titlestr = '(std. error)';
-            else
-               titlestr = sprintf('(%.0f%% conf. int)', (1 - alpha) * 100);
-            end   
-            
-            if nGroups == 1
-               if isempty(t)
-                  t = mdatinv(1 - alpha/2, obj.nRows - 1);
-               end   
-               err = se(obj) * t;
-            else
-               err = zeros(1, nGroups);
-               m = zeros(1, nGroups);
-               for nGroup = 1:nGroups
-                  ind = groups.values(:, nGroup) == 1;
-                  if isempty(t)
-                     t = mdatinv(1 - alpha/2, sum(ind) - 1);
-                  end   
-                  m(nGroup) = mean(values(ind, 1));
-                  err(nGroup) = mdase(values(ind, 1)) * t;
-               end   
-               m = mdadata(m, obj.colNamesWithoutFactors(1), groups.colNames);
-               err = mdadata(err, obj.colNamesWithoutFactors(1), groups.colNames);               
-               err.colFullNames = groups.colFullNames;
-               err.rowFullNames = obj.colFullNamesWithoutFactors(1);
-            end   
-         else
-            if t == 1
-               titlestr = '(std)';
-            else
-               titlestr = sprintf('(%.0f%% interval)', (1 - alpha) * 100);
-            end   
-            
-            if nGroups == 1
-               if isempty(t)
-                  t = mdatinv(1 - alpha/2, obj.nRows - 1);
-               end   
-               err = std(obj) * t;
-            else
-               err = zeros(1, nGroups);
-               m = zeros(1, nGroups);
-               for nGroup = 1:nGroups
-                  ind = groups.values(:, nGroup) == 1;
-                  if isempty(t)
-                     t = mdatinv(1 - alpha/2, sum(ind) - 1);
-                  end   
-                  m(nGroup) = mean(values(ind, 1));                     
-                  err(nGroup) = std(values(ind, 1)) * t;
-               end   
-               m = mdadata(m, obj.colNamesWithoutFactors(1), groups.colNames);
-               err = mdadata(err, obj.colNamesWithoutFactors(1), groups.colNames);               
-               err.colFullNames = groups.colFullNames;
-               err.rowFullNames = obj.colFullNamesWithoutFactors(1);
-            end   
-         end   
-                              
-         x = 1:err.nCols;
-         xticklabel = err.colFullNames;
- 
-         if numel(x) < 12
-            xtick = x;
-         else
-            xtick = unique(round(linspace(1, numel(x), 12)));
-         end
-            
-         h = errorbar(x, m.values, err.values, varargin{:});
-                    
-         if ~isempty(xticklabel)
-            set(gca, 'XTick', xtick, 'XTickLabel', xticklabel(xtick));
-         end
-         
-         % correct axis limits
-         if strcmp(get(gca, 'NextPlot'), 'replace')
-            correctaxislim(5, [min(x) max(x)]);
-         end
-            
-         if nGroups == 1
-            xlabel(obj.dimNames{2})         
-            ylabel('')    
-            title([obj.name ' ' titlestr])
-         else
-            xlabel(groups.dimNames{2})
-            ylabel(err.rowFullNames{1})    
-            title([err.rowFullNames{1} ' ' titlestr])
-         end
-         
-         box on
-         
-         if nargout > 0
-            varargout{1} = h;
-         end            
-      end
-      
-      function varargout = boxplot(obj, varargin)
-      % 'boxplot' makes a box and whiskers plot for dataset columns
-      %
-      %   boxplot(data);
-      %   boxplot(data, 'ParamName', ParamValue, ...);
-      %
-      %   boxplot(data, factors);
-      %   boxplot(data, factors, 'ParamName', ParamValue, ...);
-      %
-      %
-      % Optional argument "factors" is a dataset with qualitative variables
-      % (factors) used to split data values into groups and show box and
-      % whiskers separately for each group on the same axis. In this case the 
-      % plot will be made only for the first column of data.
-      %
-      % Parameters:
-      % ------------
-      %
-      %  "Whisker" - a factor 'w' that influences length of the whiskers. 
-      %  The whiskers correspond to max and min values, after removing 
-      %  outliers. The default value for w is 1.5, which corresponds 
-      %  to 2.7 std interval (99.3% of most common values) if values are 
-      %  normally distributed. 
-      %
-      %  "Labels" - show or not labels for outliers. Possible values are 
-      %  "none" (default), "names" for name of objects and "numbers"
-      %  for their numbers. 
-      %
-      %
-      % Examples:
-      % ---------
-      %   
-      %   load people
-      %   
-      %   % normal box plot for columns
-      %   figure
-      %   boxplot(people(:, {'Height', 'Weight', 'Swim'}));
-      %
-      %   % box plot for groups
-      %   people.factor('Sex', {'Male', 'Female'})
-      %   figure
-      %   boxplot(people(:, {'Height', 'Weight'}), people(:, 'Sex'), 'Labels', 'on')
-      %
-
-         if ~ishold
-            cla;
-         end
-            
-         values = obj.numValues;
-         
-         % check if factors are provided and generate groups
-         if nargin > 1 && isa(varargin{1}, 'mdadata')
-            groups = varargin{1};
-            varargin(1) = [];
-            groups = groups.getgroups();
-            nGroups = groups.nCols;
-         else
-            groups = [];
-            nGroups = 1;
-         end
-                  
-         % set up length of whiskers
-         [w, varargin] = getarg(varargin, 'Whisker');
-         if isempty(w)
-            w = 1.5;
-         end
-
-         % set up colors
-         c = mdadata.getmycolors(2);
-         [bc, varargin] = getarg(varargin, 'EdgeColor');
-         if isempty(bc)
-            bc = c(1, :);
-         end
-         
-         [mc, varargin] = getarg(varargin, 'Color');
-         if isempty(mc)
-            mc = c(2, :);
-         end
-
-         rowNames = obj.rowFullNames ;
-         colNames = obj.colFullNamesWithoutFactors;
-         
-         % check if labels to show
-         [showLabels, ~] = getarg(varargin, 'Labels');
-         if strcmp(showLabels, 'names')
-            labels = rowNames;
-         elseif strcmp(showLabels, 'numbers')
-            labels = textgen('', 1:numel(rowNames));
-         else
-            labels = [];            
-         end
-                
-         % calculate number of boxes (n) and generate x, xticklabels
-         if nGroups == 1
-            n = obj.nNumCols;
-            x = 1:n;         
-            xticklabel = colNames;
-            m = mean(values);
-         else
-            n = groups.nCols;
-            x = 1:n;
-            xticklabel = groups.colFullNames;
-         end
-         
-         % correct number of ticks
-         if numel(x) < 12
-            xtick = x;
-         else
-            xtick = unique(round(linspace(1, numel(x), 12)));
-         end
-         
-         % calculate width of boxes and limits
-         if n > 1
-            boxWidth = (max(x) - min(x)) / n * 0.75;
-            lims = [1 20];
-         else
-            boxWidth = 1;
-            lims = [50 10];
-         end   
-            
-         outX = [];
-         outY = [];
-         outLabels = [];
-            
-         % loop for plotting boxes and whiskers
-         hold on
-         for i = 1:n
-            if nGroups == 1
-               v = values(:, i);
-            else
-               ind = groups.values(:, i) == 1;
-               v = values(ind, 1);
-               if ~isempty(obj.rowFullNames)
-                  rowNames = obj.rowFullNames(ind);
-               else
-                  rowNames = [];
-               end
-               
-               m (i) = mean(v);
-            end   
-               
-            % calculate quartiles and limits
-            q1 = mdapercentile(v, 25);
-            q2 = mdapercentile(v, 50);
-            q3 = mdapercentile(v, 75);
-            h = q3 - q1;
-            up = q3 + h * w;
-            low = q1 - h * w;
-               
-            % show box
-            if abs(h) > 0
-               rectangle('Position', [x(i) - boxWidth/2, q1, boxWidth, h], 'EdgeColor', bc)
-            end   
-            line([x(i) - boxWidth/2, x(i) + boxWidth/2], [q2 q2], 'Color', mc);
-            
-            % detect outliers
-            outind = v < low | v > up;
-            outY = [outY; v(outind)];
-            outX = [outX; x(i) * ones(sum(outind), 1)];
-               
-            if ~isempty(labels)
-               outLabels = [outLabels; labels(outind)];            
-            end
-               
-            % show whiskers
-            mn = min(v(~outind));            
-            line([x(i), x(i)], [mn, q1], 'Color', bc);
-            line([x(i) - boxWidth/2, x(i) + boxWidth/2], [mn mn], 'Color', bc);
-
-            mx = max(v(~outind));
-            line([x(i), x(i)], [q3 mx], 'Color', bc);
-            line([x(i) - boxWidth/2, x(i) + boxWidth/2], [mx mx], 'Color', bc);            
-         end
-            
-         % plot outliers and average values
-         if ~isempty(outX)
-            scatter(double(outX), double(outY), 'x', 'MarkerEdgeColor', bc)            
-         end   
-         plot(x, m, '.', 'Color', mc, 'LineStyle', 'none');
-         hold off
-         
-         if ~isempty(labels)
-            mdadata.showlabels(outX, outY, outLabels, 'right');
-         end   
-         
-         if ~isempty(xticklabel)
-            set(gca, 'XTick', xtick, 'XTickLabel', xticklabel(xtick));
-         end
-         
-         if nGroups == 1
-            xlabel(obj.dimNames{2})         
-            ylabel('')    
-            title(obj.name)
-         else
-            xlabel(groups.dimNames{2})
-            ylabel(colNames{1})
-            title(obj.name)
-         end
-         
-         box on
-         if strcmp(get(gca, 'NextPlot'), 'replace')
-            correctaxislim([5 5 0.01 5], [min(x) - boxWidth/1.8 max(x) + boxWidth / 1.8]);
-         end
-         
-         if nargout > 0
-            varargout{1} = h;
-         end            
-      end
-      
-      %%% sort and display methods
-            
-      function show(obj, sigfig)
-      % 'print' prints dataset name, information and table with values.
-      %    
-      %   show(data);
-      %   show(data, sigfig)
-      %
-      %
-      % Optional parameter 'sigfig' is a number of significant figures to
-      % use for display the values. Default value is 3.
-      %
-
-         if nargin < 2
-            sigfig = 3;
-         else         
-            sigfig = round(sigfig);
-         end            
-         
-         fprintf('\n')
-         if ~isempty(obj.name)
-            fprintf('\n%s:\n', obj.name);
-         end
-
-         if ~isempty(obj.info)
-            fprintf('%s\n', obj.info);
-         end
-
-         rowNames = obj.rowFullNames ;
-         if ~isempty(rowNames)
-            rowlength = max(cellfun('length', rowNames));
-         else
-            rowlength = 0;
-         end
-         
-         values = obj.values;
-         valuesAll = obj.valuesAll(:, ~obj.excludedCols);
-
-         if ~isempty(obj.colFullNames)
-            colNames = obj.colFullNames;
-         else
-            colNames = obj.colNames;
-         end
-         
-         nCols = obj.nCols;
-         nRows = obj.nRows;
-         
-         if nRows > 200
-            warning('The data is too long, will show first 200 rows only.')
-            nRows = 200;
-            values = values(1:nRows, :);
-            if ~isempty(rowNames)
-               rowNames = rowNames(1:nRows);
-            end   
-         end
-         
-         % prepare text array for output
-         if rowlength >= 1
-            s = sprintf('%%%ds', rowlength);
-            vout = cellfun(@(x)(sprintf(s, x)), rowNames', 'UniformOutput', false);
-            if size(vout, 1) < size(vout, 2)
-               vout = vout';
-            end   
-            vout = cell2mat(vout);
-            vout = [repmat(' ', 2, rowlength); vout];
-         else
-            vout = '';
-         end
-         
-         % convert values to text
-         nFactor = 1;
-         for i = 1:nCols
-            if obj.isfactor(i)
-               % mark a column name with asterisk
-               colNames{i} = ['* ' colNames{i} ];
-               
-               % get factor values as indices
-               [~, ~, v] = unique(valuesAll(:, i));
-               v = v(~obj.excludedRows);
-               v = v(1:nRows);
-               
-               % calculate maximal width for the field
-               factors = obj.getfactorlevels(i);
-               v = factors(v);
-               lc = max(cellfun(@(x)(length(x)), factors));
-               l = max(lc, numel(colNames{i})) + 2;
-               
-               % convert factor values into a char array
-               s = sprintf('%%%ds', l);
-               v = cellfun(@(x)(sprintf(s, x)), v, 'UniformOutput', false);
-               if size(v, 1) ~= nRows
-                  v = v';
-               end   
-               v = cell2mat(v);
-               nFactor = nFactor + 1;
-            else   
-               v = num2str(values(:, i), sigfig);
-               lc = size(v, 2);
-               l = max(lc, numel(colNames{i})) + 2;               
-               v = [repmat(' ', nRows, l - lc) v];               
-            end   
-            
-            str = [sprintf('%*s', l, colNames{i}); [' ' repmat('-', 1, l - 1)]; v];  
-            vout = [vout str];
-         end
-         
-         if ~isempty(obj.dimNames) && numel(obj.dimNames) == 2 && ~isempty(obj.dimNames{2}) && nCols > 1
-            width = size(vout, 2);
-            fprintf('\n%*s\n', (width + numel(obj.dimNames{2}) + rowlength)/2 + 1, obj.dimNames{2});
-         end
-         disp(vout)
-         fprintf('\n')         
-      end
-            
+       
       function varargout = sort(obj, columns, mode)
       % 'sort' sort rows of dataset
       %
@@ -3977,72 +2539,21 @@ classdef mdadata < handle & matlab.mixin.Copyable
             columns = -columns;
          end
          
-         [val, ind] = sortrows(obj.values, columns);
+         [val, ind] = sortrows(obj.values, columns);         
+         row_ind = ~ind2bool(obj.excludedRows, obj.nRowsAll);
+         col_ind = ~ind2bool(obj.excludedCols, obj.nColsAll);
+         obj.valuesAll(row_ind, col_ind) = val;
          
-%         try
-            row_ind = ~ind2bool(obj.excludedRows, obj.nRowsAll);
-            col_ind = ~ind2bool(obj.excludedCols, obj.nColsAll);
-            obj.valuesAll(row_ind, col_ind) = val;
-            if ~isempty(obj.rowNames)
-               obj.rowNames(row_ind) = obj.rowNames(ind);
-               obj.rowFullNames(row_ind) = obj.rowFullNames(ind);
-            end   
-%         catch
-%            error('Error during sorting the dataset rows!');
-%         end   
+         if ~isempty(obj.rowNames)
+            obj.rowNames(row_ind) = obj.rowNames(ind);
+            obj.rowFullNames(row_ind) = obj.rowFullNames(ind);
+         end   
          
          if nargout > 0
             varargout{1} = 1;
          end   
       end
       
-      %%% other methods
-      
-      function ind = inpolygon(obj, position)
-      % 'inpolygon' returns indices of data points inside a polygon
-      %
-         if size(position, 1) > 2
-            values = obj.valuesAll(:, 1:2);      
-            ind = inpolygon(values(:, 1), values(:, 2), position(:, 1), position(:, 2));
-         else
-            ind = [];
-         end      
-      end
-      
-      function ind = inrect(obj, position)
-      % 'inrect' returns indices of variables inside if at least one point is inside 
-      %  a rectangle
-      %
-
-         ind = [];
-
-         if numel(position) ~= 4
-            return
-         end
-
-         obj.showExcludedCols
-         if obj.showExcludedCols
-            values = obj.valuesAll(:, ~obj.factorCols);
-            nCols = obj.nNumColsAll;
-         else   
-            values = obj.numValues;
-            nCols = obj.nNumCols;
-         end
-
-         x = [max(1, round(position(1))) min(round(position(1) + position(3)), nCols)];
-         y = [round(position(2)) round(position(2) + position(4))];
-
-         v = values(:, x(1):x(2));
-
-         [~, c] = find(v >= y(1) & v <= y(2));
-         i = unique(c) + x(1) - 1;   
-         i = obj.getfullcolind(i, obj.showExcludedCols, false);
-
-         ind = false(obj.nColsAll, 1);
-         ind(i) = true;
-         ind(obj.factorCols) = false;
-      end 
-
    end
    
    methods (Static = true)
