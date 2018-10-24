@@ -188,8 +188,8 @@ classdef regres < res
          nresp = 1;
          ncomp = nComp;
          
-         if numel(varargin) == 1
-            if iscell(varargin{1}) || ischar(varargin{1})
+         if numel(varargin) == 1            
+            if (iscell(varargin{1}) || ischar(varargin{1})) && nResp > 1
                % response name is specified
                nresp = ismember(respNames, varargin{1});
                if ~any(nresp)
@@ -209,7 +209,7 @@ classdef regres < res
                varargin(1) = [];
             end   
          elseif numel(varargin) > 1
-            if iscell(varargin{1}) || ischar(varargin{1}) 
+            if (iscell(varargin{1}) || ischar(varargin{1})) && nResp > 1
                ind = ismember(respNames, varargin{1});
                if any(ind)
                   nresp = find(ind, 1);
