@@ -33,24 +33,30 @@ classdef mdapls < regmodel
          obj.nComp = size(m.weights, 2);
          
          % assign names and values to model object
-         respNames = y.colNamesAll(~y.factorCols);
-         respFullNames = y.colFullNamesAll(~y.factorCols);
+         respNames = y.colNamesAllWithoutFactors;
+         respFullNames = y.colFullNamesAllWithoutFactors;
+         respRowValues = y.rowValuesAll;
+         respColValues = y.colValuesAllWithoutFactors;
          
-         predNames = X.colNamesAll(~X.factorCols);         
-         predFullNames = X.colFullNamesAll(~X.factorCols);
+         predNames = X.colNamesAllWithoutFactors;         
+         predFullNames = X.colFullNamesAllWithoutFactors;
+         predRowValues = X.rowValuesAll;
+         predColValues = X.colValuesAllWithoutFactors;
          
          compNames = textgen('Comp', 1:obj.nComp);
          compFullNames = textgen('Comp ', 1:obj.nComp);
          
          wayNames = {predNames, respNames, compNames};
          wayFullNames = {predFullNames, respFullNames, compFullNames};
-   
+         wayValues = {predColValues, respRowValues, 1:obj.nComp};
+         
          % regression coefficients
          name = 'Regression coefficients';         
          dimNames = {X.dimNames{2}, 'Responses', 'Components'};
          b = zeros(X.nNumColsAll, y.nNumCols, obj.nComp);
          b(~excludedCols, :, :) = m.coeffs; 
          b = mdadata3(b, wayNames, wayFullNames, dimNames, name);
+         b.wayValuesAll = wayValues;
          b.excluderows(excludedCols);
          obj.regcoeffs = regcoeffs(b);
          
@@ -60,8 +66,9 @@ classdef mdapls < regmodel
          w = zeros(X.nNumColsAll, obj.nComp);
          w(~excludedCols, :) = m.weights; 
          w = mdadata(w, predNames, compNames, dimNames, name);
-         w.rowFullNames = predFullNames;
-         w.colFullNames = compFullNames;
+         w.rowFullNamesAll = predFullNames;
+         w.colFullNamesAll = compFullNames;
+         w.colValuesAll = predColValues;
          w.excluderows(excludedCols);
          obj.weights = w;
          
@@ -71,8 +78,9 @@ classdef mdapls < regmodel
          xl = zeros(X.nNumColsAll, obj.nComp);
          xl(~excludedCols, :) = m.xloadings; 
          xl = mdadata(xl, predNames, compNames, dimNames, name);
-         xl.rowFullNames = predFullNames;
-         xl.colFullNames = compFullNames;
+         xl.rowFullNamesAll = predFullNames;
+         xl.colFullNamesAll = compFullNames;
+         xl.colValuesAll = predColValues;
          xl.excluderows(excludedCols);
          obj.xloadings = xl;
          
@@ -80,8 +88,9 @@ classdef mdapls < regmodel
          name = 'Y loadings';         
          dimNames = {y.dimNames{2}, 'Components'};
          yl = mdadata(m.yloadings, respNames, compNames, dimNames, name);
-         yl.rowFullNames = respFullNames;
-         yl.colFullNames = compFullNames;
+         yl.rowFullNamesAll = respFullNames;
+         yl.colFullNamesAll = compFullNames;
+         yl.rowValuesAll = respRowValues;
          obj.yloadings = yl;
 
          obj.setSelratio(X);
@@ -92,7 +101,7 @@ classdef mdapls < regmodel
          if nargin < 4
             makeres = true;
          end
-                  
+         
          if nargin < 3 || isempty(oyref)
             yref = [];
          else   
@@ -110,6 +119,7 @@ classdef mdapls < regmodel
          % mdadata for X scores
          xscores = mdadata(xscores, X.rowNamesAll, obj.weights.colFullNames);
          xscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
+         xscores.rowValuesAll = X.colValuesAll;
          xscores.name = 'X scores';
          xscores.excluderows(X.excludedRows);
          
@@ -133,15 +143,15 @@ classdef mdapls < regmodel
             
          % set up 3-way dataset for predictions (nPred x nResp x nComp)
          % we use empty name for components here         
-         if isempty(yref) || isempty(yref.colNames)
-            colNames = obj.calres.yref.colNames;
+         if isempty(yref) || (isempty(yref.colNames) && ~isempty(obj.calres))
+            colNamesAll = obj.calres.yref.colNamesAll;
             colFullNamesAll = obj.calres.yref.colFullNamesAll;
          else
-            colNames = yref.colNames;
+            colNamesAll = yref.colNamesAll;
             colFullNamesAll = yref.colFullNamesAll;
          end
          
-         wayNames = {X.rowNamesAll, colNames, obj.weights.colNames};
+         wayNames = {X.rowNamesAll, colNamesAll, obj.weights.colNames};
          wayFullNames = {X.rowFullNamesAll, colFullNamesAll, obj.weights.colFullNames};
          dimNames = {X.dimNames{1}, 'Responses', 'Components'};
          name = 'Predicted values';
