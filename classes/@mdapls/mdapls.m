@@ -68,7 +68,7 @@ classdef mdapls < regmodel
          w = mdadata(w, predNames, compNames, dimNames, name);
          w.rowFullNamesAll = predFullNames;
          w.colFullNamesAll = compFullNames;
-         w.colValuesAll = predColValues;
+         w.rowValuesAll = predColValues;
          w.excluderows(excludedCols);
          obj.weights = w;
          
@@ -80,7 +80,7 @@ classdef mdapls < regmodel
          xl = mdadata(xl, predNames, compNames, dimNames, name);
          xl.rowFullNamesAll = predFullNames;
          xl.colFullNamesAll = compFullNames;
-         xl.colValuesAll = predColValues;
+         xl.rowValuesAll = predColValues;
          xl.excluderows(excludedCols);
          obj.xloadings = xl;
          
@@ -90,7 +90,7 @@ classdef mdapls < regmodel
          yl = mdadata(m.yloadings, respNames, compNames, dimNames, name);
          yl.rowFullNamesAll = respFullNames;
          yl.colFullNamesAll = compFullNames;
-         yl.rowValuesAll = respRowValues;
+         yl.rowValuesAll = predRowValues;
          obj.yloadings = yl;
 
          obj.setSelratio(X);
@@ -321,6 +321,7 @@ classdef mdapls < regmodel
          
          vipscores = mdadata(vipscores, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
          vipscores.dimNames = {obj.regcoeffs.values_.dimNames{1}, obj.regcoeffs.values_.dimNames{2}};
+         vipscores.rowValuesAll = obj.regcoeffs.values_.wayValues{1};
          vipscores.name = 'VIP scores';
          obj.vipscores = vipscores;
       end

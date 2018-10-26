@@ -216,13 +216,22 @@ for i = 1:numel(sp)
    m = mdapls(s, c, 5);
    
    figure
-   subplot 431, plotregcoeffs(m)
-   subplot 432, plotregcoeffs(m, 1, 2, 'Type', 'line')
-   subplot 433, plotregcoeffs(m, 1, 2, 'Type', 'bar')
+   subplot 531, plotregcoeffs(m)
+   subplot 532, plotregcoeffs(m, 1, 2, 'Type', 'line')
+   subplot 533, plotregcoeffs(m, 1, 2, 'Type', 'bar')
    
-%    subplot 434, plotxloadings(m, 'Labels', 'names')
-%    subplot 435, plotxloadings(m, 'Type', 'line')
-%    subplot 436, plotxloadings(m, 'Type', 'bar')
+   subplot 534, plotxloadings(m, 'Labels', 'names')
+   subplot 535, plotxloadings(m, 'Type', 'line')
+   subplot 536, plotxloadings(m, 'Type', 'bar')
+   
+   subplot 537, plotweights(m, 'Labels', 'names')
+   subplot 538, plotweights(m, 1:3, 'Type', 'line')
+   subplot 539, plotweights(m, 1:2, 'Type', 'bar')
+   
+   subplot(5, 3, 10), plotvipscores(m)
+   subplot(5, 3, 11), plotvipscores(m, 'Type', 'line')
+   subplot(5, 3, 12), plotvipscores(m, 'Type', 'bar')
+   
 %    
 %    subplot 437, plotxscores(m, [1,2], 'Labels', 'names')
 %    subplot 438, plotxscores(m, [1,2], 'Type', 'line')
