@@ -119,7 +119,7 @@ classdef mdapls < regmodel
          % mdadata for X scores
          xscores = mdadata(xscores, X.rowNamesAll, obj.weights.colFullNames);
          xscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
-         xscores.rowValuesAll = X.colValuesAll;
+         xscores.rowValuesAll = X.rowValuesAll;
          xscores.name = 'X scores';
          xscores.excluderows(X.excludedRows);
          
@@ -316,7 +316,7 @@ classdef mdapls < regmodel
             b = obj.regcoeffs.values(1:end, iResp, nComp).values;
             bscores = (wpw' * pinv(wpw * wpw')) * b;         
             ss = (bscores.^2) .* sum(xscores.^2)';
-            vipscores(:, iResp) = nResp * wnorm.^2 * ss / sum(ss);
+            vipscores(:, iResp) = nPred * wnorm.^2 * ss / sum(ss);
          end
          
          vipscores = mdadata(vipscores, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
@@ -349,6 +349,7 @@ classdef mdapls < regmodel
          
          selratio = mdadata(selratio, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
          selratio.dimNames = {obj.regcoeffs.values_.dimNames{1}, obj.regcoeffs.values_.dimNames{2}};
+         selratio.rowValuesAll = obj.regcoeffs.values_.wayValues{1};
          selratio.name = 'Selectivity ratio';
          obj.selratio = selratio;         
       end
