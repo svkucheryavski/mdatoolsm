@@ -45,7 +45,7 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          obj.values_ = values;
          obj.wayNamesAll = wayNames;
          obj.wayFullNamesAll = wayFullNames;
-         obj.wayValuesAll = {};
+         obj.wayValuesAll = cell(1, 3);
          obj.dimNames = dimNames;
          obj.name = name;
          obj.excludedRows = false(size(values, 1), 1);
