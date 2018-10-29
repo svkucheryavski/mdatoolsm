@@ -33,12 +33,8 @@
          
          values = obj.values;
          valuesAll = obj.valuesAll(:, ~obj.excludedCols);
-
-         if ~isempty(obj.colFullNames)
-            colNames = obj.colFullNames;
-         else
-            colNames = obj.colNames;
-         end
+         colNames = obj.getColLabels();
+         rowNames = obj.getRowLabels();
          
          nCols = obj.nCols;
          nRows = obj.nRows;
@@ -47,9 +43,7 @@
             warning('The data is too long, will show first 200 rows only.')
             nRows = 200;
             values = values(1:nRows, :);
-            if ~isempty(rowNames)
-               rowNames = rowNames(1:nRows);
-            end   
+            rowNames = rowNames(1:nRows);
          end
          
          % prepare text array for output
@@ -58,7 +52,7 @@
             vout = cellfun(@(x)(sprintf(s, x)), rowNames', 'UniformOutput', false);
             if size(vout, 1) < size(vout, 2)
                vout = vout';
-            end   
+            end
             vout = cell2mat(vout);
             vout = [repmat(' ', 2, rowlength); vout];
          else

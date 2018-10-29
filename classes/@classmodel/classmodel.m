@@ -48,8 +48,8 @@ classdef classmodel < handle
 
             newc = c.valuesAll == factorLevels(ind);
             newc = mdadata(newc, c.rowNamesAll, c.colNames, c.dimNames, c.name);
-            newc.rowFullNames = c.rowFullNamesAll;
-            newc.colFullNames = c.colFullNames;
+            newc.rowFullNamesAll = c.rowFullNamesAll;
+            newc.colFullNamesAll = c.colFullNames;
             if sum(newc.valuesAll) == c.nRowsAll
                newc.factor(1, {className});
             else
@@ -60,7 +60,7 @@ classdef classmodel < handle
             newc = zeros(X.nRowsAll, 1);
             newc(~X.excludedRows) = c;
             newc = mdadata(newc, X.rowNamesAll, {className});
-            newc.rowFullNames = X.rowFullNamesAll;
+            newc.rowFullNamesAll = X.rowFullNamesAll;
             newc.excluderows(X.excludedRows);
             if sum(newc) == size(c, 1)
                newc.factor(1, {className});

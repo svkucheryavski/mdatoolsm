@@ -30,10 +30,14 @@ function varargout = subset(obj, varargin)
    scolFullNames = {};
    scolValues = [];
 
+   values = obj.valuesAll;
+   
    if ischar(row_ind) && strcmp(row_ind, ':')
 
       % subset with all rows - with excluded rows   
-      col_ind = getfullcolind(obj, col_ind);                        
+      col_ind = getfullcolind(obj, col_ind);    
+      row_ind = 1:obj.nRowsAll;            
+      
       svalues = obj.valuesAll(:, col_ind);
       sexcludedRows = find(obj.excludedRows);
       sexcludedCols = [];            
@@ -74,7 +78,8 @@ function varargout = subset(obj, varargin)
    else
       % partial subset for both rows and cols - no excluded data    
       col_ind = getfullcolind(obj, col_ind);   
-      row_ind = getfullrowind(obj, row_ind);                        
+      row_ind = getfullrowind(obj, row_ind);   
+      
       svalues = obj.valuesAll(row_ind, col_ind);
       sexcludedRows = [];
       sexcludedCols = [];

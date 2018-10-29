@@ -371,15 +371,15 @@ classdef mdapca < handle
          
          if ~isempty(obj.cvres) && isa(obj.cvres, 'pcares')
             var = obj.cvres.variance(:, :);
-            var.colNames = {'ExpvarCV', 'CumexpvarCV'};
-            var.colFullNames = {'Expvar (CV)', 'Cumexpvar (CV)'};
+            var.colNamesAll = {'ExpvarCV', 'CumexpvarCV'};
+            var.colFullNamesAll = {'Expvar (CV)', 'Cumexpvar (CV)'};
             out = [out var];
          end
          
          if ~isempty(obj.testres) && isa(obj.testres, 'pcares')
             var = obj.testres.variance(:, :);
-            var.colNames = {'ExpvarTest', 'CumexpvarTest'};
-            var.colFullNames = {'Expvar (Test)', 'Cumexpvar (Test)'};
+            var.colNamesAll = {'ExpvarTest', 'CumexpvarTest'};
+            var.colFullNamesAll = {'Expvar (Test)', 'Cumexpvar (Test)'};
             out = [out var];
          end
          

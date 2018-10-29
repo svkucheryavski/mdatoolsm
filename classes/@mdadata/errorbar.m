@@ -170,8 +170,8 @@
                end   
                m = mdadata(m, obj.colNamesWithoutFactors(1), groups.colNames);
                err = mdadata(err, obj.colNamesWithoutFactors(1), groups.colNames);               
-               err.colFullNames = groups.colFullNames;
-               err.rowFullNames = obj.colFullNamesWithoutFactors(1);
+               err.colFullNamesAll = groups.colFullNames;
+               err.rowFullNamesAll = obj.colFullNamesWithoutFactors(1);
             end   
          end   
 

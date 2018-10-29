@@ -469,6 +469,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
          end
       end
       
+      function set.colNames(obj, colNames)
+         obj.colNamesAll = colNames;
+         obj.colFullNamesAll = colNames;
+         if isnumeric(colNames)
+            obj.colValuesAll = colNames;
+         end
+      end
+         
       function set.colNamesAll(obj, colNames)         
       % set names for all column names            
          
@@ -523,6 +531,14 @@ classdef mdadata < handle & matlab.mixin.Copyable
             obj.rowValuesAll = [];
          else
             obj.rowValuesAll = rowValues;
+         end
+      end
+      
+      function set.rowNames(obj, rowNames)
+         obj.rowNamesAll = rowNames;
+         obj.rowFullNamesAll = rowNames;
+         if isnumeric(rowNames)
+            obj.rowValuesAll = rowNames;
          end
       end
       
@@ -856,7 +872,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          obj.valuesAll(:, ind) = [];
          
-         if ~isepmty(obj.colValuesAll)
+         if ~isempty(obj.colValuesAll)
             obj.colValuesAll(ind) = [];
          end
          
@@ -1044,7 +1060,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             newvalues(:, i) = (subValues == levels(i)) * 2 - 1;
          end
          
-         out = mdadata(newvalues, obj.rowNamesAll, levelNames, {obj.dimNames{1} obj.colNamesAll{ind}});
+         out = mdadata(newvalues, obj.rowNamesAll, levelNames, {obj.dimNames{1} obj.getColLabels{ind}});
          out.name = obj.name;
          out.info = obj.info;
          out.rowFullNamesAll = obj.rowFullNamesAll;
@@ -1321,11 +1337,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
             % add "O" to row names if they are not unique
             if ~isempty(out.rowNames) && ~isempty(b.rowNames)
                if sum(ismember(out.rowNames, b.rowNames)) > 0
-                  newRowNames = [out.rowNames, strcat('O', b.rowNames)];
-                  newRowFullNames = [out.rowFullNames, strcat('O', b.rowFullNames )];
+                  newRowNames = [out.rowNames; strcat('O', b.rowNames)];
+                  newRowFullNames = [out.rowFullNames; strcat('O', b.rowFullNames )];
                else
-                  newRowNames = [out.rowNames, b.rowNames];
-                  newRowFullNames = [out.rowFullNames, b.rowFullNames];
+                  newRowNames = [out.rowNames; b.rowNames];
+                  newRowFullNames = [out.rowFullNames; b.rowFullNames];
                end
             else
                newRowNames = {};
@@ -1360,7 +1376,6 @@ classdef mdadata < handle & matlab.mixin.Copyable
             % order as they were added in
             lv = vertcat(flv{:, fColsInd(i)});
             lv = unique(lv(:), 'stable');
-            
             if numel(lv) ~= numel(ln)
                 error('Number of levels does not correspond to number of level names!');
             end
@@ -2142,20 +2157,21 @@ classdef mdadata < handle & matlab.mixin.Copyable
                nNames = numel(outRowNames);
                outRowNames = repmat(outRowNames, 1, groups.nCols);
                
-              
-               gcolNames = repmat(groups.colNames, nNames, 1);
+               gcolNames = groups.colNames(:)';
+               gcolNames = repmat(gcolNames, nNames, 1);
                gcolNames = gcolNames(:)';
-               gcolFullNames = repmat(groups.colFullNames, nNames, 1);
+               
+               gcolFullNames = groups.colFullNames(:)';
+               gcolFullNames = repmat(gcolFullNames, nNames, 1);
                gcolFullNames = gcolFullNames(:)';
 
                orowNames = cellfun(@(x, y) [x  '-' y], outRowNames, gcolNames, 'un', 0);
                orowFullNames = cellfun(@(x, y) [x  ' ' y], outRowNames, gcolFullNames, 'un', 0);
             end   
-            
             out = mdadata(out, orowNames, obj.colNamesWithoutFactors, ...
                {groups.dimNames{2}, obj.dimNames{2}}, name); 
-            out.rowFullNames = orowFullNames;
-            out.colFullNames = obj.colFullNamesWithoutFactors;
+            out.rowFullNamesAll = orowFullNames;
+            out.colFullNamesAll = obj.colFullNamesWithoutFactors;
             out.rowValuesAll = [];
             out.colValuesAll = obj.colValuesWithoutFactors;
          end   
@@ -2208,7 +2224,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          out = mdadata([f; fr; mu - merr; mu + merr], {'Freq', 'RelFreq', 'Lower', 'Upper'}, ...
             obj.getfactorlevels(1), ['Statistics', obj(:, 1).colNames], 'Observed frequencies');
-         out.rowFullNames = {'Freq', 'Rel. Freq', sprintf('Lower (%d%%)', round((1 - alpha)*100)),...
+         out.rowFullNamesAll = {'Freq', 'Rel. Freq', sprintf('Lower (%d%%)', round((1 - alpha)*100)),...
             sprintf('Upper (%d%%)', round((1 - alpha)*100))};
       end
       
@@ -2544,8 +2560,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
          obj.valuesAll(row_ind, col_ind) = val;
          
          if ~isempty(obj.rowNames)
-            obj.rowNames(row_ind) = obj.rowNames(ind);
-            obj.rowFullNames(row_ind) = obj.rowFullNames(ind);
+            obj.rowNamesAll(row_ind) = obj.rowNames(ind);
+            obj.rowFullNamesAll(row_ind) = obj.rowFullNames(ind);
          end   
          
          if nargout > 0
