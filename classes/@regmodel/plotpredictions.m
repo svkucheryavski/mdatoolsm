@@ -1,5 +1,6 @@
 function plotpredictions(obj, varargin)
-   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, varargin{:});
+   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.calres.respNames,...
+      varargin{:});
    
    args = mdadata.getgscatteroptions(3, varargin{:});
    
@@ -19,8 +20,6 @@ function plotpredictions(obj, varargin)
    
    hold off
    box on
-   axis tight
-   correctaxislim(5);
    
    if numel(legendStr) > 1
       mdadata.legend(h, legendStr)

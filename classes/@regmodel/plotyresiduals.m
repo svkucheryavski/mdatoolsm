@@ -1,6 +1,7 @@
 function plotyresiduals(obj, varargin)
 
-   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, varargin{:});
+   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.calres.respNames,...
+      varargin{:});
    
    args = mdadata.getgscatteroptions(3, varargin{:});
    
@@ -20,12 +21,12 @@ function plotyresiduals(obj, varargin)
    
    hold off
    box on
+   
    if numel(legendStr) > 1
       mdadata.legend(h, legendStr)
    end   
 
-   lim = axis();
-   line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+   line(xlim(), [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5], 'HandleVisibility','off');
    
    if ncomp == obj.nComp
       title('Prediction residuals');
