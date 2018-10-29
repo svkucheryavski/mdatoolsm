@@ -616,8 +616,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
             labels = labels(ind);
          end
       end
-         
-         
+           
       %%% methods for including/excluding/removing values and variables
       
       function out = getfullrowind(obj, ind)
@@ -1443,7 +1442,7 @@ classdef mdadata < handle & matlab.mixin.Copyable
          
          if nargin < 4
             rowNames = a.rowNames;
-            outRowValues = a.colValues;
+            outRowValues = a.rowValues;
          end
          
          if ~isempty(b)
