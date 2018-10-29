@@ -1,12 +1,15 @@
-function varargout = plotscores(obj, comp, varargin)         
-   if nargin < 2
+function varargout = plotscores(obj, varargin)         
+
+   if numel(varargin) > 0 && isnumeric(varargin{1})
+      comp = varargin{1};
+      varargin(1) = [];
+      if min(comp) < 1 || max(comp) > obj.nComp
+         error('Wrong value for components!');
+      end   
+   else
       comp = [1 2];
    end
-   
-   if numel(comp) < 1 || numel(comp) > 2
-      error('Wrong value for "comp", specify one or two components for the plot!');
-   end   
-   
+
    [type, varargin] = getarg(varargin, 'Type');
    if isempty(type) 
       if numel(comp) < 3
