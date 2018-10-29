@@ -291,3 +291,20 @@ for i = 1:numel(sp)
    subplot(5, 3, 15), gplot(res.ypred(1:end, 1, 1:2)')
 end
 
+%% Preprocessing
+
+figure
+for i = 1:numel(sp)
+   pr = prep();
+   pr.add('savgol', 1, 5, 2);
+   pr.add('snv');
+   pr.add('center');
+   
+   s = sp{i};
+   p = copy(s);
+   pr.apply(p);
+   subplot(6, 2, 2 * i - 1), plot(s);
+   subplot(6, 2, 2 * i), plot(p(:, 5:end-5));
+end
+
+
