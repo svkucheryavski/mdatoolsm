@@ -207,13 +207,23 @@ for i = 1:numel(sp)
 end
 
 
-%% PLS - DOESN'T WORK
+%% PLS - variable based plots
 
+type = 4;
 close all
 clc
 for i = 1:numel(sp)
    s = sp{i}; c = cn{i};
-   m = mdapls(s, c, 5);
+   
+   if type == 1
+      m = mdapls(s, c, 5);
+   elseif type == 2
+      m = mdapls(s, c, 5, 'CV', {'full'});
+   elseif type == 3
+      m = mdapls(s(indc, :), c(indc, :), 5, 'TestSet', {s(indv, :), c(indv, :)});      
+   else
+      m = mdapls(s(indc, :), c(indc, :), 5, 'CV', {'full'}, 'TestSet', {s(indv, :), c(indv, :)});      
+   end
    
    figure
    subplot 531, plotregcoeffs(m)
@@ -232,17 +242,52 @@ for i = 1:numel(sp)
    subplot(5, 3, 11), plotvipscores(m, 'Type', 'line')
    subplot(5, 3, 12), plotvipscores(m, 'Type', 'bar')
    
-%    
-%    subplot 437, plotxscores(m, [1,2], 'Labels', 'names')
-%    subplot 438, plotxscores(m, [1,2], 'Type', 'line')
-%    subplot 439, plotxscores(m, [1,2], 'Type', 'bar')
-%    
-%    subplot(4, 3, 10), plotxyscores(m, [1,2], 'Labels', 'names')
-%    subplot(4, 3, 11), plotxyscores(m, [1,2], 'Type', 'line')
-%    subplot(4, 3, 12), plotxyscores(m, [1,2], 'Type', 'bar')
-%    
-%    subplot(4, 3, 13), plotcumexpvar(m)
-%    subplot(4, 3, 14), plotexpvar(m)
-%    subplot(4, 3, 15), plotrmse(m)
+   subplot(5, 3, 13), plotselratio(m)
+   subplot(5, 3, 14), plotselratio(m, 'Type', 'line')
+   subplot(5, 3, 15), plotselratio(m, 'Type', 'bar')
+end
+
+%% PLS - object based plots
+
+type = 4;
+close all
+clc
+
+for i = 1:numel(sp)
+   s = sp{i}; c = cn{i};
+   
+   if type == 1
+      m = mdapls(s, c, 5);
+   elseif type == 2
+      m = mdapls(s, c, 5, 'CV', {'full'});
+      res = m.cvres;
+   elseif type == 3
+      m = mdapls(s(indc, :), c(indc, :), 5, 'TestSet', {s(indv, :), c(indv, :)});      
+      res = m.testres;
+   else
+      m = mdapls(s(indc, :), c(indc, :), 5, 'CV', {'full'}, 'TestSet', {s(indv, :), c(indv, :)});
+      res = m.testres;
+   end
+   
+   figure
+   subplot 531, plotxscores(m, 'Labels', 'names')
+   subplot 532, plotxscores(m, 1:3, 'Type', 'line')
+   subplot 533, plotxscores(m, 1:2, 'Type', 'bar')
+   
+   subplot 534, plotxyscores(m, 'Labels', 'names')
+   subplot 535, plotxyscores(m, 1, 'Labels', 'names')
+   subplot 536, gplot(m.calres.ydecomp.scores(:, 1:2)')
+   
+   subplot 537, plotxresiduals(m, 'Labels', 'names')
+   subplot 538, gplot(res.xdecomp.T2(:, 1:2)')
+   subplot 539, gplot(res.xdecomp.Q(:, 1:2)')
+   
+   subplot(5, 3, 10), plotyresiduals(m, 'Labels', 'names')
+   subplot(5, 3, 11), plotyresiduals(m, c.getColLabels(1), 'Labels', 'names')
+   subplot(5, 3, 12), gplot(res.ypred(1:end, 1, 1:2)' - m.calres.yref')
+     
+   subplot(5, 3, 13), plotpredictions(m, 'Labels', 'names')
+   subplot(5, 3, 14), plotpredictions(m, c.getColLabels(1), 'Labels', 'names')
+   subplot(5, 3, 15), gplot(res.ypred(1:end, 1, 1:2)')
 end
 
