@@ -19,24 +19,15 @@ function varargout = plotselratio(obj, varargin)
       type = 'bar';
    end
    
-   [mr, varargin] = getarg(varargin, 'Marker');
-   if isempty(mr)
-      mr = '.';
-   end   
-
    if strcmp(type, 'bar')   
       h = bar(obj.selratio(:, nResp)', varargin{:});
    elseif strcmp(type, 'line')   
-      h = plot(obj.selratio(:, nResp)', varargin{:}, 'Marker', mr);
+      h = plot(obj.selratio(:, nResp)', varargin{:});
    else
       error('Wrong plot type!');
    end
    
    title('Selectivity ratio')
-   
-   xl = xlim();
-   xl(1) = 0;
-   xlim(xl);
    
    if nargout > 0
       varargout{1} = h.plot;
