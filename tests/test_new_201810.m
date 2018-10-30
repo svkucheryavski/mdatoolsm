@@ -209,7 +209,7 @@ end
 
 %% PLS - variable based plots
 
-type = 4;
+type = 1;
 close all
 clc
 for i = 1:numel(sp)
@@ -218,7 +218,7 @@ for i = 1:numel(sp)
    if type == 1
       m = mdapls(s, c, 5);
    elseif type == 2
-      m = mdapls(s, c, 5, 'CV', {'full'});
+      m = mdapls(s, c, 5, 'CV', {'full'}, 'CoeffsCI', 'jk');
    elseif type == 3
       m = mdapls(s(indc, :), c(indc, :), 5, 'TestSet', {s(indv, :), c(indv, :)});      
    else
@@ -227,8 +227,8 @@ for i = 1:numel(sp)
    
    figure
    subplot 531, plotregcoeffs(m)
-   subplot 532, plotregcoeffs(m, 1, 2, 'Type', 'line')
-   subplot 533, plotregcoeffs(m, 1, 2, 'Type', 'bar')
+   subplot 532, plotregcoeffs(m, 1, 2, 'Type', 'line', 'CI', 'on')
+   subplot 533, plotregcoeffs(m, 1, 2, 'Type', 'bar', 'CI', 'on')
    
    subplot 534, plotxloadings(m, 'Labels', 'names')
    subplot 535, plotxloadings(m, 'Type', 'line')
@@ -249,7 +249,7 @@ end
 
 %% PLS - object based plots
 
-type = 4;
+type = 2;
 close all
 clc
 
@@ -307,4 +307,56 @@ for i = 1:numel(sp)
    subplot(6, 2, 2 * i), plot(p(:, 5:end-5));
 end
 
+%% MLR
+
+type = 4;
+close all
+clc
+
+for i = 1:numel(sp)
+   s = sp{i}; c = cn{i};
+   
+   if type == 1
+      m = mdamlr(s(:, 1:3:end), c);
+      res = m.calres;
+   elseif type == 2
+      m = mdamlr(s(:, 1:3:end), c, 'CV', {'full'}, 'CoeffsCI', 'jk');
+      res = m.cvres;
+   elseif type == 3
+      m = mdamlr(s(indc, 1:3:end), c(indc, :), 5, 'TestSet', {s(indv, 1:3:end), c(indv, :)});      
+      res = m.testres;
+   else
+      m = mdamlr(s(indc, 1:3:end), c(indc, :), 5, 'CV', {'full'}, 'TestSet', {s(indv, 1:3:end), c(indv, :)});
+      res = m.testres;
+   end
+   
+   figure
+   subplot 331, plotregcoeffs(m)
+   subplot 332, plotregcoeffs(m, 'Type', 'line', 'CI', 'on')
+   subplot 333, plotregcoeffs(m, 'Type', 'bar', 'CI', 'on')
+   
+   subplot 334, plotyresiduals(m, 'Labels', 'names')
+   subplot 335, plotyresiduals(m, c.getColLabels(1), 'Labels', 'names')
+   subplot 336, gplot(res.ypred(1:end, 1, 1)' - m.calres.yref')
+     
+   subplot 337, plotpredictions(m, 'Labels', 'names')
+   subplot 338, plotpredictions(m, c.getColLabels(1), 'Labels', 'names')
+   subplot 339, gplot(res.ypred(1:end, 1, 1)')
+end
+
+%% mldivide
+close all
+clc
+
+figure
+for i = 1:numel(sp)
+   s = sp{i}; c = cn{i};
+   s = s(:, 1:5:end);
+   b = s \ c;
+   snew = c / b;l
+   subplot(6, 2, 2 * i - 1)
+   plot(b')
+   subplot(6, 2, 2 * i )
+   plot(snew)
+end
 
