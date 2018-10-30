@@ -1217,22 +1217,30 @@ classdef mdadata < handle & matlab.mixin.Copyable
       
       function out = mrdivide(a, b)
          if isscalar(a)
-            newColNames = b.colNamesWithoutFactors;
-            newRowNames = b.rowNames;
             newColFullNames = b.colFullNamesWithoutFactors;
+            newColNames = b.colNamesWithoutFactors;
+            newColValues = b.colValues;
             newRowFullNames = b.rowFullNames;
+            newRowNames = b.rowNames;
+            newColValues = b.rowValues;
          elseif isscalar(b)
-            newColNames = a.colNamesWithoutFactors;
-            newRowNames = a.rowNames;
             newColFullNames = a.colFullNamesWithoutFactors;
+            newColNames = a.colNamesWithoutFactors;
+            newColValues = a.colValues;
             newRowFullNames = a.rowFullNames;
+            newRowNames = a.rowNames;
+            newRowValues = a.rowValues;
          else
-            newRowNames = a.colNamesWithoutFactors;
-            newColNames = {};
-            newRowFullNames = a.colFullNamesWithoutFactors;
-            newColFullNames = {};
+            newRowFullNames = a.rowFullNames;
+            newRowNames = a.rowNames;
+            newRowValues = a.rowValues;
+            newColFullNames = b.rowFullNames;
+            newColNames = b.rowNames;
+            newColValues = b.rowValues;
          end   
          out = op(a, b, @mrdivide, newRowNames, newRowFullNames , newColNames, newColFullNames);
+         out.colValuesAll = newColValues;
+         out.rowValuesAll = newRowValues;
       end
       
       function out = ldivide(a, b)
@@ -1255,6 +1263,8 @@ classdef mdadata < handle & matlab.mixin.Copyable
       function out = mldivide(a, b)
          out = op(a, b, @mldivide, a.colNames, a.colFullNames, b.colNamesWithoutFactors, ...
             b.colFullNamesWithoutFactors);
+         out.rowValuesAll = a.colValues;
+         out.colValuesAll = b.colValues;
          out.dimNames = {'Coefficients', 'Variables'};
       end
                  
@@ -1337,11 +1347,11 @@ classdef mdadata < handle & matlab.mixin.Copyable
             % add "O" to row names if they are not unique
             if ~isempty(out.rowNames) && ~isempty(b.rowNames)
                if sum(ismember(out.rowNames, b.rowNames)) > 0
-                  newRowNames = [out.rowNames; strcat('O', b.rowNames)];
-                  newRowFullNames = [out.rowFullNames; strcat('O', b.rowFullNames )];
+                  newRowNames = [out.rowNames(:); strcat('O', b.rowNames(:))];
+                  newRowFullNames = [out.rowFullNames(:); strcat('O', b.rowFullNames(:) )];
                else
-                  newRowNames = [out.rowNames; b.rowNames];
-                  newRowFullNames = [out.rowFullNames; b.rowFullNames];
+                  newRowNames = [out.rowNames(:); b.rowNames(:)];
+                  newRowFullNames = [out.rowFullNames(:); b.rowFullNames(:)];
                end
             else
                newRowNames = {};

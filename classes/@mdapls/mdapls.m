@@ -56,7 +56,7 @@ classdef mdapls < regmodel
          b = zeros(X.nNumColsAll, y.nNumCols, obj.nComp);
          b(~excludedCols, :, :) = m.coeffs; 
          b = mdadata3(b, wayNames, wayFullNames, dimNames, name);
-         b.wayValuesAll = wayValues;
+         b.wayValuesAll{1} = predColValues;
          b.excluderows(excludedCols);
          obj.regcoeffs = regcoeffs(b);
          

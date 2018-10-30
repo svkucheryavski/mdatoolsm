@@ -164,13 +164,16 @@ classdef regcoeffs < handle
          pvalues = 2 * mdatcdf(tmin, nRep - 1);
          
          pvalues = mdadata3(pvalues, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
+         pvalues.wayValuesAll = obj.values_.wayValuesAll;
          pvalues.name = 'P-values for regression coefficients';
          obj.pvalues_ = pvalues;
                   
          ciLo = mdadata3(ciLo, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
+         ciLo.wayValuesAll = obj.values_.wayValuesAll;
          ciLo.name = 'Confidence intervals (lower) for regression coefficients';
          
          ciUp = mdadata3(ciUp, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
+         ciUp.wayValuesAll = obj.values_.wayValuesAll;
          ciUp.name = 'Confidence intervals (upper) for regression coefficients';
          obj.ci_ = {ciLo, ciUp};
       end
@@ -258,17 +261,18 @@ classdef regcoeffs < handle
          
          if showCI && ~isempty(obj.ci_)
             hold on            
-            ci = obj.ci(1:end, resp, comp); 
-            v = values.values;
-            l = v - ci(:, 1).values';
-            u = ci(:, 2).values' - v;
-            if strcmp(type, 'bar')
-               errorbar(1:size(v, 2), v, l, u, '.', 'Color', mdalight(mdadata.getmycolors(1)))
-            elseif strcmp(type, 'line')
-               plot(1:size(v, 2), v - l, '-', 'Color', mdalight(mdadata.getmycolors(1)))
-               plot(1:size(v, 2), v + u, '-', 'Color', mdalight(mdadata.getmycolors(1)))               
-            end
+            ci = obj.ci(1:end, resp, comp)'; 
             
+            if strcmp(type, 'line')
+               plot(ci, 'Color', mdalight(mdadata.getmycolors(1)));
+            elseif strcmp(type, 'bar')
+               x = values.colValuesAll;
+               if isempty(x)
+                  x = 1:size(values, 2);
+               end
+               errorbar(x, values.values, values.values - ci(1, :).values, '.',...
+                  'Color', mdalight(mdadata.getmycolors(1)));
+            end            
             hold off
          end
          
