@@ -258,9 +258,15 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          else
             sexcludedRows = [];
             svalues = obj.values_(~obj.excludedRows, ind{2}, ind{3});
-            swayValuesAll{1} = obj.wayValuesAll{1}(~obj.excludedRows);
-            swayNamesAll{1} = obj.wayNamesAll{1}(~obj.excludedRows);
-            swayFullNamesAll{1} = obj.wayFullNamesAll{1}(~obj.excludedRows);
+            if ~isempty(obj.wayValuesAll{1})
+               swayValuesAll{1} = obj.wayValuesAll{1}(~obj.excludedRows);
+            end
+            if ~isempty(obj.wayNamesAll{1})
+               swayNamesAll{1} = obj.wayNamesAll{1}(~obj.excludedRows);
+            end
+            if ~isempty(obj.wayFullNamesAll{1})
+               swayFullNamesAll{1} = obj.wayFullNamesAll{1}(~obj.excludedRows);
+            end
          end   
             
          data = mdadata3(svalues, swayNamesAll, swayFullNamesAll, obj.dimNames, obj.name);
