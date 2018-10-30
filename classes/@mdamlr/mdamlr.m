@@ -29,6 +29,7 @@ classdef mdamlr < regmodel
          name = 'Regression coefficients';
          
          b = mdadata3(b, wayNames, wayFullNames, dimNames, name);
+         b.wayValuesAll{1} = X.colValuesAll;
          b.excluderows(excludedCols);
 
          obj.regcoeffs = regcoeffs(b);
@@ -79,6 +80,7 @@ classdef mdamlr < regmodel
             name = 'Predicted values';
             
             ypred = mdadata3(ypred, wayNames, wayFullNames, dimNames, name);
+            ypred.wayValuesAll{1} = X.rowValuesAll;
             ypred.excluderows(X.excludedRows);
             res = mlrres(ypred, yref);
          end   
@@ -144,7 +146,8 @@ classdef mdamlr < regmodel
          dimNames = {X.dimNames{1}, 'Responses', ''};
          name = 'Predicted values';
          ycv = mdadata3(ycv, wayNames, wayFullNames, dimNames, name);
-
+         ycv.wayValuesAll{1} = X.rowValues;
+         
          res.res = mlrres(ycv, y);
          res.jkcoeffs = jkcoeffs;
       end

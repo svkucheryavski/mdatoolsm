@@ -117,13 +117,13 @@ classdef regcoeffs < handle
          
          out1 = obj.ci_{1}(varargin{:}).values;
          fnames = out1.colFullNames;
-         out1.colNames = strcat(out1.colNames, 'lo');
-         out1.colFullNames = strcat(fnames, ' (lo)');
+         out1.colNamesAll = strcat(out1.colNames, 'lo');
+         out1.colFullNamesAll = strcat(fnames, ' (lo)');
          
          out2 = obj.ci_{2}(varargin{:}).values;
          fnames = out2.colFullNames;
-         out2.colNames = strcat(out2.colNames, 'up');
-         out2.colFullNames = strcat(fnames, ' (up)');
+         out2.colNamesAll = strcat(out2.colNames, 'up');
+         out2.colFullNamesAll = strcat(fnames, ' (up)');
          
          out = [out1 out2];
          out.name = 'Confidence intervals';
