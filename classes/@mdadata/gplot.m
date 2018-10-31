@@ -181,10 +181,11 @@ function varargout = gplot(obj, varargin)
          error('Argument "Marker" should have one value or values for each groups!');
       end   
    end
-
+   
    [ms, ~] = getarg(varargin, 'MarkerSize');
    if isempty(ms) 
-      ms = repmat(15, nGroups, 1);
+      ms = repmat(8, nGroups, 1);
+      ms(strcmp(mr, '.')) = 16;
    else
       if numel(ms) == 1
          ms = repmat(ms, nGroups, 1);
@@ -199,7 +200,7 @@ function varargout = gplot(obj, varargin)
       ind = groups.values(:, i) == 1;    
       hk = plot(subset(obj, ind, ':'), ...
                'Color', lc(i, :), 'LineWidth', lw(i), 'LineStyle', ls{i},...
-               'Marker', mr{i}, 'MarkerSize', ms(i, :));               
+               'Marker', mr{i}, 'MarkerSize', ms(i));               
       h{i} = hk;
       hl = [hl, hk.plot(1)];
       hold on
