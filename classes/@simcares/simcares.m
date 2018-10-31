@@ -41,7 +41,7 @@ classdef simcares < pcares & classres
             expvar.colNames = {'Expvar'};
             
             cumexpvar = obj.variance(:, 2);
-            expvar.colNames = {'Cumexpvar'};
+            cumexpvar.colNames = {'Cumexpvar'};
 
             fn = obj.stat.fn(:, iClass);
             fn.colNames = {'FN'};
