@@ -1,7 +1,7 @@
 function varargout = plotvipscores(obj, varargin)
 
    nResp = 1;
-   if nargin > 1 && size(obj.vipscores, 2) > 1
+   if nargin > 1 
       if isnumeric(varargin{1})
          nResp = varargin{1};
          varargin(1) = [];
@@ -18,7 +18,7 @@ function varargout = plotvipscores(obj, varargin)
    else
       type = 'bar';
    end
-      
+   
    if strcmp(type, 'bar')   
       h = bar(obj.vipscores(:, nResp)', varargin{:});
    elseif strcmp(type, 'line')   
