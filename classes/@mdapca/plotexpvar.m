@@ -33,16 +33,21 @@ function varargout = plotexpvar(obj, varargin)
    
    plotData = mdadata(plotData, rowNames, 1:size(plotData, 1));
    plotData.name = 'Explained variance';
+   plotData.colValuesAll = 1:plotData.nCols;
    
    if strcmp(type, 'bar')   
       h = gbar(plotData, varargin{:}, 'FaceColor', c);
+      xlim([0.25 plotData.nCols + 0.75])      
    elseif strcmp(type, 'line')   
       h = gplot(plotData, varargin{:}, 'Marker', mr, 'Color', c);
+      xlim([0.75 plotData.nCols + 0.25])
    else
       error('Wrong plot type!');
    end
    
-   ylim([0, 105]);
+   set(gca, 'XTick', 1:plotData.nCols);
+   
+   title('Explained varaince')
    ylabel('Variance, %');
    xlabel('Components');
    

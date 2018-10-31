@@ -33,16 +33,21 @@ function varargout = plotcumexpvar(obj, varargin)
    
    plotData = mdadata(plotData, rowNames, 0:size(plotData, 2));
    plotData.name = 'Explained variance (cumulative)';
+   plotData.colValuesAll = 0:plotData.nCols-1;
    
-   if strcmp(type, 'bar')   
-      h = gbar(plotData, varargin{:}, 'FaceColor', c);
-   elseif strcmp(type, 'line')   
+   if strcmp(type, 'line')   
       h = gplot(plotData, varargin{:}, 'Marker', mr, 'Color', c);
+      xlim([-0.25 plotData.nCols - 0.75])
+   elseif strcmp(type, 'bar')   
+      h = gbar(plotData, varargin{:}, 'FaceColor', c);
+      xlim([-0.75 plotData.nCols - 0.25])      
    else
       error('Wrong plot type!');
    end
    
-   ylim([0, 105]);
+   set(gca, 'XTick', 0:plotData.nCols-1);
+   
+   title('Cumulative explained varaince')
    ylabel('Variance, %');
    xlabel('Components');
    
