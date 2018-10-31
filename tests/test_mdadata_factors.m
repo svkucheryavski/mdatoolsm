@@ -95,7 +95,7 @@ show(percentile(people, people(:, {'Sex', 'Region'}), 25:25:99))
 show(var(people, people(:, {'Sex', 'Region'})))
 show(std(people, people(:, {'Sex', 'Region'})))
 show(se(people, people(:, {'Sex', 'Region'})))
-
+%%
 show(ci(people, people(:, {'Sex', 'Region'})))
 show(ci(people, people(:, {'Sex', 'Region'}), 0.01))
 

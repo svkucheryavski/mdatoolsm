@@ -31,14 +31,19 @@ function varargout = plotxexpvar(obj, varargin)
       c(end, :) = [];
    end   
       
+   plotData.rowValuesAll = 1:plotData.nRows;
    if strcmp(type, 'bar')   
       h = gbar(plotData', varargin{:}, 'FaceColor', c);
+      xlim([0.25 plotData.nRows + 0.75])
    elseif strcmp(type, 'line')   
       h = gplot(plotData', varargin{:}, 'Marker', mr, 'Color', c);
+      xlim([0.75 plotData.nRows + 0.25])
    else
       error('Wrong plot type!');
    end
    
+   set(gca, 'XTick', 1:plotData.nRows);
+
    if nargout > 0
       varargout{1} = h.plot;
    end   

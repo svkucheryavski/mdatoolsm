@@ -1,4 +1,5 @@
-function varargout = plotxyscores(obj, varargin)         
+function varargout = plotxyscores(obj, varargin)   
+
    if numel(varargin) > 0 && isnumeric(varargin{1})
       ncomp = varargin{1};
       varargin(1) = [];

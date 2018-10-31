@@ -6,12 +6,13 @@ function varargout = plotyresiduals(obj, varargin)
    if isempty(type)
       type = 'scatter';
    end
+   
    if ~isempty(obj.yref)
-      s = obj.yref(:, nresp).colNames{1};
+      s = obj.yref.getColLabels(nresp);
       plotData = [obj.yref(:, nresp).valuesAll, obj.yref(:, nresp).valuesAll - obj.ypred_(:, nresp, ncomp).valuesAll.valuesAll];
-      plotData = mdadata(plotData, obj.yref.rowNamesAll, {[s 'ref'], [s 'res']});
-      plotData.colFullNamesAll = {[s ', reference'], [s ', residuals']};
-      plotData.rowFullNamesAll = obj.yref.rowFullNamesAll;
+      plotData = mdadata(plotData, obj.ypred.rowNamesAll, {[s{1} 'ref'], [s{1} 'res']});
+      plotData.colFullNamesAll = {[s{1} ', reference'], [s{1} ', residuals']};
+      plotData.rowFullNamesAll = obj.ypred.rowFullNamesAll;
       plotData.excluderows(obj.yref.excludedRows);
    else
       error('Reference values are not available!');
@@ -24,11 +25,11 @@ function varargout = plotyresiduals(obj, varargin)
    end
 
    if ~ishold
-      box on
-      title('Prediction residuals');
-      lim = axis();
-      line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+      line(xlim(), [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5], 'HandleVisibility','off');
    end
+   
+   box on
+   title('Prediction residuals');
    
    if nargout > 0
       varargout{1} = h.plot;

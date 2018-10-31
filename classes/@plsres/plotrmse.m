@@ -1,4 +1,4 @@
-function varargout = plotrmse(obj, varargin)         
+function varargout = plotrmse(obj, varargin)     
    if numel(varargin) > 0 && isnumeric(varargin{1})
       nresp = varargin{1};
       varargin(1) = [];
@@ -28,14 +28,19 @@ function varargout = plotrmse(obj, varargin)
    end   
    
    plotData = obj.stat.rmse(:, nresp);
+   plotData.rowValuesAll = 1:plotData.nRows;
    
    if strcmp(type, 'bar')   
       h = bar(plotData', varargin{:});
+      xlim([0.25 plotData.nRows + 0.75])
    elseif strcmp(type, 'line')   
       h = plot(plotData', varargin{:}, 'Marker', mr);
+      xlim([0.75 plotData.nRows + 0.25])
    else
       error('Wrong plot type!');
    end
+   
+   set(gca, 'XTick', 1:plotData.nRows);
    
    if ~ishold
       box on

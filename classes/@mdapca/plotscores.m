@@ -1,37 +1,38 @@
-function varargout = plotscores(obj, comp, varargin)         
-   if nargin < 2
+function varargout = plotscores(obj, varargin)         
+
+   if numel(varargin) > 0 && isnumeric(varargin{1})
+      comp = varargin{1};
+      varargin(1) = [];
+      if min(comp) < 1 || max(comp) > obj.nComp
+         error('Wrong value for components!');
+      end   
+   else
       comp = [1 2];
    end
-   
-   if numel(comp) < 1 || numel(comp) > 2
-      error('Wrong value for "comp", specify one or two components for the plot!');
-   end   
-   
-   args = mdadata.getgscatteroptions(3, varargin{:});
-   
-   hold on
-   h(1) = obj.calres.plotscores(comp, args{1}{:});
-   legendStr{1} = 'cal';
-      
-   if ~isempty(obj.testres)
-      h(2) = obj.testres.plotscores(comp, args{3}{:});
-      legendStr{end + 1} = 'test';
-   end
-   hold off
-   box on
-   if numel(legendStr) > 1
-      mdadata.legend(h, legendStr)
-   end   
-   title('Scores');
 
-   
-   lim = axis();
-   line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
-   
-   if numel(comp) > 1
-      line([0 0], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+   [type, varargin] = getarg(varargin, 'Type');
+   if isempty(type) 
+      if numel(comp) < 3
+         type = 'scatter';
+      else
+         type = 'line';
+      end   
    end
    
+   if strcmp(type, 'scatter') && ~isempty(obj.testres)
+      args = mdadata.getgscatteroptions(3, varargin{:});
+      h = obj.calres.plotscores(comp, 'Type', type, args{1}{:});
+      hold on
+      h(end + 1) = obj.testres.plotscores(comp, args{3}{:});
+      hold off
+      title('Scores');
+      legend({'cal', 'test'});
+   else   
+      h = obj.calres.plotscores(comp, 'Type', type, varargin{:});
+      title('Scores (cal set)');
+   end
+      
+   box on   
    if nargout > 0
       varargout{1} = h;
    end      

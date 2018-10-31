@@ -23,12 +23,30 @@ classdef mdamlr < regmodel
          
          % set up 3-way dataset for coefficients (nPred x nResp x nComp)
          % we use empty name for components here
-         wayNames = {X.colNamesAll(~X.factorCols), y.colNamesAll(~y.factorCols), {'x'}};
-         wayFullNames = {X.colFullNamesAll(~X.factorCols), y.colFullNamesAll(~y.factorCols), {'x'}};
+         
+         wayNames = cell(3, 1);
+         wayNames{3} = {'x'};
+         if ~isempty(X.colNamesAll)
+            wayNames{1} = X.colNamesAll(~X.factorCols);
+         end         
+         if ~isempty(y.colNamesAll)
+            wayNames{2} = y.colNamesAll(~y.factorCols);
+         end
+
+         wayFullNames = cell(3, 1);
+         wayFullNames{3} = {'x'};
+         if ~isempty(X.colFullNamesAll)
+            wayFullNames{1} = X.colFullNamesAll(~X.factorCols);
+         end         
+         if ~isempty(y.colFullNamesAll)
+            wayFullNames{2} = y.colFullNamesAll(~y.factorCols);
+         end
+         
          dimNames = {X.dimNames{2}, 'Responses', ''};
          name = 'Regression coefficients';
          
          b = mdadata3(b, wayNames, wayFullNames, dimNames, name);
+         b.wayValuesAll{1} = X.colValuesAll;
          b.excluderows(excludedCols);
 
          obj.regcoeffs = regcoeffs(b);
@@ -65,7 +83,7 @@ classdef mdamlr < regmodel
          else   
          % set up 3-way dataset for coefficients (nPred x nResp x nComp)
          % we use empty name for components here         
-            if isempty(yref) || isempty(yref.colNames)
+            if isempty(yref) || (isempty(yref.colNames) && ~isempty(obj.calres))
                colNames = obj.calres.yref.colNames;
                colFullNamesAll = obj.calres.yref.colFullNamesAll;
             else
@@ -79,6 +97,7 @@ classdef mdamlr < regmodel
             name = 'Predicted values';
             
             ypred = mdadata3(ypred, wayNames, wayFullNames, dimNames, name);
+            ypred.wayValuesAll{1} = X.rowValuesAll;
             ypred.excluderows(X.excludedRows);
             res = mlrres(ypred, yref);
          end   
@@ -144,7 +163,8 @@ classdef mdamlr < regmodel
          dimNames = {X.dimNames{1}, 'Responses', ''};
          name = 'Predicted values';
          ycv = mdadata3(ycv, wayNames, wayFullNames, dimNames, name);
-
+         ycv.wayValuesAll{1} = X.rowValues;
+         
          res.res = mlrres(ycv, y);
          res.jkcoeffs = jkcoeffs;
       end

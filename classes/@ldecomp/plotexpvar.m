@@ -15,11 +15,15 @@ function varargout = plotexpvar(obj, varargin)
    
    if strcmp(type, 'line')
       h = plot(obj.variance(:, 1)', 1:obj.variance.nRows, varargin{:});
+      xlim([0.75 obj.variance.nRows + 0.25])
    elseif strcmp(type, 'bar')   
       h = bar(obj.variance(:, 1)', 1:obj.variance.nRows, varargin{:});
+      xlim([0.25 obj.variance.nRows + 0.75])
    else
       error('Wrong plot type!');
    end
+   
+   set(gca, 'XTick', 1:obj.variance.nRows);
    
    title('Explained varaince')
    ylabel('Variance, %')

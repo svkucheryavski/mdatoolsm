@@ -13,38 +13,41 @@ function varargout = plotcumexpvar(obj, varargin)
       mr = '.';
    end   
    
-   lead = mdadata(0, {'Cumexpvar'}, {'Comp 0'});
-   plotData = [lead obj.calres.variance(:, 2)'];
-   plotData.name = obj.calres.variance.name;
-   plotData.dimNames = {'Results', obj.calres.variance.dimNames{2}};
-   plotData.rowNames = {'cal'};
    c = mdadata.getmycolors(3);
-
+   plotData = [0 obj.calres.variance.values(:, 2)'];
+   rowNames = {'cal'};
+   
    if ~isempty(obj.cvres) && isa(obj.cvres, 'pcares')
-      plotData = [plotData; [lead obj.cvres.variance(:, 2)']];
-      plotData(end, :).rowNames = {'cv'};
+      plotData = [plotData; [0 obj.cvres.variance.values(:, 2)']];
+      rowNames = [rowNames, 'cv'];
    else
       c(2, :) = [];
    end   
    
    if ~isempty(obj.testres) && isa(obj.testres, 'pcares')
-      plotData = [plotData; [lead obj.testres.variance(:, 2)']];
-      plotData(end, :).rowNames = {'test'};
+      plotData = [plotData; [0 obj.testres.variance.values(:, 2)']];
+      rowNames = [rowNames, 'test'];
    else
       c(end, :) = [];
    end   
    
-   plotData.colNames = 0:(plotData.nCols - 1);
+   plotData = mdadata(plotData, rowNames, 0:size(plotData, 2));
    plotData.name = 'Explained variance (cumulative)';
-      
-   if strcmp(type, 'bar')   
-      h = gbar(plotData, varargin{:}, 'FaceColor', c);
-   elseif strcmp(type, 'line')   
+   plotData.colValuesAll = 0:plotData.nCols-1;
+   
+   if strcmp(type, 'line')   
       h = gplot(plotData, varargin{:}, 'Marker', mr, 'Color', c);
+      xlim([-0.25 plotData.nCols - 0.75])
+   elseif strcmp(type, 'bar')   
+      h = gbar(plotData, varargin{:}, 'FaceColor', c);
+      xlim([-0.75 plotData.nCols - 0.25])      
    else
       error('Wrong plot type!');
    end
    
+   set(gca, 'XTick', 0:plotData.nCols-1);
+   
+   title('Cumulative explained varaince')
    ylabel('Variance, %');
    xlabel('Components');
    

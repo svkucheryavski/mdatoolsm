@@ -16,11 +16,15 @@ function varargout = plotcumexpvar(obj, varargin)
    
    if strcmp(type, 'line')
       h = plot([mdadata(0, {}, {'Comp 0'}) obj.variance(:, 2)'], 0:obj.variance.nRows, varargin{:});
+      xlim([-0.25 obj.variance.nRows + 0.25])
    elseif strcmp(type, 'bar')   
       h = bar([mdadata(0, {}, {'Comp 0'}) obj.variance(:, 2)'], 0:obj.variance.nRows, varargin{:});
+      xlim([-0.75 obj.variance.nRows + 0.75])
    else
       error('Wrong plot type!');
    end
+   
+   set(gca, 'XTick', 0:obj.variance.nRows);
    
    title('Cumulative explained varaince')
    ylabel('Variance, %')

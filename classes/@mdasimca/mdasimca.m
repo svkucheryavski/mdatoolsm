@@ -16,6 +16,7 @@ classdef mdasimca < mdapca & classmodel
          % prepare reference values for calibration set
          cref = ones(X.nRowsAll, 1);
          cref = mdadata(cref, X.rowNamesAll, {className}, {'Objects', 'Class'});
+         cref.rowValuesAll = X.rowValuesAll;
          cref.excluderows(X.excludedRows);
          cref.factor(1, {className});
 
@@ -46,7 +47,7 @@ classdef mdasimca < mdapca & classmodel
                   
          if ~isempty(obj.testres)
             cpred = mdasimca.classify(obj.testres, lim, obj.className);
-            ctest = classmodel.getClassFromFactor(ctest, obj.className);
+            ctest = classmodel.getClassFromFactor(ctest, obj.className, Xtest);
             obj.testres = simcares(obj.testres, cpred, ctest);
             obj.testres.info = 'Results for test set';
          end
@@ -152,6 +153,7 @@ classdef mdasimca < mdapca & classmodel
          dimNames = {res.Q.dimNames{1}, {className}, res.Q.dimNames{2}};
          
          cpred = mdadata3(cpred, wayNamesAll, wayFullNamesAll, dimNames);
+         cpred.wayValuesAll{1} = res.Q.rowValuesAll;
          cpred.excluderows(res.Q.excludedRows);
       end
    end   

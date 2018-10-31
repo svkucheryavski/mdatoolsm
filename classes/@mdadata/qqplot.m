@@ -194,7 +194,12 @@ function varargout = qqplot(obj, varargin)
    hold off
 
    axis auto
-   title(obj.colFullNamesWithoutFactors{1})         
+   if ~isempty(obj.colNamesAll)
+      title(obj.colFullNamesWithoutFactors{1})         
+   else
+      title('Variable #1')
+   end
+   
    ylabel('Data quantiles');         
    xlabel('Normal theoretical quantiles');
    box on

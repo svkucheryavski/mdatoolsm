@@ -72,7 +72,7 @@ function m = do_test(type, casen)
       case 2
          fprintf('2. Testing data with excluded colums and rows\n')   
          
-         for i = 1:numel(factorCols);
+         for i = 1:numel(factorCols)
             X.factor(factorCols{i}, factorLevels{i});
          end
          
@@ -122,7 +122,7 @@ function m = do_test(type, casen)
       case 5
          fprintf('5. Test set and cross-validation for data with factors and hidden values\n')   
 
-         for i = 1:numel(factorCols);
+         for i = 1:numel(factorCols)
             X.factor(factorCols{i}, factorLevels{i});
          end
          X.excludecols(excludedCols);      
@@ -148,7 +148,7 @@ function m = do_test(type, casen)
       case 6
          fprintf('5. Prediction for a new data\n')   
 
-         for i = 1:numel(factorCols);
+         for i = 1:numel(factorCols)
             X.factor(factorCols{i}, factorLevels{i});
          end
          X.excludecols(excludedCols);      
@@ -193,11 +193,11 @@ function showPlotsForModel(m, cname, name)
    subplot(2, 2, 2)
    plotpredictions(m, 1, 1, 'Labels', 'names', 'ShowExcluded', 'on');
    printplot(gcf, [mfilename('fullpath') '/' name ' - model - predictions.png'], [1024 768], 'png', '-r90');
-
+   subplot(2, 2, 3)
    plotclassification(m);
-   printplot(gcf, [mfilename('fullpath') '/' name ' - model - classification.png'], [1024 768], 'png', '-r90');
+   subplot(2, 2, 4)
    plotclassification(m, cname);
-   plotclassification(m, cname, 2);
+   printplot(gcf, [mfilename('fullpath') '/' name ' - model - classification.png'], [1024 768], 'png', '-r90');
    
    figure('Name', 'Model: regression coefficients')
    subplot(2, 2, 1)

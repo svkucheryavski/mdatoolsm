@@ -129,37 +129,31 @@ classdef ldecomp < handle
             res = reshape(res, scores.height, scores.width, size(res, 2));
             res = mdaimage(res, loadings.rowNames);            
          else   
-            T2 = mdadata(T2, scores.rowNamesAll, scores.colNames);
-            T2.rowFullNames = scores.rowFullNamesAll;
-            Q = mdadata(Q, scores.rowNamesAll, scores.colNames);
-            Q.rowFullNames = scores.rowFullNamesAll;
-            res = mdadata(res, scores.rowNamesAll, loadings.rowNames);
-            res.rowFullNames = scores.rowFullNamesAll;
+            T2 = mdadata(T2, scores.rowFullNamesAll, scores.colFullNamesAll);
+            T2.rowValuesAll = scores.rowValuesAll;
+            Q = mdadata(Q, scores.rowFullNamesAll, scores.colFullNamesAll);
+            Q.rowValuesAll = scores.rowValuesAll;
+            res = mdadata(res, scores.rowFullNamesAll, loadings.rowFullNamesAll);
+            res.colValuesAll = scores.rowValuesAll;
+            res.rowValuesAll = loadings.rowValuesAll;
          end
          
-         T2.name = 'T2 residuals';
+         T2.name = 'T^2 residuals';
          T2.dimNames = scores.dimNames;
-         T2.colFullNames = scores.colFullNames;
          T2.excluderows(excludedRows);
-
+      
          Q.name = 'Q residuals';
          Q.dimNames = scores.dimNames;
-         Q.colFullNames = scores.colFullNames;
          Q.excluderows(excludedRows);
 
          res.name = 'Residuals';
          res.dimNames = {scores.dimNames{1}, loadings.dimNames{1}};
-         res.colFullNames = loadings.rowFullNames;
          res.excluderows(excludedRows);
          
-         tnorm = mdadata(tnorm, {'tnorm'}, scores.colNames, {'tnorm', scores.dimNames{2}});
+         tnorm = mdadata(tnorm, {'tnorm'}, scores.colFullNamesAll, {'tnorm', scores.dimNames{2}});
          tnorm.name = 'Singular values for scores';
-         tnorm.colFullNamesAll = scores.colFullNamesAll;
-
-         modpower = mdadata(modpower, scores.rowNamesAll, scores.colNames, scores.dimNames);
+         modpower = mdadata(modpower, scores.rowFullNamesAll, scores.colFullNames, scores.dimNames);
          modpower.name = 'Modelling power';
-         modpower.rowFullNamesAll = scores.rowFullNamesAll;
-         modpower.colFullNamesAll = scores.colFullNamesAll;
          modpower.excluderows(excludedRows);         
       end
       
@@ -168,11 +162,9 @@ classdef ldecomp < handle
          cumexpvar = 100 - cumresvar;
          expvar = [cumexpvar(1), diff(cumexpvar)];   
          
-         variance = mdadata([expvar; cumexpvar], {'Expvar', 'Cumexpvar'});
+         variance = mdadata([expvar; cumexpvar], {'Expvar', 'Cumexpvar'}, Q.colFullNamesAll);
          variance.dimNames = {'Variance', Q.dimNames{2}};
          variance.name = 'Variance';
-         variance.colNames = Q.colNames;
-         variance.colFullNamesAll = Q.colFullNamesAll;
          variance = variance';
       end
    

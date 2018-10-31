@@ -14,11 +14,11 @@ function varargout = plotpredictions(obj, varargin)
    end   
 
    if ~isempty(obj.yref)
-      s = obj.yref(:, nresp).colNames{1};
+      s = obj.yref.getColLabels(nresp);
       plotData = [obj.yref.valuesAll(:, nresp) obj.ypred_.values_(:, nresp, ncomp)];
-      plotData = mdadata(plotData, obj.yref.rowNamesAll, {[s 'ref'], [s 'pred']});
-      plotData.colFullNamesAll = {[s ', reference'], [s, ', predictions']};
-      plotData.rowFullNamesAll = obj.yref.rowFullNamesAll;
+      plotData = mdadata(plotData, obj.ypred.rowNamesAll, {[s{1} 'ref'], [s{1} 'pred']});
+      plotData.colFullNamesAll = {[s{1} ', reference'], [s{1}, ', predictions']};
+      plotData.rowFullNamesAll = obj.ypred.rowFullNamesAll;
       plotData.excluderows(obj.yref.excludedRows);
    else
       plotData = obj.ypred_(:, nresp, ncomp).values;
@@ -41,12 +41,10 @@ function varargout = plotpredictions(obj, varargin)
           c = mdadata.getmycolors(1);
       end
       
-      line(x, y, 'Color', mdalight(c));          
+      line(x, y, 'Color', mdalight(c), 'HandleVisibility','off');          
    end
    
    if ~ishold
-      axis tight
-      correctaxislim(5);
       box on
       title('Predictions');
    end

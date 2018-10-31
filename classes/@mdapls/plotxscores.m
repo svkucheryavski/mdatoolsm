@@ -9,22 +9,28 @@ function varargout = plotxscores(obj, varargin)
       comp = [1 2];
    end
    
-   args = mdadata.getgscatteroptions(3, varargin{:});
-   
-   hold on
-   h(1) = obj.calres.plotxscores(comp, args{1}{:});
-   legendStr{1} = 'cal';
-      
-   if ~isempty(obj.testres)
-      h(end + 1) = obj.testres.plotxscores(comp, args{3}{:});
-      legendStr{end + 1} = 'test';
+   [type, varargin] = getarg(varargin, 'Type');
+   if isempty(type) 
+      if numel(comp) < 3
+         type = 'scatter';
+      else
+         type = 'line';
+      end   
    end
    
-   hold off
-   box on
-   if numel(legendStr) > 1
-      mdadata.legend(h, legendStr)
-   end   
+   if strcmp(type, 'scatter') && ~isempty(obj.testres)
+      args = mdadata.getgscatteroptions(3, varargin{:});
+      h = obj.calres.xdecomp.plotscores(comp, 'Type', type, args{1}{:});
+      hold on
+      h = obj.testres.xdecomp.plotscores(comp, args{3}{:});
+      hold off
+      title('Scores');
+      legend({'cal', 'test'});
+   else   
+      h = obj.calres.xdecomp.plotscores(comp, 'Type', type, varargin{:});
+      title('Scores (cal set)');
+   end
+  
    title('X scores');
             
    if nargout > 0

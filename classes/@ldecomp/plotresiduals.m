@@ -13,8 +13,8 @@ function varargout = plotresiduals(obj, varargin)
    end
    
    plotData = mdadata([obj.T2(:, ncomp).valuesAll obj.Q(:, ncomp).valuesAll]);
-   plotData.rowNames = obj.T2.rowNamesAll;
-   plotData.rowFullNames = obj.T2.rowFullNamesAll;
+   plotData.rowNamesAll = obj.T2.rowNamesAll;
+   plotData.rowFullNamesAll = obj.T2.rowFullNamesAll;
    plotData.excluderows(obj.T2.excludedRows);
    
    h = scatter(plotData, varargin{:});

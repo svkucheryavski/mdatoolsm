@@ -33,24 +33,30 @@ classdef mdapls < regmodel
          obj.nComp = size(m.weights, 2);
          
          % assign names and values to model object
-         respNames = y.colNamesAll(~y.factorCols);
-         respFullNames = y.colFullNamesAll(~y.factorCols);
+         respNames = y.colNamesAllWithoutFactors;
+         respFullNames = y.colFullNamesAllWithoutFactors;
+         respRowValues = y.rowValuesAll;
+         respColValues = y.colValuesAllWithoutFactors;
          
-         predNames = X.colNamesAll(~X.factorCols);         
-         predFullNames = X.colFullNamesAll(~X.factorCols);
+         predNames = X.colNamesAllWithoutFactors;         
+         predFullNames = X.colFullNamesAllWithoutFactors;
+         predRowValues = X.rowValuesAll;
+         predColValues = X.colValuesAllWithoutFactors;
          
          compNames = textgen('Comp', 1:obj.nComp);
          compFullNames = textgen('Comp ', 1:obj.nComp);
          
          wayNames = {predNames, respNames, compNames};
          wayFullNames = {predFullNames, respFullNames, compFullNames};
-   
+         wayValues = {predColValues, respRowValues, 1:obj.nComp};
+         
          % regression coefficients
          name = 'Regression coefficients';         
          dimNames = {X.dimNames{2}, 'Responses', 'Components'};
          b = zeros(X.nNumColsAll, y.nNumCols, obj.nComp);
          b(~excludedCols, :, :) = m.coeffs; 
          b = mdadata3(b, wayNames, wayFullNames, dimNames, name);
+         b.wayValuesAll{1} = predColValues;
          b.excluderows(excludedCols);
          obj.regcoeffs = regcoeffs(b);
          
@@ -60,8 +66,9 @@ classdef mdapls < regmodel
          w = zeros(X.nNumColsAll, obj.nComp);
          w(~excludedCols, :) = m.weights; 
          w = mdadata(w, predNames, compNames, dimNames, name);
-         w.rowFullNames = predFullNames;
-         w.colFullNames = compFullNames;
+         w.rowFullNamesAll = predFullNames;
+         w.colFullNamesAll = compFullNames;
+         w.rowValuesAll = predColValues;
          w.excluderows(excludedCols);
          obj.weights = w;
          
@@ -71,8 +78,9 @@ classdef mdapls < regmodel
          xl = zeros(X.nNumColsAll, obj.nComp);
          xl(~excludedCols, :) = m.xloadings; 
          xl = mdadata(xl, predNames, compNames, dimNames, name);
-         xl.rowFullNames = predFullNames;
-         xl.colFullNames = compFullNames;
+         xl.rowFullNamesAll = predFullNames;
+         xl.colFullNamesAll = compFullNames;
+         xl.rowValuesAll = predColValues;
          xl.excluderows(excludedCols);
          obj.xloadings = xl;
          
@@ -80,8 +88,9 @@ classdef mdapls < regmodel
          name = 'Y loadings';         
          dimNames = {y.dimNames{2}, 'Components'};
          yl = mdadata(m.yloadings, respNames, compNames, dimNames, name);
-         yl.rowFullNames = respFullNames;
-         yl.colFullNames = compFullNames;
+         yl.rowFullNamesAll = respFullNames;
+         yl.colFullNamesAll = compFullNames;
+         yl.rowValuesAll = predRowValues;
          obj.yloadings = yl;
 
          obj.setSelratio(X);
@@ -92,7 +101,7 @@ classdef mdapls < regmodel
          if nargin < 4
             makeres = true;
          end
-                  
+         
          if nargin < 3 || isempty(oyref)
             yref = [];
          else   
@@ -110,6 +119,7 @@ classdef mdapls < regmodel
          % mdadata for X scores
          xscores = mdadata(xscores, X.rowNamesAll, obj.weights.colFullNames);
          xscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
+         xscores.rowValuesAll = X.rowValuesAll;
          xscores.name = 'X scores';
          xscores.excluderows(X.excludedRows);
          
@@ -133,19 +143,20 @@ classdef mdapls < regmodel
             
          % set up 3-way dataset for predictions (nPred x nResp x nComp)
          % we use empty name for components here         
-         if isempty(yref) || isempty(yref.colNames)
-            colNames = obj.calres.yref.colNames;
+         if isempty(yref) || (isempty(yref.colNames) && ~isempty(obj.calres))
+            colNamesAll = obj.calres.yref.colNamesAll;
             colFullNamesAll = obj.calres.yref.colFullNamesAll;
          else
-            colNames = yref.colNames;
+            colNamesAll = yref.colNamesAll;
             colFullNamesAll = yref.colFullNamesAll;
          end
          
-         wayNames = {X.rowNamesAll, colNames, obj.weights.colNames};
+         wayNames = {X.rowNamesAll, colNamesAll, obj.weights.colNames};
          wayFullNames = {X.rowFullNamesAll, colFullNamesAll, obj.weights.colFullNames};
          dimNames = {X.dimNames{1}, 'Responses', 'Components'};
          name = 'Predicted values';
          ypred = mdadata3(ypred, wayNames, wayFullNames, dimNames, name);
+         ypred.wayValuesAll{1} = X.rowValuesAll;
          ypred.excluderows(X.excludedRows);
 
          xdecomp = ldecomp(xscores, obj.xloadings, X);
@@ -155,6 +166,7 @@ classdef mdapls < regmodel
             % mdadata for Y scores
             yscores = mdadata(yscores, X.rowNamesAll, obj.weights.colFullNames);
             yscores.dimNames = {X.dimNames{1}, obj.weights.dimNames{2}};
+            yscores.rowValuesAll = X.rowValuesAll;
             yscores.name = 'Y scores';
             yscores.excluderows(X.excludedRows);
 
@@ -244,31 +256,37 @@ classdef mdapls < regmodel
          xQ = xQ ./ nRep;
          xT2 = xT2 ./ nRep;
          
+         wayValues = {X.rowValues, [], []};
          wayNames = {X.rowNames, y.colNames, obj.xloadings.colNames};
          wayFullNames = {X.rowFullNames, y.colFullNames, obj.xloadings.colFullNames};
          dimNames = {X.dimNames{1}, 'Responses', 'Components'};
          name = 'Predicted values';
          ycv = mdadata3(ycv, wayNames, wayFullNames, dimNames, name);
-
+         ycv.wayValuesAll = wayValues;
+         
          xT2 = mdadata(xT2, X.rowNames, obj.xloadings.colNames, obj.calres.xdecomp.scores.dimNames);
          xT2.name = 'T2 residuals';
-         xT2.rowFullNames = X.rowFullNames;
-         xT2.colFullNames = obj.xloadings.colFullNames;
-
+         xT2.rowFullNamesAll = X.rowFullNames;
+         xT2.colFullNamesAll = obj.xloadings.colFullNames;
+         xT2.rowValuesAll = X.rowValues;
+         
          xQ = mdadata(xQ, xT2.rowNames, xT2.colNames, xT2.dimNames, 'Q residuals');
-         xQ.rowFullNames = xT2.rowFullNamesAll;
-         xQ.colFullNames = xT2.colFullNamesAll;
+         xQ.rowFullNamesAll = xT2.rowFullNamesAll;
+         xQ.colFullNamesAll = xT2.colFullNamesAll;
+         xQ.rowValuesAll = xT2.rowValuesAll;
 
          xdecomp = ldecomp([], [], [], obj.calres.xdecomp.tnorm, obj.calres.xdecomp.totvar, xQ, xT2, []);
 
          yT2 = mdadata(yT2, X.rowNames, obj.yloadings.colNames, obj.calres.xdecomp.scores.dimNames);
          yT2.name = 'T2 residuals';
-         yT2.rowFullNames = X.rowFullNames;
-         yT2.colFullNames = obj.yloadings.colFullNames;
-
+         yT2.rowFullNamesAll = X.rowFullNames;
+         yT2.colFullNamesAll = obj.yloadings.colFullNames;
+         yT2.rowValuesAll = X.rowValues;
+         
          yQ = mdadata(yQ, yT2.rowNames, yT2.colNames, yT2.dimNames, 'Q residuals');
-         yQ.rowFullNames = yT2.rowFullNamesAll;
-         yQ.colFullNames = yT2.colFullNamesAll;
+         yQ.rowFullNamesAll = yT2.rowFullNamesAll;
+         yQ.colFullNamesAll = yT2.colFullNamesAll;
+         yQ.rowValuesAll = yT2.rowValuesAll;
          ydecomp = ldecomp([], [], [], obj.calres.ydecomp.tnorm, obj.calres.ydecomp.totvar, yQ, yT2, []);
 
          res.res = plsres(xdecomp, ydecomp, ycv, y);
@@ -306,11 +324,12 @@ classdef mdapls < regmodel
             b = obj.regcoeffs.values(1:end, iResp, nComp).values;
             bscores = (wpw' * pinv(wpw * wpw')) * b;         
             ss = (bscores.^2) .* sum(xscores.^2)';
-            vipscores(:, iResp) = nResp * wnorm.^2 * ss / sum(ss);
+            vipscores(:, iResp) = nPred * wnorm.^2 * ss / sum(ss);
          end
          
          vipscores = mdadata(vipscores, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
          vipscores.dimNames = {obj.regcoeffs.values_.dimNames{1}, obj.regcoeffs.values_.dimNames{2}};
+         vipscores.rowValuesAll = obj.regcoeffs.values_.wayValues{1};
          vipscores.name = 'VIP scores';
          obj.vipscores = vipscores;
       end
@@ -338,6 +357,7 @@ classdef mdapls < regmodel
          
          selratio = mdadata(selratio, obj.regcoeffs.values_.wayNames{1}, obj.regcoeffs.values_.wayNames{2});
          selratio.dimNames = {obj.regcoeffs.values_.dimNames{1}, obj.regcoeffs.values_.dimNames{2}};
+         selratio.rowValuesAll = obj.regcoeffs.values_.wayValues{1};
          selratio.name = 'Selectivity ratio';
          obj.selratio = selratio;         
       end

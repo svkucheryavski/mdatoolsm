@@ -117,13 +117,13 @@ classdef regcoeffs < handle
          
          out1 = obj.ci_{1}(varargin{:}).values;
          fnames = out1.colFullNames;
-         out1.colNames = strcat(out1.colNames, 'lo');
-         out1.colFullNames = strcat(fnames, ' (lo)');
+         out1.colNamesAll = strcat(out1.colNames, 'lo');
+         out1.colFullNamesAll = strcat(fnames, ' (lo)');
          
          out2 = obj.ci_{2}(varargin{:}).values;
          fnames = out2.colFullNames;
-         out2.colNames = strcat(out2.colNames, 'up');
-         out2.colFullNames = strcat(fnames, ' (up)');
+         out2.colNamesAll = strcat(out2.colNames, 'up');
+         out2.colFullNamesAll = strcat(fnames, ' (up)');
          
          out = [out1 out2];
          out.name = 'Confidence intervals';
@@ -164,13 +164,16 @@ classdef regcoeffs < handle
          pvalues = 2 * mdatcdf(tmin, nRep - 1);
          
          pvalues = mdadata3(pvalues, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
+         pvalues.wayValuesAll = obj.values_.wayValues;
          pvalues.name = 'P-values for regression coefficients';
          obj.pvalues_ = pvalues;
                   
          ciLo = mdadata3(ciLo, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
+         ciLo.wayValuesAll = obj.values_.wayValues;
          ciLo.name = 'Confidence intervals (lower) for regression coefficients';
          
          ciUp = mdadata3(ciUp, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
+         ciUp.wayValuesAll = obj.values_.wayValues;
          ciUp.name = 'Confidence intervals (upper) for regression coefficients';
          obj.ci_ = {ciLo, ciUp};
       end
@@ -208,6 +211,7 @@ classdef regcoeffs < handle
       end
       
       function varargout = plot(obj, varargin)
+         
          [resp, comp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.respNames, varargin{:});
          
          [type, varargin] = getarg(varargin, 'Type');
@@ -249,27 +253,25 @@ classdef regcoeffs < handle
          values = obj.values(1:end, resp, comp)';
          if strcmp(type, 'line')
             h = plot(values, varargin{:}, 'Marker', mr);
-            xl = [1, obj.nPred];
          elseif strcmp(type, 'bar')   
             h = bar(values, varargin{:});
-            xl = [0.5, obj.nPred + 0.5];
          else
             error('Wrong plot type!');
          end
          
          if showCI && ~isempty(obj.ci_)
-            hold on            
-            ci = obj.ci(1:end, resp, comp); 
-            v = values.values;
-            l = v - ci(:, 1).values';
-            u = ci(:, 2).values' - v;
-            if strcmp(type, 'bar')
-               errorbar(1:size(v, 2), v, l, u, '.', 'Color', mdalight(mdadata.getmycolors(1)))
-            elseif strcmp(type, 'line')
-               plot(1:size(v, 2), v - l, '-', 'Color', mdalight(mdadata.getmycolors(1)))
-               plot(1:size(v, 2), v + u, '-', 'Color', mdalight(mdadata.getmycolors(1)))               
-            end
-            
+            ci = obj.ci(1:end, resp, comp)'; 
+            hold on     
+            if strcmp(type, 'line')
+               plot(ci, 'Color', mdalight(mdadata.getmycolors(1)));
+            elseif strcmp(type, 'bar')
+               x = values.colValues;
+               if isempty(x)
+                  x = 1:size(values, 2);
+               end
+               errorbar(x, values.values, values.values - ci(1, :).values, '.',...
+                  'Color', mdalight(mdadata.getmycolors(1)));
+            end            
             hold off
          end
          
@@ -280,13 +282,7 @@ classdef regcoeffs < handle
          end   
    
          axis auto
-                  
-         dx = abs(diff(xl))/25;
-         xlim([xl(1) - dx xl(2) + dx])
-         yl = ylim();
-         dy = abs(diff(yl))/25;
-         ylim([yl(1) - dy yl(2) + dy])
-         
+                           
          if showLines && strcmp(type, 'line')
             lim = axis();
             line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.8 0.8 0.8]);

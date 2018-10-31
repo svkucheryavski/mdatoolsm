@@ -75,6 +75,7 @@ function varargout = gplot(obj, varargin)
    end
 
    x = [];
+   groups = [];
    
    % check if factors are provided
    if numel(varargin) > 0 
@@ -90,58 +91,13 @@ function varargout = gplot(obj, varargin)
          varargin(1) = [];
          groups = groups.getgroups();
          nGroups = groups.nCols;         
-      else   
-      % consider every row as a separate group
-         groups = [];
-         nGroups = obj.nRows;
       end       
-      
-   else
-      groups = [];
-      nGroups = obj.nRows;            
    end
 
+   % if no groups - use every row as separate group
    if isempty(groups)
-      groups = mdadata(eye(nGroups), obj.rowNames, obj.rowNames);
-   end
-
-   % check if excluded variables will be shown
-   [v, varargin] = getarg(varargin, 'ShowExcluded');
-
-   if isempty(v) || ~strcmp(v, 'on')
-      showExcluded = false;
-   else
-      showExcluded = true;
-   end   
-
-   % get values and various parameters
-   % the serIncl/serExcl is a matrix with start
-   % and end indices of series in variables         
-   if showExcluded
-      values = obj.valuesAll(~obj.excludedRows, ~obj.factorCols);
-      nCols = size(values, 2);
-      indExcl = find(obj.excludedCols(~obj.factorCols));
-      indIncl = find(~obj.excludedCols(~obj.factorCols));
-      serExcl = getserind(indExcl);
-      serIncl = getserind(indIncl);
-      colNames = obj.colFullNamesAll(~obj.factorCols);
-   else
-      values = obj.numValues;
-      nCols = size(values, 2);
-      indIncl = 1:nCols;
-      serIncl = getserind(indIncl);
-      colNames = obj.colFullNamesWithoutFactors;
-   end
-
-   % check x values are provided and set up x and xtick values
-   if ~isempty(x)
-      if numel(x) ~= nCols
-         error('Number of x values should be the same as number of columns in dataset!');
-      end
-      xticklabel = [];
-   else   
-      x = 1:nCols;
-      xticklabel = colNames;
+      groups = mdadata(eye(obj.nRows), obj.rowFullNames, obj.rowFullNames);
+      nGroups = obj.nRows;            
    end
 
    % check legend and labels
@@ -225,10 +181,11 @@ function varargout = gplot(obj, varargin)
          error('Argument "Marker" should have one value or values for each groups!');
       end   
    end
-
+   
    [ms, ~] = getarg(varargin, 'MarkerSize');
    if isempty(ms) 
-      ms = repmat(15, nGroups, 1);
+      ms = repmat(8, nGroups, 1);
+      ms(strcmp(mr, '.')) = 16;
    else
       if numel(ms) == 1
          ms = repmat(ms, nGroups, 1);
@@ -236,70 +193,25 @@ function varargout = gplot(obj, varargin)
          error('Argument "MarkerSize" should have one value or values for each groups!');
       end   
    end         
-
-   % set X ticks
-   if numel(x) < 12
-      xtick = x;
-   else
-      xtick = unique(round(linspace(1, numel(x), 12)));
-   end
-
-   hold on
+   
    h = cell(nGroups, 1);
-   hl = zeros(nGroups, 1);
-   for iGroup = 1:nGroups
-      indR = groups.values(:, iGroup) == 1;
-      hk = [];
-      if any(indR)
-         for i = 1:size(serIncl, 1);
-            indC = indIncl(serIncl(i, 1):serIncl(i, 2));
-            if indC(1) > 1
-               indC = [indC(1) - 1; indC];
-            end
-            if indC(end) < nCols
-               indC = [indC; indC(end) + 1];
-            end   
-            hk = [hk; plot(x(indC), values(indR, indC)',...
-               'Color', lc(iGroup, :), 'LineWidth', lw(iGroup), 'LineStyle', ls{iGroup},...
-               'Marker', mr{iGroup}, 'MarkerSize', ms(iGroup, :))];               
-         end          
-         h{iGroup} = hk;
-         hl(iGroup) = hk(1);
-      end   
-   end
-   hold off
-   indl = ~(hl == 0);         
-
-   if showExcluded && any(obj.excludedCols)
-      lc = obj.EXCLUDED_COLOR;
-      [~, varargin] = getarg(varargin, 'Color');
-      [~, varargin] = getarg(varargin, 'Marker');
-      [~, varargin] = getarg(varargin, 'MarkerSize');
+   hl = [];
+   for i = 1:nGroups
+      ind = groups.values(:, i) == 1;    
+      hk = plot(subset(obj, ind, ':'), ...
+               'Color', lc(i, :), 'LineWidth', lw(i), 'LineStyle', ls{i},...
+               'Marker', mr{i}, 'MarkerSize', ms(i));               
+      h{i} = hk;
+      hl = [hl, hk.plot(1)];
       hold on
-      for i = 1:size(serExcl, 1);
-         indC = indExcl(serExcl(i, 1):serExcl(i, 2));
-         hp = plot(x(indC), values(:, indC)', 'Color', lc, 'Marker', '.', ...
-            'MarkerSize', 8, varargin{:});
-      end   
-      hold off         
-   end
-
-   xlabel(obj.dimNames{2});
-   title(obj.name);
-   if ~isempty(xticklabel)
-      set(gca, 'XTick', xtick, 'XTickLabel', xticklabel);
    end   
-   box on
-
+   hold off
+      
    if showLegend
-      legend(hl(indl), groups.colFullNames(indl), 'Location', lp, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
-   end
-
-   if strcmp(get(gca, 'NextPlot'), 'replace')
-      %correctaxislim(5);
+      legend(hl, groups.colFullNames, 'Location', lp, 'EdgeColor', obj.LEGEND_EDGE_COLOR);
    end
 
    if nargout > 0
-      varargout{1} = h(indl);
+      varargout{1} = h;
    end   
 end

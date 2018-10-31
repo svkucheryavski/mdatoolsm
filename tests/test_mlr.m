@@ -30,6 +30,7 @@ function test_mlr(type, casen)
          oX = d.spectra(:, 1:2:end);
          oy = d.conc(:, 1);
          scale = 'on';
+         center = 'on';
          info = 'Model for UV/Vis spectra (simdata)';
          factorCols = {};
          factorLevels = {};

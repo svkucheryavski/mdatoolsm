@@ -1,12 +1,13 @@
 function plotpredictions(obj, varargin)
-   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, varargin{:});
+   [nresp, ncomp, varargin] = regres.getRegPlotParams(obj.nResp, obj.nComp, obj.calres.respNames,...
+      varargin{:});
    
    args = mdadata.getgscatteroptions(3, varargin{:});
    
-   hold on
    h(1) = obj.calres.plotpredictions(nresp, ncomp, args{1}{:});
    legendStr{1} = 'cal';
-   
+
+   hold on   
    if ~isempty(obj.cvres)
       h(end + 1) = obj.cvres.plotpredictions(nresp, ncomp, args{2}{:});
       legendStr{end + 1} = 'cv';
@@ -15,12 +16,9 @@ function plotpredictions(obj, varargin)
    if ~isempty(obj.testres)
       h(end + 1) = obj.testres.plotpredictions(nresp, ncomp, args{3}{:});
       legendStr{end + 1} = 'test';
-   end
-   
+   end   
    hold off
    box on
-   axis tight
-   correctaxislim(5);
    
    if numel(legendStr) > 1
       mdadata.legend(h, legendStr)

@@ -199,12 +199,20 @@ function varargout = scatter(obj, varargin)
    if obj.nNumCols == 1
       x = (1:obj.nRows)';
       y = obj.numValues(:, 1);
-      colNames = [obj.dimNames{1} obj.colFullNamesWithoutFactors(1)];
+      if ~isempty(obj.colNamesAll)
+         colNames = [obj.dimNames{1} obj.colFullNamesWithoutFactors(1)];
+      else
+         colNames = [obj.dimNames{1} 'Variable #1'];
+      end
    else   
       values = obj.numValues(:, 1:2);
       x = values(:, 1);
       y = values(:, 2);
-      colNames = obj.colFullNamesWithoutFactors(1:2);
+      if ~isempty(obj.colNamesAll)
+         colNames = obj.colFullNamesWithoutFactors(1:2);
+      else
+         colNames = {'Variable #1', 'Variable #2'};
+      end
    end
 
    nanind = isnan(x) | isnan(y);

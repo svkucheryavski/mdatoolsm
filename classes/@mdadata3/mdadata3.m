@@ -13,6 +13,7 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
    
 	properties 
       name 
+      wayValuesAll
    end
    
 	properties (Dependent = true)
@@ -20,6 +21,7 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
       valuesAll
       wayNames
       wayFullNames
+      wayValues
 	end
 
 	methods
@@ -43,6 +45,7 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          obj.values_ = values;
          obj.wayNamesAll = wayNames;
          obj.wayFullNamesAll = wayFullNames;
+         obj.wayValuesAll = cell(1, 3);
          obj.dimNames = dimNames;
          obj.name = name;
          obj.excludedRows = false(size(values, 1), 1);
@@ -54,6 +57,20 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          end
          
          obj.dimNames = value;
+      end
+
+      function out = get.wayValues(obj)        
+         if ~isempty(obj.wayValuesAll{1})
+            out{1} = obj.wayValuesAll{1}(~obj.excludedRows);
+         else
+            out{1} = {};
+         end   
+         if ~isempty(obj.wayValuesAll{2})
+            out{2} = obj.wayValuesAll{2}(~obj.excludedCols);
+         else
+            out{2} = {};
+         end   
+         out{3} = obj.wayValuesAll{3};
       end
       
       function out = get.wayNames(obj)
@@ -127,8 +144,10 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          
          out = squeeze(values);
          out = mdadata(out, obj.wayNamesAll{dimin(1)}, obj.wayNamesAll{dimin(2)});
-         out.rowFullNames = obj.wayFullNamesAll{dimin(1)};
-         out.colFullNames = obj.wayFullNamesAll{dimin(2)};        
+         out.rowFullNamesAll = obj.wayFullNamesAll{dimin(1)};
+         out.colFullNamesAll = obj.wayFullNamesAll{dimin(2)};        
+         out.rowValuesAll = obj.wayValuesAll{dimin(1)};
+         out.colValuesAll = obj.wayValuesAll{dimin(2)};
          
          out.dimNames = obj.dimNames(dimin);
          if isempty(obj.wayNamesAll{dimout}) || strcmp(obj.wayNamesAll{dimout}{1}, 'x')
@@ -211,6 +230,7 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
 
          swayNamesAll = cell(3, 1);
          swayFullNamesAll = cell(3, 1);
+         swayValuesAll = cell(3, 1);
          
          for i = 1:3    
             % TODO: change to mdaparseind() to work with names as well
@@ -219,6 +239,10 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
             end
             
             if i > 1
+               if ~isempty(obj.wayValuesAll{i})
+                  swayValuesAll{i} = obj.wayValuesAll{i}(ind{i});
+               end   
+               
                if ~isempty(obj.wayNamesAll{i})
                   swayNamesAll{i} = obj.wayNamesAll{i}(ind{i});
                end   
@@ -232,17 +256,25 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          if numel(ind{1}) == size(obj.values_, 1)
             sexcludedRows = obj.excludedRows;
             svalues = obj.values_(:, ind{2}, ind{3});
+            swayValuesAll{1} = obj.wayValuesAll{1};
             swayNamesAll{1} = obj.wayNamesAll{1};
             swayFullNamesAll{1} = obj.wayFullNamesAll{1};
          else
             sexcludedRows = [];
             svalues = obj.values_(~obj.excludedRows, ind{2}, ind{3});
-            swayNamesAll{1} = obj.wayNamesAll{1}(~obj.excludedRows);
-            swayFullNamesAll{1} = obj.wayFullNamesAll{1}(~obj.excludedRows);
+            if ~isempty(obj.wayValuesAll{1})
+               swayValuesAll{1} = obj.wayValuesAll{1}(~obj.excludedRows);
+            end
+            if ~isempty(obj.wayNamesAll{1})
+               swayNamesAll{1} = obj.wayNamesAll{1}(~obj.excludedRows);
+            end
+            if ~isempty(obj.wayFullNamesAll{1})
+               swayFullNamesAll{1} = obj.wayFullNamesAll{1}(~obj.excludedRows);
+            end
          end   
             
          data = mdadata3(svalues, swayNamesAll, swayFullNamesAll, obj.dimNames, obj.name);
-         
+         data.wayValuesAll = swayValuesAll;
          if ~isempty(sexcludedRows)
             data.excluderows(sexcludedRows);
          end

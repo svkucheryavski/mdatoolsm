@@ -7,7 +7,7 @@ function m = test_pca(type, casen)
    end
    
    if nargin < 2
-      casen = 5;
+      casen = 6;
    end
    
    switch type

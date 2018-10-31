@@ -42,8 +42,10 @@ function varargout = plotresiduals(obj, varargin)
    dy = (lim(4) - lim(3)) / 10;
    lim(2) = max(lim(2), slim(1) + dx);
    lim(4) = max(lim(4), slim(2) + dy);
-   line([slim(1) slim(1)], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
-   line([lim(1) lim(2)], [slim(2) slim(2)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);   
+   line([slim(1) slim(1)], [lim(3) lim(4)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5],...
+      'HandleVisibility','off');
+   line([lim(1) lim(2)], [slim(2) slim(2)], 'LineStyle', '--', 'Color', [0.5 0.5 0.5],...
+      'HandleVisibility','off');   
    axis(lim);
    
    if nargout > 0

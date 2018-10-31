@@ -74,6 +74,14 @@ function varargout = plot(obj, varargin)
 %
 %
 
+   % check if x values are provided and set up x and xtick values
+   xticklabel = {};
+   x = [];
+   if numel(varargin) > 0 && isnumeric(varargin{1})
+      x = varargin{1};
+      varargin(1) = [];
+   end
+
    % check if this is a group plot
    [gb, varargin] = getarg(varargin, 'Groupby');   
    if ~isempty(gb)
@@ -102,10 +110,10 @@ function varargout = plot(obj, varargin)
          else   
             ms = 8;
          end
-         varargin = [varargin, 'MarkerSize', ms];
       end   
+      varargin = [varargin, 'MarkerSize', ms];
    end
-
+   
    % check if excluded variables will be shown
    [v, varargin] = getarg(varargin, 'ShowExcluded');         
    if ~isempty(v) 
@@ -135,37 +143,35 @@ function varargout = plot(obj, varargin)
       indIncl = 1:nCols;
       serIncl = getserind(indIncl);
    end
-
-   % check if x values are provided and set up x and xtick values
-   if numel(varargin) > 0 && isnumeric(varargin{1})
-      x = varargin{1};
-      varargin(1) = [];
-
-      if numel(x) ~= nCols
-         error('Number of x values should be the same as number of columns in dataset!');
-      end
-      xticklabel = [];
-   else   
+   
+   % continue with defining x-values if they were not provided as argument
+   if isempty(x)
       % colValues is a new property, for old object we need a workaround
       if isprop(obj, 'colValuesAll') && ~isempty(obj.colValuesAll)
          if showExcluded
             x = obj.colValuesAllWithoutFactors;
-            xticklabel = obj.colFullNamesAllWithoutFactors;
          else   
             x = obj.colValuesWithoutFactors;
-            xticklabel = obj.colFullNamesWithoutFactors;
          end   
       else
          x = 1:nCols;
-         if showExcluded
-            xticklabel = obj.colFullNamesAllWithoutFactors;
-         else   
-            xticklabel = obj.colFullNamesWithoutFactors;
-         end   
+         if ~isempty(obj.colNamesAll)
+            if showExcluded
+               xticklabel = obj.colFullNamesAllWithoutFactors;
+            else   
+               xticklabel = obj.colFullNamesWithoutFactors;
+            end   
+         end
       end
    end
+   
+   % check if number of x-values is correct   
+   if numel(x) ~= nCols
+      error('Number of x values should be the same as number of columns in dataset!');
+   end 
 
-   if numel(x) < 12
+   % define values for xticks if needed
+   if numel(x) < 12 && ~isempty(xticklabel)
       xtick = x;
    else
       xtick = unique(round(linspace(1, numel(x), 12)));
@@ -195,12 +201,19 @@ function varargout = plot(obj, varargin)
       clear('v', 's', 'ind');
    end   
 
+   % check if "hold on" was activated before 
+   turnHoldOn = false;
    if ~ishold
       cla;
+   else
+      turnHoldOn = true;
    end
+
+   
    if isempty(cgroup)
+      % normal plot
       hold on
-      for i = 1:size(serIncl, 1);
+      for i = 1:size(serIncl, 1)
          indC = indIncl(serIncl(i, 1):serIncl(i, 2));
          if indC(1) > 1
             indC = [indC(1) - 1; indC];
@@ -212,13 +225,14 @@ function varargout = plot(obj, varargin)
       end   
       hold off
    else
+      % plot with color groups
       indR = fix((cgroup - min(cgroup)) / (max(cgroup) - min(cgroup)) * (size(cmap, 1) - 1)) + 1;
       hp = cell(size(cmap, 1), 1);
       hold on
       for k = 1:size(cmap, 1)
          if any(indR == k)
             hh = [];
-            for i = 1:size(serIncl, 1);
+            for i = 1:size(serIncl, 1)
                indC = indIncl(serIncl(i, 1):serIncl(i, 2));
                if indC(1) > 1
                   indC = [indC(1) - 1; indC];
@@ -237,36 +251,30 @@ function varargout = plot(obj, varargin)
    h.plot = hp;
 
    if showExcluded && any(obj.excludedCols)
+      % show plot for excluded variables
       lc = obj.EXCLUDED_COLOR;
       [~, varargin] = getarg(varargin, 'Color');
       [~, varargin] = getarg(varargin, 'Marker');
       [~, varargin] = getarg(varargin, 'MarkerSize');
 
-      flag = true;
-      if ishold
-         flag = false;
-      end
-
-      if flag
-         hold on
-      end
-
-      for i = 1:size(serExcl, 1);
+      hold on
+      for i = 1:size(serExcl, 1)
          indC = indExcl(serExcl(i, 1):serExcl(i, 2));
-         hp = plot(x(indC), values(:, indC)', 'Color', lc, 'Marker', '.', ...
-            'MarkerSize', 8, varargin{:});
+         if numel(indC) == 1
+            hp = plot(x(indC), values(:, indC)', 'Color', lc, 'Marker', '.', ...
+               'MarkerSize', 8, varargin{:});
+         else
+            hp = plot(x(indC), values(:, indC)', 'Color', lc, varargin{:});
+         end
       end
-
-      if flag
-         hold off
-      end   
+      hold off
    end
    h.plotHidden = hp;
 
    % correct axis limits
-   if strcmp(get(gca, 'NextPlot'), 'replace') && abs(min(x) - max(x)) > 0.001
-      correctaxislim([5, 5, 0, 5], [min(x) max(x)]);
-   end
+   %if strcmp(get(gca, 'NextPlot'), 'replace') && abs(min(x) - max(x)) > 0.001
+   %   correctaxislim([5, 5, 0, 5], [min(x) max(x)]);
+   %end
 
    % show colorbar
    if isColorbar
@@ -276,6 +284,7 @@ function varargout = plot(obj, varargin)
       h.colorbar = mdadata.showcolorbar(cmap, cgroup, colorbarTitle, dx, dy, cgroupLevels);
    end
 
+   % show xticklabel if they are not empty
    if ~isempty(xticklabel)
       set(gca, 'XTick', xtick, 'XTickLabel', xticklabel(xtick));
    end
@@ -288,6 +297,11 @@ function varargout = plot(obj, varargin)
    title(obj.name)
    box on
 
+   % if "hold on" was activated before the plot do it again 
+   if turnHoldOn 
+      hold on;
+   end
+   
    if nargout > 0
       varargout{1} = h;
    end            
