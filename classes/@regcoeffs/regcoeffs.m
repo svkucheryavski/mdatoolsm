@@ -164,16 +164,16 @@ classdef regcoeffs < handle
          pvalues = 2 * mdatcdf(tmin, nRep - 1);
          
          pvalues = mdadata3(pvalues, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
-         pvalues.wayValuesAll = obj.values_.wayValuesAll;
+         pvalues.wayValuesAll = obj.values_.wayValues;
          pvalues.name = 'P-values for regression coefficients';
          obj.pvalues_ = pvalues;
                   
          ciLo = mdadata3(ciLo, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
-         ciLo.wayValuesAll = obj.values_.wayValuesAll;
+         ciLo.wayValuesAll = obj.values_.wayValues;
          ciLo.name = 'Confidence intervals (lower) for regression coefficients';
          
          ciUp = mdadata3(ciUp, obj.values_.wayNames, obj.values_.wayFullNames, obj.values_.dimNames);
-         ciUp.wayValuesAll = obj.values_.wayValuesAll;
+         ciUp.wayValuesAll = obj.values_.wayValues;
          ciUp.name = 'Confidence intervals (upper) for regression coefficients';
          obj.ci_ = {ciLo, ciUp};
       end
@@ -260,13 +260,12 @@ classdef regcoeffs < handle
          end
          
          if showCI && ~isempty(obj.ci_)
-            hold on            
             ci = obj.ci(1:end, resp, comp)'; 
-            
+            hold on     
             if strcmp(type, 'line')
                plot(ci, 'Color', mdalight(mdadata.getmycolors(1)));
             elseif strcmp(type, 'bar')
-               x = values.colValuesAll;
+               x = values.colValues;
                if isempty(x)
                   x = 1:size(values, 2);
                end
