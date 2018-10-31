@@ -1,6 +1,5 @@
 function varargout = plotperformance(obj, varargin)    
    [nclass, varargin] = classres.getClassNum(obj.nClasses, obj.classNames, varargin{:});
-   
    [restype, varargin] = getarg(varargin, 'Restype');
    if isempty(restype)
       restype = 'missclassified';
@@ -22,37 +21,38 @@ function varargout = plotperformance(obj, varargin)
       type = 'line';
    end
    
+   i = find(strcmp(varargin, 'Color'), 1);
+   if ~isempty(i)
+      color = varargin{i + 1};
+      varargin(i:i+1) = [];
+   else
+      color = mdadata.getmycolors(1);
+   end
+   
    [mr, varargin] = getarg(varargin, 'Marker');
    if isempty(mr)
       mr = '.';
    end   
    
-   switch restype
-      case 'misclassified'
-         plotData = obj.stat.misclassified(:, nclass);
-      case 'sensitivity'
-         plotData = obj.stat.sensitivity(:, nclass);
-      case 'specificity'
-         plotData = obj.stat.specificity(:, nclass);
-      otherwise
-         error('Wrone type of classification results!')
-   end
-      
+   plotData = obj.stat.(restype)(:, nclass);   
+   plotData.rowValuesAll = 1:plotData.nRows;
+   
    if strcmp(type, 'bar')   
-      h = bar(plotData', varargin{:});
+      h = bar(plotData', varargin{:}, 'FaceColor', color);
+      xlim([0.25 plotData.nRows + 0.75])      
    elseif strcmp(type, 'line')   
-      h = plot(plotData', varargin{:}, 'Marker', mr);
+      h = plot(plotData', varargin{:}, 'Marker', mr, 'Color', color);
+      xlim([0.75 plotData.nRows + 0.25])
    else
       error('Wrong plot type!');
    end
    
-   ylim([-0.05 1.05])
+   set(gca, 'XTick', 1:plotData.nRows);
+   ylim([0 1.1])
+   
    if ~ishold
       box on
       title([upper(restype(1)) restype(2:end) ' (' obj.classNames{nclass} ')'])
-      if plotData.nCols > 1
-%          correctaxislim()
-      end    
    end
    
    if nargout > 0
