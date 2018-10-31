@@ -14,15 +14,15 @@ quick start guide, which gives a brief overview of basic methods with a lot of e
 It allows you to start working with the toolbox after 30 minutes learning. Then just continue with 
 the user guide to get acquainted with all available features and details.
 
-The toolbox was tested using MATLAB 2012b and 2015b and should also work on
-versions in between. For the basic functionality you do not need any additional toolboxes
+The last version of the toolbox was tested using MATLAB 2018b but should also work in earlier
+varsion. For the basic functionality you do not need any additional toolboxes
 installed. All methods were tested using well-known datasets, but there still could be some bugs,
 in this case please report to <svkucheryavski@gmail.com>.
 
 
 ## Installation ##
 
-The current version is _0.1.6_ (from 7.01.2016). 
+The current version is _0.1.7_ (from 31.10.2018). 
 
 Installation is easy and the procedure is similar to most of the others 3rd party MATLAB Toolboxes.
 Download zip archive for the latest release and unzip it to the folder you use to keep you MATLAB code,

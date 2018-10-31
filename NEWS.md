@@ -1,3 +1,13 @@
+v.0.1.7
+=======
+* use of row and column labels were completely rewritten and simplified (also in plots)
+* functionality for using vector of numbers as column labels has been improved significantly
+* same works now for row labels (e.g. you can specify time or similar values as row labels)
+* both column and row values are inherited when any transformations or models are used
+* you can also speficy the values directly using properties `rowValuesAll` and `colValuesAll`
+* fixed several minor bugs and made small improvements mainly for plot methods
+* fixed several small bugs in model methods
+
 v.0.1.6
 =======
 * new behaviour for all statistical methods (`mean()`, `std()`, ...), now values are calculated for each column of a dataset
