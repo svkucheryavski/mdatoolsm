@@ -102,31 +102,41 @@ classdef classres < res
          fn = zeros(nComp, nClasses);
          fp = zeros(nComp, nClasses);
          tp = zeros(nComp, nClasses);
+         tn = zeros(nComp, nClasses);
          
          for i = 1:obj.nClasses
             c = squeeze(cpred(:, i, :));
             fn(:, i) = sum(bsxfun(@times, cref(:, i) == 1, c == -1));
             fp(:, i) = sum(bsxfun(@times, cref(:, i) == 0, c == 1));
             tp(:, i) = sum(bsxfun(@times, cref(:, i) == 1, c == 1));
+            tn(:, i) = sum(bsxfun(@times, cref(:, i) == 0, c == -1));
          end
          
          sensitivity = tp ./ (tp + fn);
-         specificity = tp ./ (tp + fp);
+         specificity = tn ./ (tn + fp);
          misclassified = (fp + fn)/size(cref, 1);
                            
          dimNames = {'', ''};
          rowNames = obj.cpred_.wayNames{3};
          colNames = obj.cpred_.wayNames{2};
-         
+         rowValues = 1:nComp;
          dimNames{2} = 'Classes';
          dimNames{1} = 'Components';
          
          obj.stat.fp = mdadata(fp, rowNames, colNames, dimNames, 'False positives');
+         obj.stat.fp.rowValuesAll = rowValues;
          obj.stat.fn  = mdadata(fn, rowNames, colNames, dimNames, 'False negatives');         
+         obj.stat.fn.rowValuesAll = rowValues;
          obj.stat.tp = mdadata(tp, rowNames, colNames, dimNames, 'True positives');
+         obj.stat.tp.rowValuesAll = rowValues;
+         obj.stat.tn = mdadata(tn, rowNames, colNames, dimNames, 'True negatives');
+         obj.stat.tn.rowValuesAll = rowValues;
          obj.stat.sensitivity = mdadata(sensitivity, rowNames, colNames, dimNames, 'Sensitivity');         
+         obj.stat.sensitivity.rowValuesAll = rowValues;
          obj.stat.specificity = mdadata(specificity , rowNames, colNames, dimNames, 'Specificity');
+         obj.stat.specificity.rowValuesAll = rowValues;
          obj.stat.misclassified = mdadata(misclassified, rowNames, colNames, dimNames, 'Misclassified');
+         obj.stat.misclassified.rowValuesAll = rowValues;
       end   
       
    end
