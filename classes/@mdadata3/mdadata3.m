@@ -65,7 +65,11 @@ classdef mdadata3 < handle & matlab.mixin.Copyable
          else
             out{1} = {};
          end   
-         out{2} = obj.wayValuesAll{2};
+         if ~isempty(obj.wayValuesAll{2})
+            out{2} = obj.wayValuesAll{2}(~obj.excludedCols);
+         else
+            out{2} = {};
+         end   
          out{3} = obj.wayValuesAll{3};
       end
       

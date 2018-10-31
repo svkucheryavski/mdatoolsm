@@ -63,7 +63,7 @@ function varargout = bar(obj, varargin)
    else
       x = obj.colValuesAll;      
    end
-
+   
    if isempty(find(strcmp(varargin, 'FaceColor'), 1))
       c = mdadata.getmycolors(1);
       varargin = [varargin, 'FaceColor', c(1, :)];

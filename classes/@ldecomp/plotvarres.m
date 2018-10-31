@@ -24,8 +24,7 @@ function varargout = plotvarres(obj, colind, varargin)
    title('Objects residuals');
    
    if strcmp(type, 'line') 
-      lim = axis();
-      line([lim(1) lim(2)], [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
+      line(xlim(), [0 0], 'LineStyle', '--', 'Color', [0.5 0.5 0.5]);
    end   
       
    if nargout > 0

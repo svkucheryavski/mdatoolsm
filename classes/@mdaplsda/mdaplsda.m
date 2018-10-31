@@ -114,6 +114,7 @@ classdef mdaplsda < mdapls & classmodel
          cpred = -ones(size(values));         
          cpred(values >= 0) = 1;         
          cpred = mdadata3(cpred, y.wayNamesAll, y.wayFullNamesAll, y.dimNames);
+         cpred.wayValuesAll{1} = y.wayValuesAll{1};
          cpred.excluderows(y.excludedRows);
       end
    end   
