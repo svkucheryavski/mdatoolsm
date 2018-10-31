@@ -22,7 +22,7 @@ function varargout = plotxscores(obj, varargin)
       args = mdadata.getgscatteroptions(3, varargin{:});
       h = obj.calres.xdecomp.plotscores(comp, 'Type', type, args{1}{:});
       hold on
-      h(end + 1) = obj.testres.xdecomp.plotscores(comp, args{3}{:});
+      h = obj.testres.xdecomp.plotscores(comp, args{3}{:});
       hold off
       title('Scores');
       legend({'cal', 'test'});
