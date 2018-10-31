@@ -249,7 +249,7 @@ end
 
 %% PLS - object based plots
 
-type = 2;
+type = 4;
 close all
 clc
 
@@ -344,7 +344,8 @@ for i = 1:numel(sp)
    subplot 339, gplot(res.ypred(1:end, 1, 1)')
 end
 
-%% mldivide
+%% mldivide / mrdivide
+
 close all
 clc
 
@@ -353,10 +354,101 @@ for i = 1:numel(sp)
    s = sp{i}; c = cn{i};
    s = s(:, 1:5:end);
    b = s \ c;
-   snew = c / b;l
+   snew = c / b;
    subplot(6, 2, 2 * i - 1)
    plot(b')
    subplot(6, 2, 2 * i )
    plot(snew)
 end
 
+%% SIMCA
+
+type = 4;
+close all
+clc
+
+cl = @(x)(x > median(x.values));
+
+for i = 1:numel(sp)
+   s = sp{i}; c = cn{i};
+   if type == 1
+      m = mdasimca(s(cl(c), :), 'C', 3);
+      res = m.calres;
+   elseif type == 2
+      m = mdasimca(s(cl(c), :), 'C', 3, 'CV', {'full'});
+      res = m.cvres;
+   elseif type == 3
+      m = mdasimca(s(indc(cl(c(indc, :))), :), 'C', 3, 'TestSet', {s(indv, :), cl(c(indv, :))});      
+      res = m.testres;
+   else
+      m = mdasimca(s(indc(cl(c(indc, :))), :), 'C', 3, 'CV', {'full'}, 'TestSet', {s(indv, :), cl(c(indv, :))});
+      res = m.testres;
+   end
+   
+   figure
+   
+   subplot 531, plotloadings(m, 'Labels', 'names')
+   subplot 532, plotloadings(m, 1:3, 'Type', 'line')
+   subplot 533, plotloadings(m, 1:2, 'Type', 'bar')
+   
+   subplot 534, plotscores(m, 'Labels', 'names')
+   subplot 535, plotscores(m, 1:3, 'Type', 'line')
+   subplot 536, plotscores(m, 1:2, 'Type', 'bar')
+   
+   subplot 537, plotresiduals(m, 'Labels', 'names')
+   subplot 538, gplot(res.T2(:, 1:3)')
+   subplot 539, gbar(res.Q(:, 1:2)')
+   
+   subplot (5, 3, 10), plotclassification(m, 'Labels', 'names')
+   subplot (5, 3, 11), plotclassification(m.calres, 'Labels', 'names')
+   subplot (5, 3, 12), bar(res.cpred')
+end
+
+%% PLS-DA
+
+type = 4;
+close all
+clc
+
+cl = @(x)(x > median(x.values));
+
+for i = 1:numel(sp)
+   s = sp{i}; c = cn{i};
+   if type == 1
+      m = mdaplsda(s, cl(c), 'C', 3);
+      res = m.calres;
+   elseif type == 2
+      m = mdaplsda(s, cl(c), 'C', 3, 'CV', {'full'});
+      res = m.cvres;
+   elseif type == 3
+      m = mdaplsda(s(indc, :), cl(c(indc, :)), 'C', 3, 'TestSet', {s(indv, :), cl(c(indv, :))});      
+      res = m.testres;
+   else
+      m = mdaplsda(s(indc, :), cl(c(indc, :)), 'C', 3, 'CV', {'full'}, 'TestSet', {s(indv, :), cl(c(indv, :))});
+      res = m.testres;
+   end
+   
+   figure
+   
+   subplot 531, plotregcoeffs(m)
+   subplot 532, plotregcoeffs(m, 1, 3, 'Type', 'line', 'CI', 'on')
+   subplot 533, plotregcoeffs(m, 1, 2, 'Type', 'bar', 'CI', 'on')
+   
+   subplot 534, plotxscores(m, 'Labels', 'names')
+   subplot 535, plotxscores(m, 1:3, 'Type', 'line')
+   subplot 536, plotxscores(m, 1:2, 'Type', 'bar')
+   
+   subplot 537, plotyresiduals(m, 'Labels', 'names')
+   subplot 538, gplot(res.xdecomp.T2(:, 1:3)')
+   subplot 539, gbar(res.xdecomp.Q(:, 1:2)')
+   
+   subplot (5, 3, 10), plotclassification(m, 'Labels', 'names')
+   subplot (5, 3, 11), plotclassification(m.calres, 'Labels', 'names')
+   subplot (5, 3, 12), bar(res.cpred')
+   
+   subplot (5, 3, 13), plotmisclassified(m)
+   subplot (5, 3, 14), plotsensitivity(m)
+   subplot (5, 3, 15), plotspecificity(res)
+   
+   drawnow
+end

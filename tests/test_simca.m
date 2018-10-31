@@ -95,7 +95,7 @@ function m = test_simca(type, casen)
       case 5
          fprintf('5. Test set and cross-validation for data with factors and hidden values\n')   
 
-         for i = 1:numel(factorCols);
+         for i = 1:numel(factorCols)
             Xc.factor(factorCols{i}, factorLevels{i});
             Xt.factor(factorCols{i}, factorLevels{i});
          end
@@ -184,7 +184,7 @@ function showPlotsForModel(m, cname)
    subplot(2, 2, 3)
    plotsensitivity(m, 1)
    subplot(2, 2, 4)
-   plotspecificity(m, cname, 'Labels', 'names')
+   plotspecificity(m, cname)
 
 end
 

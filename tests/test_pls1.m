@@ -1,4 +1,4 @@
-function test_pls1
+ function test_pls1
    close all
    clear
    clc
@@ -6,7 +6,7 @@ function test_pls1
    types = {'people', 'spectra'};
    cases = 1:5;
    
-   if isdir(mfilename('fullpath'))
+   if isfolder(mfilename('fullpath'))
       rmdir(mfilename('fullpath'), 's')
    end
    mkdir(mfilename('fullpath'))
@@ -34,7 +34,7 @@ function m = do_test(type, casen)
       case 'people'
          ncomp = 3;
          d = load('people');
-         oX = d.people(:, [2:12]);
+         oX = d.people(:, 2:12);
          oy = d.people(:, 1);
          info = 'Model for People data';   
          factorCols = {'Sex', 'Region'};
@@ -85,7 +85,7 @@ function m = do_test(type, casen)
          fprintf('2. Testing data with excluded colums and rows\n')   
          X = copy(oX);
          y = copy(oy);
-         for i = 1:numel(factorCols);
+         for i = 1:numel(factorCols)
             X.factor(factorCols{i}, factorLevels{i});
          end
          X.excludecols(excludedCols);      
@@ -138,7 +138,7 @@ function m = do_test(type, casen)
          fprintf('5. Test set and cross-validation for data with factors and hidden values\n')   
          X = copy(oX);
          y = copy(oy);
-         for i = 1:numel(factorCols);
+         for i = 1:numel(factorCols)
             X.factor(factorCols{i}, factorLevels{i});
          end
          X.excludecols(excludedCols);      
@@ -157,7 +157,7 @@ function m = do_test(type, casen)
 
          m = mdapls(Xc, yc, ncomp, 'TestSet', {Xt, yt}, 'CV', {'full'}, 'Prep', {p, prep()}, 'Scale', scale);
          m.info = info;
-
+                  
          showPlotsForModel(m, 'mcg', cname);
          showPlotsForResult(m.calres, 'calres', cname);
          showPlotsForResult(m.cvres, 'cvres', cname);
