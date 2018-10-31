@@ -60,6 +60,7 @@ classdef classmodel < handle
             newc = zeros(X.nRowsAll, 1);
             newc(~X.excludedRows) = c;
             newc = mdadata(newc, X.rowNamesAll, {className});
+            newc.rowValuesAll = X.rowValuesAll;
             newc.rowFullNamesAll = X.rowFullNamesAll;
             newc.excluderows(X.excludedRows);
             if sum(newc) == size(c, 1)
