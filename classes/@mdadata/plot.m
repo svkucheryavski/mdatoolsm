@@ -110,10 +110,10 @@ function varargout = plot(obj, varargin)
          else   
             ms = 8;
          end
-         varargin = [varargin, 'MarkerSize', ms];
       end   
+      varargin = [varargin, 'MarkerSize', ms];
    end
-
+   
    % check if excluded variables will be shown
    [v, varargin] = getarg(varargin, 'ShowExcluded');         
    if ~isempty(v) 
@@ -165,7 +165,7 @@ function varargout = plot(obj, varargin)
       end
    end
    
-   % check if number of x-values is correct
+   % check if number of x-values is correct   
    if numel(x) ~= nCols
       error('Number of x values should be the same as number of columns in dataset!');
    end 
